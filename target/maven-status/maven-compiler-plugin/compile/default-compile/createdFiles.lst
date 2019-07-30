@@ -1,0 +1,11 @@
+net\jwdouglas\willy\GetterYAML.class
+net\jwdouglas\willy\Core.class
+net\jwdouglas\willy\Willy.class
+net\jwdouglas\willy\MyLogger.class
+net\jwdouglas\willy\Config.class
+net\jwdouglas\willy\Discord.class
+net\jwdouglas\willy\LogFileHandler.class
+net\jwdouglas\willy\Watson.class
+net\jwdouglas\willy\Command.class
+net\jwdouglas\willy\LogFileHandler$1.class
+net\jwdouglas\willy\LogHandler.class

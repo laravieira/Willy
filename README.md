@@ -1,31 +1,30 @@
 # Willy
-Willy it's your best, beautiful, little and cute friend. He will help you to do everything possible.
+Willy is your best, beautiful, little and cute friend. He will help you to do everything possible.
 
 ## What you need
 
  * Watson Assistant, you can create one [here](https://assistant-us-south.watsonplatform.net/).
  * Discord Bot, you can create one [here](https://discordapp.com/developers/applications/).
  * JVM 8 installed on your machine, you can download Java 8 [here](https://www.java.com/en/download/).
- * More important, you will need **patience**.
+ * More importantly, you will need **patience**.
 
-## How start
+## How to start
 
-#### Start Willy first time
-To start you need to run the app a first time. To run, you can start Willy using builded file on folder targets with the follow command on cmd:
+#### Start Willy for the first time
+To begin you need to run the app a first time. To run, you can start Willy by using the built file on the folder *target/* with the following command on cmd:
 > java -jar [willy-0.0.1-SNAPSHOT-jar-with-dependencies.jar](target/willy-0.0.1-SNAPSHOT-jar-with-dependencies.jar)
 
-After start, Willy will create a log folder, containing log files and a **config.yml** file and close with an error that you can ignore for now.
+After running, Willy will create a log *folder/*, containing the log files and a **config.yml** file and then close with an error that you can ignore for now.
 
 #### Set up config.yml
-Config file is written in YAML language, this is most simple language and very similar to human languages. You can open this file with any text editor.
-On config.yml you have to set a Willy name. Hir name is Willy, but you can call him for another name... Do this:
+The config file is written in YAML language, this is the most simple language and very similar to human ones. You can open this file with any text editor. On *config.yml* you have to set a Willy name. His name is Willy, but you can call him anything... Do this:
 >willy_name: Willy
 
-or
+or any name you want
 
->willy_name: MyChatBoot
+>willy_name: MyChatBot
 
-After set up a name, you can set aliases to this name like follow:
+After setting up a name, you can set aliases to this name as follows:
 >willy_aliases:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- willy<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- Wily<br>
@@ -33,16 +32,16 @@ After set up a name, you can set aliases to this name like follow:
 >&nbsp;&nbsp;&nbsp;&nbsp;- Billy<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- billy
 
-or
+or something like
 
 >willy_aliases:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- mychatboot<br>
+>&nbsp;&nbsp;&nbsp;&nbsp;- mychatbot<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- MCB<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- mcb
 
-###### Willy's name and aliases are case sensitive, use aliases to overlapse this.
+###### Willy's name and aliases are case sensitive, use aliases to circumvent this.
 
-Now put Discord id and token, like this:
+Now put the Discord id and token, like this:
 >discord:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;client_id: <bot_client_id><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;token: <bot_token>
@@ -53,23 +52,23 @@ one example is:
 >&nbsp;&nbsp;&nbsp;&nbsp;client_id: 3498573895738593<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;token: hj3455g3jh5g3jh3g5jhg4hj5g3hj53ghj5hj34g53jh5g3jh5g<br>
 
-And now put Watson Assistant credentials:
+And now put your Watson Assistant credentials:
 
 >watson_assistant:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: <any date after 2019><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: <assistant_id><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: <credentials_password><br>
 
-one example is:
+for example:
 
 >watson_assistant:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7
 
-And you can save config.yml file.
+You can now save *config.yml* file.
 
-### Your config.yml is like this:
+### Your config.yml should look like this:
 
 >willy_name: Willy<br>
 >willy_aliases:<br>
@@ -89,11 +88,11 @@ And you can save config.yml file.
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7<br>
 >
 
-### Now you can start Willy again, with same command and he will work fine.
+### Now you can run Willy again, with the same command and he will work just fine.
 
 
-License is Apache 2.0.
+The license is Apache 2.0.
 
-If you want to help me, [talk me](https://jwdouglas.net/contact/).
+If you want to help me, [talk to me](https://jwdouglas.net/contact/).
 
 

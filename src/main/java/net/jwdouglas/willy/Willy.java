@@ -13,10 +13,12 @@ public class Willy {
 	private static final String my_image   = "/src/main/resources/profile.jpg";
 	
 	// Application Variables
-	private static Logger  log        = MyLogger.getLogger();
+	private static Logger  log        = null;
 	private static boolean stop       = false;
 	
 	public static void main(String[] args) throws InterruptedException {
+		MyLogger.load();
+		log = MyLogger.getLogger();
     	log.info("Willy is starting!");
     	new Config().loadConfig();
     	
@@ -39,6 +41,7 @@ public class Willy {
 	
 	private static void loop() {
 		Watson.refreshSession();
+		Core.clearChannel();
 	}
     
     private static void lineReaderStart() {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -12,50 +13,67 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+
 public class MyLogger {
-	private static final Logger logger = Logger.getLogger("Willy");
-	private static boolean      logset = false;
 	
-	public static Logger logger(String level) {
-		System.setProperty("java.util.logging.SimpleFormatter.format", "[%4$s] %5$s %n");
-		
-		switch(level.toLowerCase()) {
-			case "debug": logger.setLevel(Level.ALL); break;
-			case "normal": logger.setLevel(Level.INFO); break;
-			default: logger.setLevel(Level.INFO); break;
-		}
-		
+	private static Logger  fileLogger     = null;
+	private static Logger  consoleLogger  = null;
+	private static Handler fileHandler    = null;
+	private static Handler consoleHandler = null;
+	
+	public static void load() {
 		try {
-			logger.addHandler(new LogFileHandler());
-			logger.addHandler(new LogHandler());
-			LogManager.getLogManager().addLogger(logger);
+			// Reset Loggers
+			LogManager.getLogManager().reset();
+			System.setProperty("java.util.logging.SimpleFormatter.format", "[%4$s] %5$s %n");
+			Handler[] handlers = Logger.getLogger(Willy.class.getCanonicalName()).getParent().getHandlers();
+			for(Handler handler : handlers)
+				Logger.getLogger(Willy.class.getCanonicalName()).getParent().removeHandler(handler);
+
+			// Create a format for loggers
+			Formatter fileFormatter = new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
+				}
+			};
+			Formatter consoleFormatter = new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					return String.format("[%1$s] %2$s %n", record.getLevel(), record.getMessage());
+				}
+			};
+			
+			fileHandler    = new LogFileHandler();
+			consoleHandler = new ConsoleHandler();
+			
+			fileHandler.setLevel(Level.ALL);
+			consoleHandler.setLevel(Level.INFO);
+			fileHandler.setFormatter(fileFormatter);
+			consoleHandler.setFormatter(consoleFormatter);
+			
+			fileLogger    = Logger.getGlobal();
+			consoleLogger = Logger.getLogger(Willy.class.getCanonicalName());
+			
+			fileLogger.addHandler(fileHandler);
+			fileLogger.addHandler(consoleHandler);
+			consoleLogger.addHandler(consoleHandler);
+			
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
-		logset = true;
-		return logger;
 	}
 	
 	public static Logger getLogger() {
-		if(!logset)
-			return logger("normal");
-		else
-			return logger;
+		return fileLogger;
 	}
 	
-	public void setLevel(String level) {
-		switch(level.toLowerCase()) {
-			case "debug": logger.setLevel(Level.ALL); break;
-			case "normal": logger.setLevel(Level.INFO); break;
-			default: logger.setLevel(Level.INFO); break;
-		}
+	public static Logger getConsoleLogger() {
+		return consoleLogger;
 	}
 	
-	public void close() {
-		for(Handler handler:logger.getHandlers()) {
-			logger.removeHandler(handler);
-			handler.close();
-		}
+	public static void close() {
+		fileHandler.close();
 	}
 	
 }
@@ -65,12 +83,6 @@ class LogFileHandler extends Handler {
 	private String      filepath    = (new File(".").getCanonicalPath())+File.separator+"logs"+File.separator;
 	private String      fileName    = null;
 	private FileHandler fileHandler = null;
-	private Formatter   fileForm    = new Formatter() {
-		@Override
-		public String format(LogRecord record) {
-			return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
-		}
-	};
 	
 	private void createHandler() {
 		if(!(new File(filepath).isDirectory()))
@@ -87,7 +99,6 @@ class LogFileHandler extends Handler {
 		}
 		try {
 			fileHandler = new FileHandler(filepath+fileName+".log", true);
-			fileHandler.setFormatter(fileForm);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -119,23 +130,9 @@ class LogFileHandler extends Handler {
 		fileHandler = null;
 	}
 	
-}
-
-class LogHandler extends Handler {
-
 	@Override
-	public void close() throws SecurityException {}
-
-	@Override
-	public void flush() {}
-
-	@Override
-	public void publish(LogRecord record) {
-		//if(record.getLoggerName() != "Willy") {
-		//	record.setLevel(Level.OFF);
-		//}else {
-		//	System.out.println("["+record.getLevel()+"]"+record.getMessage());
-		//}
+	public void setFormatter(Formatter formatter) {
+		fileHandler.setFormatter(formatter);
 	}
 	
 }

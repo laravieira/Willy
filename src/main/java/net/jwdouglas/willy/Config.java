@@ -26,6 +26,7 @@ public class Config {
 	private static List<String> aliases    = null;
 	private static String       dis_id     = null;
 	private static String       dis_token  = null;
+	private static boolean      wat_keep   = false;
 	private static String       wat_date   = null;
 	private static String       wat_id     = null;
 	private static String       wat_pass   = null;
@@ -35,7 +36,7 @@ public class Config {
 	private boolean setConfig(File file) throws FileNotFoundException {
 		GetterYAML config = new GetterYAML(file);
 		if(config.load()) {
-			
+
 			// Check if maps and lists exists
 			if(!config.hasString("willy_name"))          return false;
 			if(!config.hasList("willy_aliases"))         return false;
@@ -47,6 +48,7 @@ public class Config {
 			// Check if keys exist on maps
 			if(!config.getMap("discord"         ).containsKey("client_id"))            return false;
 			if(!config.getMap("discord"         ).containsKey("token"))                return false;
+			if(!config.getMap("watson_assistant").containsKey("keep_alive"))           return false;
 			if(!config.getMap("watson_assistant").containsKey("api_date"))             return false;
 			if(!config.getMap("watson_assistant").containsKey("assistant_id"))         return false;
 			if(!config.getMap("watson_assistant").containsKey("credentials_password")) return false;
@@ -62,6 +64,7 @@ public class Config {
 			// Check exceptions
 			if(config.getString("willy_name").length() < 3) return false;
 			if(!(config.getMap("watson_assistant").get("api_date") instanceof Date)) return false;
+			if(!(config.getMap("watson_assistant").get("keep_alive") instanceof Boolean)) return false;
 			
 			// Set variables
 			if((config.getString("clear_after_wait").contains("s") && Integer.parseInt(config.getString("clear_after_wait").split("s")[0]) > 0)) {
@@ -78,6 +81,7 @@ public class Config {
 			clear_chat = config.getBoolean("clear_public_chats");
 			dis_id     = config.getMap("discord"          ).get("client_id"           ).toString();
 			dis_token  = config.getMap("discord"          ).get("token"               ).toString();
+			wat_keep   = Boolean.parseBoolean(config.getMap("watson_assistant").get("keep_alive").toString());
 			wat_date   = new SimpleDateFormat("yyyy-MM-dd").format((Date)config.getMap("watson_assistant").get("api_date"));
 			wat_id     = config.getMap("watson_assistant" ).get("assistant_id"        ).toString();
 			wat_pass   = config.getMap("watson_assistant" ).get("credentials_password").toString();
@@ -154,15 +158,16 @@ public class Config {
 		}
 	}
 
-	public static String       getName()           {return name;}
-	public static List<String> getAliases()        {return aliases;}
-	public static boolean      getClearChats()     {return clear_chat;}
-	public static long         getClearTime()      {return clear_time;}
-	public static String       getDiscordID()      {return dis_id;}
-	public static String       getDiscordToken()   {return dis_token;}
-	public static String       getWatsonAPIDate()  {return wat_date;}
-	public static String       getWatsonID()       {return wat_id;}
-	public static String       getWatsonPassword() {return wat_pass;}
+	public static String       getName()            {return name;}
+	public static List<String> getAliases()         {return aliases;}
+	public static boolean      getClearChats()      {return clear_chat;}
+	public static long         getClearTime()       {return clear_time;}
+	public static String       getDiscordID()       {return dis_id;}
+	public static String       getDiscordToken()    {return dis_token;}
+	public static boolean      getWatsonKeepAlive() {return wat_keep;}
+	public static String       getWatsonAPIDate()   {return wat_date;}
+	public static String       getWatsonID()        {return wat_id;}
+	public static String       getWatsonPassword()  {return wat_pass;}
 }
 
 class GetterYAML {

@@ -23,11 +23,12 @@ import com.ibm.watson.assistant.v2.model.SessionResponse;
 
 public class Watson {
 
-	private static Logger          log     = MyLogger.getLogger();
-	private static Long            lastRef = new Date().getTime();
-	private static SessionResponse session = null;
-	private static Assistant       service = null;
-	private static String          toprint = "";
+	private static Logger          log       = MyLogger.getLogger();
+	private static Long            lastRef   = new Date().getTime();
+	private static boolean         refreshed = false;
+	private static SessionResponse session   = null;
+	private static Assistant       service   = null;
+	private static String          toprint   = "";
 	
 	public static void start() {
 		if(service == null) {
@@ -43,13 +44,20 @@ public class Watson {
 		if(service == null) {return;}
 		CreateSessionOptions cso = new CreateSessionOptions.Builder().assistantId(Config.getWatsonID()).build();
 		session = service.createSession(cso).execute().getResult();
-		lastRef = new Date().getTime()+270000;
+		
+		MessageInput    msgi = new MessageInput.Builder().text("").build();
+		MessageOptions  msgo = new MessageOptions.Builder(Config.getWatsonID(), session.getSessionId()).input(msgi).build();
+		service.message(msgo).execute().getResult();
+		
+		lastRef   = new Date().getTime()+270000;
+		refreshed = false;
 	}
 	
 	public static void refreshSession() {
-		if(lastRef < new Date().getTime()) {
-			sendMessage("refresh_session");
-			log.info("Session refreshed.");
+		if(Config.getWatsonKeepAlive() && lastRef < new Date().getTime()) {
+			sendMessage("");
+			refreshed = true;
+			log.info("Watson session refreshed.");
 		}
 	}
 
@@ -64,18 +72,27 @@ public class Watson {
 	public static MessageResponse sendMessage(String message) {
 		if(service == null) {return null;}
 		try {
+			if(refreshed) {
+				MessageInput    msgi = new MessageInput.Builder().text("").build();
+				MessageOptions  msgo = new MessageOptions.Builder(Config.getWatsonID(), session.getSessionId()).input(msgi).build();
+				service.message(msgo).execute().getResult();
+				refreshed = false;
+			}
 			MessageInput    msgi = new MessageInput.Builder().text(message).build();
 			MessageOptions  msgo = new MessageOptions.Builder(Config.getWatsonID(), session.getSessionId()).input(msgi).build();
 			MessageResponse msgr = service.message(msgo).execute().getResult();
-			lastRef = new Date().getTime()+270000;
+			lastRef   = new Date().getTime()+270000;
+			refreshed = false;
 			return msgr;
 		}catch(NotFoundException e) {
 			if(e.getMessage().equalsIgnoreCase("invalid session")) {
+				log.info("Watson session expired, creating a new session...");
 				createSession();
 				MessageInput    msgi = new MessageInput.Builder().text(message).build();
 				MessageOptions  msgo = new MessageOptions.Builder(Config.getWatsonID(), session.getSessionId()).input(msgi).build();
 				MessageResponse msgr = service.message(msgo).execute().getResult();
-				lastRef = new Date().getTime()+270000;
+				lastRef   = new Date().getTime()+270000;
+				refreshed = false;
 				return msgr;
 			}
 			return null;

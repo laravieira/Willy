@@ -31,7 +31,7 @@ public class Core {
 			if(type.equalsIgnoreCase("text")) {
 				message.getChannel().block().createMessage(text).block();
 				
-				Logger log = MyLogger.getConsoleLogger();
+				Logger log = MyLogger.getLogger();
 				log.info("Message transaction in a private chat.");
 				//log.info("Received: "+content);
 				//log.info("Returned: "+text);
@@ -65,7 +65,7 @@ public class Core {
 				Message response = message.getChannel().block().createMessage(text).block();
 				toClear.put(Date.from(response.getTimestamp()), response);
 				
-				Logger log = MyLogger.getConsoleLogger();
+				Logger log = MyLogger.getLogger();
 				log.info("Message transaction in a public chat.");
 				//log.info("Received: "+content);
 				//log.info("Returned: "+text);
@@ -81,14 +81,14 @@ public class Core {
 				if(key.before(date)) {
 					value.delete("Time expired.").block();
 					toRemove.put(key, value);
+					Logger log = MyLogger.getLogger();
+					log.info("Message deleted from a public chat.");
 				}
 			});
 			toRemove.forEach((key, value) -> {
 				toClear.remove(key, value);
 			});
 			
-			Logger log = MyLogger.getConsoleLogger();
-			log.info("Message deleted from a public chat.");
 		}
 	}
 }

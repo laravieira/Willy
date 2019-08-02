@@ -51,11 +51,9 @@ public class Willy {
     	Thread line = new Thread(() -> {
     		try {
 				while(!stop) {
-					if(input.ready()) {
-						String[] commandLine = input.readLine().split(" ");
-						if(commandLine.length > 0) {
-							Command.onCommand(commandLine);
-						}
+					String[] commandLine = input.readLine().split(" ");
+					if(commandLine.length > 0) {
+						Command.onCommand(commandLine);
 					}
 				}
 			} catch (IOException e) {

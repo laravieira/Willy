@@ -86,7 +86,7 @@ for example:
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7
 
-###### *keep_alive* option will keep watson assistant session alive forever, this is not recommended and not necessary, if a session expire, Willy will create a new. Only turn *keep_alive* option true if you have problems with bad connections.
+###### *keep_alive* option will keep watson assistant session alive forever, consuming more internet data, this is not recommended and not necessary, if a session expire, Willy will create a new. Only turn *keep_alive* option true if you have problems with bad pings.
 
 You can now save *config.yml* file.
 
@@ -100,9 +100,9 @@ You can now save *config.yml* file.
 >&nbsp;&nbsp;&nbsp;&nbsp;- Billy<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- billy<br>
 ><br>
->clear_public_chats: false
+>clear_public_chats: false<br>
 ><br>
->clear_after_wait: 8m
+>clear_after_wait: 8m<br>
 ><br>
 >discord:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;client_id: 3498573895738593<br>

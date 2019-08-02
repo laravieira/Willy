@@ -1,6 +1,8 @@
 package net.jwdouglas.willy;
 
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
 public class Willy {
@@ -13,8 +15,9 @@ public class Willy {
 	private static final String my_image   = "/src/main/resources/profile.jpg";
 	
 	// Application Variables
-	private static Logger  log        = null;
-	private static boolean stop       = false;
+    private static BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+	private static Logger         log   = null;
+	private static boolean        stop  = false;
 	
 	public static void main(String[] args) throws InterruptedException {
 		MyLogger.load();
@@ -28,7 +31,7 @@ public class Willy {
     	if(!stop) {Discord.login();}
     	if(!stop) {log.info("Discord instance has benn openned.");}
     	
-    	if(!stop) {lineReaderStart();}
+    	if(!stop) {lineReader();}
     	if(!stop) {log.info("Welcome to Willy bot. Talk with him on Discord.");}
     	
     	while(!stop) {loop(); Thread.sleep(1);}
@@ -43,29 +46,24 @@ public class Willy {
 		Watson.refreshSession();
 		Core.clearChannel();
 	}
-    
-    private static void lineReaderStart() {
-    	Thread lineReader = new Thread(() -> {
-	    	@SuppressWarnings("resource")
-			Scanner input   = new Scanner(System.in);
-    		while(!stop && input.hasNextLine()) {
-    			String commandLine = input.nextLine();
-    			if(!commandLine.isEmpty()) {
-    				Thread command = new Thread(() -> {
-    					Command.onCommand(commandLine.split(" "));
-    				});
-    				command.setDaemon(true);
-    				command.start();
-    				try {
-    					command.join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+
+    private static void lineReader() {
+    	Thread line = new Thread(() -> {
+    		try {
+				while(!stop) {
+					if(input.ready()) {
+						String[] commandLine = input.readLine().split(" ");
+						if(commandLine.length > 0) {
+							Command.onCommand(commandLine);
+						}
 					}
-    			}
-    		}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
     	});
-    	lineReader.setDaemon(true);
-    	lineReader.start();
+    	line.setDaemon(true);
+    	line.start();
     }
     
     public static void stop() {

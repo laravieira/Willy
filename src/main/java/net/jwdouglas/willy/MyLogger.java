@@ -25,7 +25,7 @@ public class MyLogger {
 		try {
 			// Reset Loggers
 			LogManager.getLogManager().reset();
-			System.setProperty("java.util.logging.SimpleFormatter.format", "[%4$s] %5$s %n");
+			System.setProperty("java.util.logging.SimpleFormatter.format", "[%2$tT][%4$s] %5$s %n");
 			Handler[] handlers = Logger.getLogger(Willy.class.getCanonicalName()).getParent().getHandlers();
 			for(Handler handler : handlers)
 				Logger.getLogger(Willy.class.getCanonicalName()).getParent().removeHandler(handler);
@@ -40,7 +40,7 @@ public class MyLogger {
 			Formatter consoleFormatter = new Formatter() {
 				@Override
 				public String format(LogRecord record) {
-					return String.format("[%1$s] %2$s %n", record.getLevel(), record.getMessage());
+					return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
 				}
 			};
 			

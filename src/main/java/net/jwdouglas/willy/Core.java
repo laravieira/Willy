@@ -79,10 +79,11 @@ public class Core {
 			Map<Date, Message> toRemove = new HashMap<Date, Message>();
 			toClear.forEach((key, value) -> {
 				if(key.before(date)) {
-					value.delete("Time expired.").block();
+					try {
+						value.delete("Time expired.").block();
+						MyLogger.getLogger().info("Message deleted from a public chat.");
+					}catch(RuntimeException e) {}
 					toRemove.put(key, value);
-					Logger log = MyLogger.getLogger();
-					log.info("Message deleted from a public chat.");
 				}
 			});
 			toRemove.forEach((key, value) -> {

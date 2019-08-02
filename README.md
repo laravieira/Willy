@@ -48,10 +48,10 @@ if you don't want auto clear public chat do:
 >clear_public_chats: false
 
 if your choice is to clear public chats, you need to set the time to wait before delete each message, write this:
-* *<number>s* to wait *<number>* seconds before delete a message;
-* *<number>m* to wait *<number>* minutes before delete a message;
-* *<number>h* to wait *<number>* hours before delete a message;
-* *<number>d* to wait *<number>* days before delete a message;
+* *< number >s* to wait *< number >* seconds before delete a message;
+* *< number >m* to wait *< number >* minutes before delete a message;
+* *< number >h* to wait *< number >* hours before delete a message;
+* *< number >d* to wait *< number >* days before delete a message;
 
 for example, to wait 8 minutes after send to delete a message, type:
 >clear_after_wait: 8m
@@ -73,7 +73,7 @@ one example is:
 And now put your Watson Assistant credentials:
 
 >watson_assistant:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: <true or false><br>
+>&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: < true or false ><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: <any date after 2019><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: <assistant_id><br>
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: <credentials_password><br>
@@ -100,11 +100,16 @@ You can now save *config.yml* file.
 >&nbsp;&nbsp;&nbsp;&nbsp;- Billy<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;- billy<br>
 ><br>
+>clear_public_chats: false
+><br>
+>clear_after_wait: 8m
+><br>
 >discord:<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;client_id: 3498573895738593<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;token: hj3455g3jh5g3jh3g5jhg4hj5g3hj53ghj5hj34g53jh5g3jh5g<br>
 ><br>
 >watson_assistant:<br>
+>&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: false<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7<br>

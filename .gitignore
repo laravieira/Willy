@@ -1,1 +1,7 @@
 /target/
+/.settings/
+/.git/
+/config.yml
+/logs/
+/Procfile
+/start.bat

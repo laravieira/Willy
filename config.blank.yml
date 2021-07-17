@@ -1,0 +1,64 @@
+# ---------------------------------------------------------- #
+#                                                            #
+#                    Willy Bot Config File                   #
+#                                                            #
+#                                                            #
+#      For help check https://github.com/JWDouglas/Willy     #
+#                                                            #
+# ---------------------------------------------------------- #
+
+
+willy_name: Willy
+willy_aliases:
+    - willy
+    - Wily
+    - wily
+    - Wil
+    - wil
+    - illy
+    - ily
+
+user_context_life_time: 1m
+
+ignore_start_with:
+    - '!'
+    - '?'
+    - '@'
+    - '/'
+    - '\'
+    - '//'
+    - '#'
+
+clear_public_chats: true
+clear_after_wait: 2m
+
+discord:
+    client_id: THE_BOT_ID
+    token: THE_DISCORD_TOKEN
+    verbuse: THE_CHANNEL_ID
+    keep_willy_nick: true
+    keep_master_nick: THE_MASTER_ID
+
+watson_assistant:
+    session_live: 5m
+    keep_alive: false
+    api_date: 2019-07-25
+    assistant_id: THE_WHATSON_ID
+    credentials_password: THE_WATSON_TOKEN
+
+audio_player:
+    change_activity: true
+    command_default_channel_id: DEFAULT_VOICE_CHANNEL_ID
+
+bitly:
+    use: true
+    token: THE_BITLY_TOKEN
+
+youtube_downloader:
+    willy_vpn: false
+    use_bitly: true
+
+web_server:
+    use: false
+    uri: http://localhost/
+    port: 80

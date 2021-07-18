@@ -22,7 +22,7 @@ public class Watson {
 	
 	public static void start() {
 		IamAuthenticator iamAuth = new IamAuthenticator(Config.getWatsonPassword());
-		service = new Assistant("2019-07-25", iamAuth);
+		service = new Assistant("2021-06-14", iamAuth);
 		if(Config.getWatsonKeepSessionAlive())
 			registrySession();
 		MyLogger.getLogger().info("Watson instance has been openned.");

@@ -26,7 +26,7 @@ public class Kernel {
 
 	public static boolean checkForPlayQuestion(Context context, String content) {
 		for(String key : Config.getPlayerPlayAskKeys())
-			if(content.substring(0, key.length()).equalsIgnoreCase(key)) {
+			if(content.toLowerCase().startsWith(key.toLowerCase())) {
 				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
 				String data = content.substring(key.length()).trim();
 				System.out.println(data);

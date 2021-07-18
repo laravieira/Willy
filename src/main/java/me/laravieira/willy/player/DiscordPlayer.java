@@ -170,6 +170,8 @@ public class DiscordPlayer {
 	}
 	
 	public static DiscordPlayer getDiscordPlayerFromContext(Context context) {
+		if(context.getDiscordMessage() == null)
+			return null;
 		Member member = context.getDiscordMessage().getAuthorAsMember().block();
 		if(member != null) {
 			VoiceState voiceState = member.getVoiceState().block();

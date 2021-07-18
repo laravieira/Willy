@@ -13,10 +13,6 @@ willy_aliases:
     - willy
     - Wily
     - wily
-    - Wil
-    - wil
-    - illy
-    - ily
 
 user_context_life_time: 1m
 
@@ -49,6 +45,14 @@ watson_assistant:
 audio_player:
     change_activity: true
     command_default_channel_id: DEFAULT_VOICE_CHANNEL_ID
+    blends_for_play:
+        - "Willy play"
+        - "Willy toca"
+        - "Willy adiciona"
+        - "Willy reproduz"
+        - "Willy reproduza"
+        - "Willy toque"
+        - "Willy coloca"
 
 bitly:
     use: true

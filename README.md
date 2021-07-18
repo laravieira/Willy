@@ -12,7 +12,7 @@ Willy is your best, beautiful, little and cute friend. He will help you to do ev
 
 #### Start Willy for the first time
 To begin you need to run the app a first time. To run, you can start Willy by using the built file on the folder *target/* with the following command on cmd:
-> java -jar [willy-0.0.1-SNAPSHOT-jar-with-dependencies.jar](target/willy-0.0.1-SNAPSHOT-jar-with-dependencies.jar)
+> java -jar willy-0.13.0-jar-with-dependencies.jar
 
 After running, Willy will create a log *folder/*, containing the log files and a **config.yml** file and then close with an error that you can ignore for now.
 
@@ -84,7 +84,7 @@ for example:
 >&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: false<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
->&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7
+>&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlï¿½kgjaï¿½lkfgjaï¿½e45hj-e48t39th3aifghj_384tha3g34tr7
 
 ###### *keep_alive* option will keep watson assistant session alive forever, consuming more internet data, this is not recommended and not necessary, if a session expire, Willy will create a new. Only turn *keep_alive* option true if you have problems with bad pings.
 
@@ -112,7 +112,7 @@ You can now save *config.yml* file.
 >&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: false<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
 >&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
->&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlçkgjaçlkfgjaçe45hj-e48t39th3aifghj_384tha3g34tr7<br>
+>&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjlï¿½kgjaï¿½lkfgjaï¿½e45hj-e48t39th3aifghj_384tha3g34tr7<br>
 >
 
 ### Now you can run Willy again, with the same command and he will work just fine.

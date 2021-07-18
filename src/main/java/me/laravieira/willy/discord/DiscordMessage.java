@@ -120,19 +120,19 @@ public class DiscordMessage {
 	private static void floodChat(MessageChannel channel) {
 		try {Message response = null;
 			
-			response = channel.createMessage(specs -> { specs.setEmbed(embed -> {
+			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
 				embed.setImage("https://jwdouglas.net/willy_files/helps.png");
 			});}).block(); messages.put(new Date().getTime()+Config.getClearTime(), response);
 			
-			response = channel.createMessage(specs -> { specs.setEmbed(
+			response = channel.createMessage(specs -> { specs.addEmbed(
 				embed -> {embed.setImage("https://jwdouglas.net/willy_files/help.png");
 			});}).block(); messages.put(new Date().getTime()+Config.getClearTime(), response);
 
-			response = channel.createMessage(specs -> { specs.setEmbed(embed -> {
+			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
 				embed.setImage("https://jwdouglas.net/willy_files/be-help.png");
 			});}).block(); messages.put(new Date().getTime()+Config.getClearTime(), response);
 
-			response = channel.createMessage(specs -> {	specs.setEmbed(embed -> {
+			response = channel.createMessage(specs -> {	specs.addEmbed(embed -> {
 				embed.setThumbnail("https://jwdouglas.net/willy_files/piscadela.jpg");
 			});}).block(); messages.put(new Date().getTime()+Config.getClearTime(), response);
 			

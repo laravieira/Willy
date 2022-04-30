@@ -1,0 +1,1 @@
+worker: java --enable-preview --add-opens java.base/java.lang=ALL-UNNAMED -jar target/willy-0.14.0-jar-with-dependencies.jar

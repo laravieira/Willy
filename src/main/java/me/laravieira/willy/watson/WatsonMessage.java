@@ -15,97 +15,55 @@ import com.ibm.watson.assistant.v2.model.MessageInput;
 import com.ibm.watson.assistant.v2.model.MessageInputOptions;
 import com.ibm.watson.assistant.v2.model.MessageOptions;
 import com.ibm.watson.assistant.v2.model.MessageOutput;
-import com.ibm.watson.assistant.v2.model.MessageOutputDebug;
 import com.ibm.watson.assistant.v2.model.MessageResponse;
 import com.ibm.watson.assistant.v2.model.RuntimeEntity;
 import com.ibm.watson.assistant.v2.model.RuntimeIntent;
 import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import com.ibm.watson.assistant.v2.model.SearchResult;
 
-import me.laravieira.willy.config.Config;
-import me.laravieira.willy.kernel.Action;
-import me.laravieira.willy.kernel.Context;
-import me.laravieira.willy.kernel.Messager;
+import me.laravieira.willy.Willy;
 
 public class WatsonMessage {
-	
+
 	private MessageResponse response = null;
 	private MessageContext context = null;
 	private String id = null;
-	
+
 	public WatsonMessage(MessageContext context, String id) {
 		this.context = context;
 		this.id = id;
 	}
 
-	public MessageResponse getResponse() {
-		return response;
-	}
+	private void callWatsonListener(MessageResponse response) {
+		if(response.getContext() == null || response.getOutput() == null) {
+			new WatsonListener().onErrorResponse(response);
+			return;
+		}
 
-	public MessageContext getContext() {
-		return context;
-	}
-	
-	public MessageOutput getOutput() {
-		return response.getOutput();
-	}
-
-	public List<DialogNodeAction> getActions() {
-		return response.getOutput().getActions();
-	}
-
-	public List<RuntimeResponseGeneric> getGeneric() {
-		return response.getOutput().getGeneric();
-	}
-
-	public List<RuntimeEntity> getEntities() {
-		return response.getOutput().getEntities();
-	}
-
-	public List<RuntimeIntent> getIntents() {
-		return response.getOutput().getIntents();
-	}
-
-	public Map<String, Object> getUserDefined() {
-		return (Map<String, Object>)response.getContext().skills().get("main_skill").userDefined();
-	}
-	
-	public boolean hasGenericResponse() {
 		if(response.getOutput().getGeneric() != null && !response.getOutput().getGeneric().isEmpty())
-			return true;
-		else return false;
-	}
-	
-	public boolean hasAction() {
+			response.getOutput().getGeneric().forEach((generic) -> {
+				if(generic.responseType().equalsIgnoreCase("text"))
+					new WatsonListener().onTextMessageResponse(response, generic, id);
+			});
+
 		if(response.getOutput().getActions() != null && !response.getOutput().getActions().isEmpty())
-			return true;
-		else return false;
-	}
-	
-	public MessageOutputDebug getDebug() {
-		return response.getOutput().getDebug();
+			response.getOutput().getActions().forEach(
+					(action) -> new WatsonListener().onActionResponse(response, action, id));
 	}
 
-	private boolean itSendedOk(MessageResponse response) {
-		if(response.getContext() != null && response.getOutput() != null)
-			return true;
-		else return false;
-	}
-	
-	private boolean sendMessage(MessageInput input) {
-		if(!Watson.isSessionRegistered())
+	private void sendMessage(MessageInput input) {
+		if(!new Watson().isConnected())
 			Watson.registrySession();
-		
-		MessageOptions options = new MessageOptions.Builder(Config.getWatsonID(), Watson.getSessionId())
-			.input(input).context(context).build();
-		response = Watson.getService().message(options).execute().getResult();
-		
+
+		MessageOptions options = new MessageOptions.Builder(Willy.getConfig().asString("watson.assistant-id"), Watson.getSessionId())
+				.input(input).context(context).build();
+
+		MessageResponse response = Watson.getService().message(options).execute().getResult();
 		Watson.setSessionTimestamp(new Date().getTime());
-		Context.getContext(id).setWatsonContext(response.getContext());
-		
-		return itSendedOk(response);
+
+		callWatsonListener(response);
 	}
-	
+
 	public void sendActionMessage(String name, Object value) {
 		Map<String, Object> userDefined = context.skills().get("main skill").userDefined();
 		userDefined.put(name, value);
@@ -114,26 +72,21 @@ public class WatsonMessage {
 		MessageInputOptions inputOptions = new MessageInputOptions.Builder().returnContext(true).build();
 
 		MessageInput input = new MessageInput.Builder()
-				.messageType("text").text(null).options(inputOptions).build();
-		
+				.messageType("text").text(null)
+				.options(inputOptions).build();
+
 		sendMessage(input);
-		if(hasGenericResponse() && response.getOutput().getGeneric().get(0).responseType().equalsIgnoreCase("text"))
-			new Messager(id).sendMessage(response.getOutput().getGeneric().get(0).text());
-		if(hasAction()) new Action(id);
 	}
-	
+
 	public void sendTextMessage(String message) {
 		MessageInputOptions inputOptions = new MessageInputOptions.Builder().returnContext(true).build();
 
 		MessageInput input = new MessageInput.Builder()
-		  .messageType("text").text(message).options(inputOptions).build();
-		
+				.messageType("text").text(message).options(inputOptions).build();
+
 		sendMessage(input);
-		if(hasGenericResponse() && response.getOutput().getGeneric().get(0).responseType().equalsIgnoreCase("text"))
-			new Messager(id).sendMessage(response.getOutput().getGeneric().get(0).text());
-		if(hasAction()) new Action(id);
 	}
-	
+
 	public void debug(Logger log) {
 		MessageOutput output = response.getOutput();
 		log.info(" ▪ Timezone: "+context.global().system().timezone());
@@ -190,7 +143,7 @@ public class WatsonMessage {
 			dialogs.forEach((dialog) -> {
 				log.info("       - "+dialog.getClass().toGenericString());
 				String space = "             ";
-				
+
 				Map<String, String> subDialog = new HashMap<String, String>();
 				subDialog.put("Header",        dialog.header());
 				subDialog.put("Title",         dialog.title());
@@ -202,7 +155,7 @@ public class WatsonMessage {
 				subDialog.put("Msg To Human",  dialog.messageToHumanAgent());
 				subDialog.put("Description",   dialog.description());
 				subDialog.put("Text",          dialog.text());
-				
+
 				subDialog.forEach((name, vars) -> {
 					if(vars == null || vars.isEmpty())
 						log.info(space+"+ "+name+": null");

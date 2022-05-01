@@ -16,14 +16,14 @@ import me.laravieira.willy.chat.whatsapp.Whatsapp;
 public class Willy {
 	
 	private static final String my_name    = "Willy";
-	private static final int[]  my_version = {0,14,0};
+	private static final int[]  my_version = {0,15,0};
 	private static final String my_release = "SNAPSHOT";
 	private static final String my_descrpt = "Willy it's your best, beautiful, little and cute friend. He will help to do everything possible.";
 	private static final String my_image   = "/src/main/resources/profile.jpg";
 	private static final long   start_time = new Date().getTime();
 
-	private static Willy willy = new Willy();
-	private static WillyLogger logger = new WillyLogger();
+	private static final Willy willy = new Willy();
+	private static final WillyLogger logger = new WillyLogger();
 	private static Config config;
 
 	private final ArrayList<WillyChat> chats = new ArrayList<>();
@@ -34,7 +34,7 @@ public class Willy {
     }
 
     public static Willy       getWilly()  {return willy;}
-	public static Config      getConfig() {return Config.config;}
+	public static Config      getConfig() {return config;}
 	public static WillyLogger getLogger() {return logger;}
 
 	public void stop() {
@@ -89,15 +89,15 @@ public class Willy {
 	}
 
 	private void connectWillyChatInstances() {
-		chats.forEach((chat) -> chat.connect());
+		chats.forEach(WillyChat::connect);
 	}
 
 	private void refreshWillyChatInstances() {
-		chats.forEach((chat) -> chat.refresh());
+		chats.forEach(WillyChat::refresh);
 	}
 
 	private void disconnectWillyChatInstances() {
-		chats.forEach((chat) -> chat.disconnect());
+		chats.forEach(WillyChat::disconnect);
 	}
 
 	public void addWillyChatInstance(WillyChat chat) {

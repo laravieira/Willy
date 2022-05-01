@@ -14,6 +14,7 @@ import it.auties.whatsapp4j.protobuf.chat.Chat;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.chat.discord.Discord;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.chat.discord.DiscordNoADM;
 import me.laravieira.willy.feature.player.DiscordPlayer;
@@ -51,7 +52,7 @@ public class Command {
 		console.info("Discord: "+(new Discord().isConnected()?"Connected":"Disconnected"));
 		console.info("Contexts: "+Context.getContexts().size()+" in use");
 		console.info("Web Server: "+(Server.isRunning()?"Working":"Stopped"));
-		console.info("Bitly Use: "+Willy.getConfig().asBoolean("bitly.enable"));
+		console.info("Bitly Use: "+ Config.getBoolean("bitly.enable"));
 		console.info("Music Players: "+DiscordPlayer.getPlayers().size()+" loaded");
 		long time  = (new Date().getTime()-Willy.getWilly().getStartTime())/1000;
 		console.info("UpTime: "+time/(3600*24)+"d, "+(time%(3600*24))/(3600)+"h, "+(time%(3600)/60)+"m, "+time%60+"s.");
@@ -124,7 +125,7 @@ public class Command {
 	
 	private static void player(String[] args) {
 		if(args.length > 1) {
-			VoiceChannel channel = (VoiceChannel)Discord.getBotGateway().getChannelById(Snowflake.of(Willy.getConfig().asString("audio-player.command-default-channel-id"))).block();
+			VoiceChannel channel = (VoiceChannel)Discord.getBotGateway().getChannelById(Snowflake.of(Config.getString("ap.command_default_channel_id"))).block();
 			DiscordPlayer player = DiscordPlayer.createDiscordPlayer(channel);
 			if(args.length > 2 && args[1].equalsIgnoreCase("add")) {
 				player.add(args[2]);
@@ -148,7 +149,7 @@ public class Command {
 				console.info("Playing track: "+(player.getPlayer().getPlayingTrack() == null?"EMPTY":player.getPlayer().getPlayingTrack().getInfo().title));
 				console.info("Next track: "+(player.getTrackScheduler().getNext() == null?"EMPTY":player.getTrackScheduler().getNext().getInfo().title));
 				console.info("Queue size: "+player.getTrackScheduler().getQueue().size());
-				console.info("Channel status: "+(player.getChannel().isMemberConnected(Snowflake.of(Willy.getConfig().asString("discord.client-id"))).block()?"CONNECTED":"DISCONNECTED"));
+				console.info("Channel status: "+(player.getChannel().isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block()?"CONNECTED":"DISCONNECTED"));
 				console.info("Channel identifier: "+player.getChannel().getName()+" ("+player.getChannel().getId().asString()+")");
 				console.info("---------------------------------------------------------------");
 			}else {

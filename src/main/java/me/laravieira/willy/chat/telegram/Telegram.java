@@ -2,6 +2,7 @@ package me.laravieira.willy.chat.telegram;
 
 import com.pengrad.telegrambot.TelegramBot;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Telegram implements WillyChat {
@@ -9,9 +10,9 @@ public class Telegram implements WillyChat {
 
     @Override
     public void connect() {
-        if(!Willy.getConfig().asBoolean("telegram.enable"))
+        if(!Config.getBoolean("telegram.enable"))
             return;
-        bot = new TelegramBot(Willy.getConfig().asString("telegram.token"));
+        bot = new TelegramBot(Config.getString("telegram.token"));
         bot.setUpdatesListener(new TelegramListener());
         Willy.getLogger().info("Telegram instance connected.");
     }

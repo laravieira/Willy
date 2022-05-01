@@ -14,6 +14,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
+
 import javax.net.ssl.SSLException;
 
 public class Server {
@@ -50,7 +52,7 @@ public class Server {
 	}
 
 	public static void load() {
-		if(!Willy.getConfig().asBoolean("web.enable"))
+		if(!Config.getBoolean("web.enable"))
 			return;
 		try {
 			SelfSignedCertificate ssc = new SelfSignedCertificate();
@@ -82,7 +84,7 @@ public class Server {
 									Server.getHTTP2ServerAPNHandler());
 						}
 					});
-			int port = Willy.getConfig().asInt("web.port");
+			int port = Config.getInt("web.port");
 			channel = bootstrap.bind(port).sync().channel();
 			log.info("Server opened on port "+port+".");
 

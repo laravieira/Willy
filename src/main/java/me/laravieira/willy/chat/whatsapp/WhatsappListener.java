@@ -5,6 +5,7 @@ import it.auties.whatsapp4j.protobuf.info.MessageInfo;
 import it.auties.whatsapp4j.response.impl.json.UserInformationResponse;
 import lombok.NonNull;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.internal.WillyUtils;
 
@@ -23,7 +24,7 @@ public class WhatsappListener implements it.auties.whatsapp4j.listener.WhatsappL
 
         if(content.isEmpty())
             return;
-        if(Willy.getConfig().asBoolean("whatsapp.shared-chat")
+        if(Config.getBoolean("whatsapp.shared_chat")
         && !WillyUtils.hasWillyCall(content)
         && !Context.getContexts().containsKey(id))
             return;

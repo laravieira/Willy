@@ -10,13 +10,14 @@ import com.ibm.watson.assistant.v2.model.DeleteSessionOptions;
 import com.ibm.watson.assistant.v2.model.SessionResponse;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.kernel.Context;
 
 public class Watson implements WillyChat {
 
-	private static long expireTimestamp = Willy.getConfig().asTimestamp("watson.session-live");
-	private static boolean keepAlive = Willy.getConfig().asBoolean("watson.keep-alive");
+	private static long expireTimestamp = Config.getLong("wa.session_live");
+	private static boolean keepAlive = Config.getBoolean("wa.keep_alive");
 
 	private static boolean   registered = false;
 	private static Assistant service    = null;
@@ -24,7 +25,7 @@ public class Watson implements WillyChat {
 	private static long      expire     = 0;
 
 	public static void registrySession() {
-		CreateSessionOptions cso = new CreateSessionOptions.Builder().assistantId(Willy.getConfig().asString("watson.assistant-id")).build();
+		CreateSessionOptions cso = new CreateSessionOptions.Builder().assistantId(Config.getString("wa.assistant_id")).build();
 		SessionResponse sessionResponse = Watson.getService().createSession(cso).execute().getResult();
 		expire = new Date().getTime()+expireTimestamp;
 		session = sessionResponse.getSessionId();
@@ -67,9 +68,9 @@ public class Watson implements WillyChat {
 
 	@Override
 	public void connect() {
-		IamAuthenticator iamAuth = new IamAuthenticator(Willy.getConfig().asString("watson.credentials-password"));
-		service = new Assistant("2021-11-27", iamAuth);
-		service.setServiceUrl("https://api.us-south.assistant.watson.cloud.ibm.com");
+		IamAuthenticator iamAuth = new IamAuthenticator(Config.getString("wa.password"));
+		service = new Assistant(Config.getString("wa.api_date"), iamAuth);
+		service.setServiceUrl(Config.getString("wa.server_url"));
 		if(keepAlive)
 			registrySession();
 		Willy.getLogger().info("Watson instance opened.");
@@ -79,7 +80,7 @@ public class Watson implements WillyChat {
 	public void disconnect() {
 		if(session != null) {
 			try {
-				DeleteSessionOptions dso = new DeleteSessionOptions.Builder(Willy.getConfig().asString("watson.assistant-id"), session).build();
+				DeleteSessionOptions dso = new DeleteSessionOptions.Builder(Config.getString("wa.assistant_id"), session).build();
 				service.deleteSession(dso).execute();
 				registered = false;
 			}catch(NotFoundException ignore) {}

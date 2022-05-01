@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -115,11 +116,11 @@ public class Youtube {
 	public String getDownloadLink() {
 		if(format == null) return null;
 		
-		if(Willy.getConfig().asBoolean("youtube-downloader.willy-vpn"))
+		if(Config.getBoolean("ytd.willy_vpn"))
 			download();
 		else link = format.url();
 		
-		if(Bitly.canUse && Willy.getConfig().asBoolean("youtube-downloader.use-bitly")) {
+		if(Bitly.canUse && Config.getBoolean("ytd.use_bitly")) {
 			Bitly bitly = new Bitly(link);
 			if(bitly.getShort() != null)
 				return bitly.getShort();
@@ -138,7 +139,7 @@ public class Youtube {
 		Response<File> response = downloader.downloadVideoFile(request);
 		file = response.data();
 
-		link = Willy.getConfig().asString("web-server.uri")+"videos/"+file.getName();
+		link = Config.getString("web.uri")+"videos/"+file.getName();
 	}
 	
 //    private static boolean isReachable(String url) {

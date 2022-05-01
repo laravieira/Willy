@@ -22,6 +22,7 @@ import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import com.ibm.watson.assistant.v2.model.SearchResult;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 
 public class WatsonMessage {
 
@@ -55,7 +56,7 @@ public class WatsonMessage {
 		if(!new Watson().isConnected())
 			Watson.registrySession();
 
-		MessageOptions options = new MessageOptions.Builder(Willy.getConfig().asString("watson.assistant-id"), Watson.getSessionId())
+		MessageOptions options = new MessageOptions.Builder(Config.getString("wa.assistant_id"), Watson.getSessionId())
 				.input(input).context(context).build();
 
 		MessageResponse response = Watson.getService().message(options).execute().getResult();

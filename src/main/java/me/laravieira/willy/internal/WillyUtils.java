@@ -6,9 +6,9 @@ import java.util.List;
 
 public class WillyUtils {
     public static boolean hasWillyCall(String message) {
-        if(message.contains(Willy.getConfig().asString("willy-name")))
+        if(message.contains(Config.getString("name")))
             return true;
-        for(String alias : (List<String>)Willy.getConfig().asList("willy-aliases"))
+        for(String alias : (List<String>)Config.getList("aliases"))
             if(message.contains(alias))
                 return true;
         return false;

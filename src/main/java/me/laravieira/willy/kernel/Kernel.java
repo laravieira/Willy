@@ -5,6 +5,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.DiscordContext;
 import me.laravieira.willy.feature.player.DiscordPlayer;
+import me.laravieira.willy.internal.Config;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class Kernel {
 	private static MessageChannel verbuse = null;
 
 	public static boolean checkForPlayQuestion(DiscordContext context, String content) {
-		for(String key : (List<String>)Willy.getConfig().asList("audio-player.blends-for-play"))
+		for(String key : (List<String>) Config.getList("ap.blends_for_play"))
 			if(content.toLowerCase().startsWith(key.toLowerCase())) {
 				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
 				String data = content.substring(key.length()).trim();
@@ -29,8 +30,8 @@ public class Kernel {
 	
 	
 	public static void onMemberUpdate(MemberUpdateEvent event) {
-		String master = Willy.getConfig().asString("discord.keep-master-nick");
-		boolean willy = Willy.getConfig().asBoolean("discord.keep-willy-nick");
+		String master = Config.getString("discord.keep_master_nick");
+		boolean willy = Config.getBoolean("discord.keep_willy_nick");
 		
 		if(master != null && event.getMemberId().asString().equals(master) && event.getCurrentNickname().isPresent()) {
 			try {
@@ -45,7 +46,7 @@ public class Kernel {
 			}
 		}
 		
-		if(willy && event.getMemberId().asString().equals(Willy.getConfig().asString("discord.client-id")) && event.getCurrentNickname().isPresent()) {
+		if(willy && event.getMemberId().asString().equals(Config.getString("discord.client_id")) && event.getCurrentNickname().isPresent()) {
 			try {
 				event.getMember().block().edit(spec -> spec.setNickname(null)).doOnError(data -> {
 					Willy.getLogger().warning("Willy nickname reset falied caused by: "+data.getMessage());

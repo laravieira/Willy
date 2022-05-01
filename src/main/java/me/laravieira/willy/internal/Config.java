@@ -1,106 +1,138 @@
 package me.laravieira.willy.internal;
 
 import me.laravieira.willy.Willy;
-import org.snakeyaml.engine.v2.api.Load;
-import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Config {
-	public static Config config;
+	private final static int TYPE_INT = 1;
+	private final static int TYPE_STRING = 2;
+	private final static int TYPE_BOOLEAN = 3;
+	private final static int TYPE_LONG = 4;
+	private final static int TYPE_LIST = 5;
+	private final static int TYPE_TIME = 6;
+
+	private final static Map<String, Object> settings = new HashMap<>();
+	private static Yaml configFile;
 
 	public static void load() {
+		loadConfigFile();
+
+		List<String> aliases = new ArrayList<>();
+		aliases.add("willy");
+
+		List<String> ignore = new ArrayList<>();
+		ignore.add("!");
+		ignore.add("?");
+		ignore.add("@");
+		ignore.add("/");
+		ignore.add("\\");
+		ignore.add("//");
+		ignore.add("#");
+
+		List<String> apBlends = new ArrayList<>();
+		apBlends.add("Willy play");
+		apBlends.add("Willy toca");
+		apBlends.add("Willy adiciona");
+		apBlends.add("Willy reproduz");
+		apBlends.add("Willy reproduza");
+		apBlends.add("Willy toque");
+		apBlends.add("Willy coloca");
+
+		// Overall Settings
+		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, "Willy");
+		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,    aliases);
+		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("1m"));
+		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,    ignore);
+
+		// Watson Assistant settings
+		set("wa.session_live", "WILLY_WA_SESSION_LIVE", "watson.session-live",         TYPE_TIME,    parseTime("5m"));
+		set("wa.keep_alive",   "WILLY_WA_KEEP_ALIVE",   "watson.keep-alive",           TYPE_BOOLEAN, false);
+		set("wa.api_date",     "WILLY_WA_API_DATE",     "watson.api-date",             TYPE_STRING,  "2021-11-27");
+		set("wa.server_url",   "WILLY_WA_SERVER_URL",   "watson.server-url",           TYPE_STRING,  "https://api.us-south.assistant.watson.cloud.ibm.com");
+		set("wa.assistant_id", "WILLY_WA_ASSISTANT_ID", "watson.assistant-id",         TYPE_STRING,  null);
+		set("wa.password",     "WILLY_WA_PASSWORD",     "watson.credentials-password", TYPE_STRING,  null);
+
+		// Discord settings
+		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, false);
+		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
+		set("discord.token",              "WILLY_DISCORD_TOKEN",                    "discord.token",                   TYPE_STRING,  null);
+		set("discord.verbose",            "WILLY_DISCORD_VERBOSE",                  "discord.verbose-channel",         TYPE_STRING,  null);
+		set("discord.keep_willy_nick",    "WILLY_DISCORD_KEEP_NICK_WILLY",          "discord.keep_willy_nick",         TYPE_BOOLEAN, true);
+		set("discord.keep_master_nick",   "WILLY_DISCORD_KEEP_NICK_MASTER",         "discord.keep-master-nick",        TYPE_STRING,  null);
+		set("discord.clear_public_chats", "WILLY_DISCORD_CLEAR_PUBLIC_CHATS",       "discord.clear-public-chats",      TYPE_BOOLEAN, true);
+		set("discord.clear_after_wait",   "WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER", "discord.clear-after-wait",        TYPE_TIME,    parseTime("10m"));
+
+		// Whatsapp Settings
+		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, false);
+		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, true);
+
+		// Telegram Settings
+		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, false);
+		set("telegram.token",  "WILLY_TELEGRAM_TOKEN",  "telegram.token",  TYPE_STRING,  null);
+
+		// Audio Player Settings
+		set("ap.enable",                     "WILLY_AP_ENABLE",          "audio-player.enable",                     TYPE_BOOLEAN, true);
+		set("ap.change_activity",            "WILLY_AP_CHANGE_ACTIVITY", "audio-player.change-activity",            TYPE_BOOLEAN, true);
+		set("ap.command_default_channel_id", "WILLY_AP_DEFAULT_CHANNEL", "audio-player.command-default-channel-id", TYPE_STRING,  null);
+		set("ap.blends_for_play",            "WILLY_AP_BLENDS",          "audio-player.blends-for-play",            TYPE_LIST,    apBlends);
+
+		// Bitly Settings
+		set("bitly.enable", "WILLY_BITLY_ENABLE", "bitly.enable", TYPE_BOOLEAN, true);
+		set("bitly.token",  "WILLY_BITLY_TOKEN",  "bitly.token",  TYPE_STRING,  null);
+
+		// YouTube Downloader Settings
+		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, true);
+		set("ytd.willy_vpn", "WILLY_YTD_LOCAL",     "youtube-downloader.willy-vpn", TYPE_BOOLEAN, false);
+		set("ytd.use_bitly", "WILLY_YTD_USE_BITLY", "youtube-downloader.use-bitly", TYPE_BOOLEAN, true);
+
+		// WebServer Settings
+		set("web.enable", "WILLY_WEB_ENABLE", "web-server.enable", TYPE_BOOLEAN, false);
+		set("web.uri",    "WILLY_WEB_URI",    "web-server.uri", TYPE_STRING, "https://localhost/");
+		set("web.port",   "WILLY_WEB_PORT",   "web-server.port", TYPE_INT, 443);
+	}
+
+	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {
+		if(configFile.has(fileKey)) {
+			switch (type) {
+				case TYPE_STRING  -> settings.put(key, configFile.asString(fileKey));
+				case TYPE_INT     -> settings.put(key, configFile.asInt(fileKey));
+				case TYPE_LONG    -> settings.put(key, configFile.asLong(fileKey));
+				case TYPE_BOOLEAN -> settings.put(key, configFile.asBoolean(fileKey));
+				case TYPE_TIME    -> settings.put(key, parseTime(configFile.asString(fileKey)));
+				case TYPE_LIST    -> settings.put(key, configFile.asList(fileKey));
+				default -> settings.put(key, configFile.asObject(fileKey));
+			}
+		}
+		if(System.getenv().get(envKey) != null) {
+			switch (type) {
+				case TYPE_STRING  -> settings.put(key, System.getenv(envKey));
+				case TYPE_INT     -> settings.put(key, Integer.parseInt(System.getenv(envKey)));
+				case TYPE_LONG    -> settings.put(key, Long.parseLong(System.getenv(envKey)));
+				case TYPE_BOOLEAN -> settings.put(key, Boolean.parseBoolean(System.getenv(envKey)));
+				case TYPE_TIME    -> settings.put(key, parseTime(System.getenv(envKey)));
+				case TYPE_LIST    -> settings.put(key, Arrays.stream(System.getenv(envKey).split(";")).toList());
+				default -> settings.put(key, System.getenv(envKey));
+			}
+		}
+		settings.putIfAbsent(key, defaultValue);
+	}
+
+	public static void loadConfigFile() {
 		File confFile = new File("config.yml");
 		if(confFile.exists() && confFile.isFile())
-			config = new Config("config.yml", false);
+			configFile = new Yaml("config.yml", false);
 		else {
+			// TODO Implement a better cofig file generator
 			String sconf = "";
 			sconf += "# ---------------------------------------------------------- #\r\n";
 			sconf += "#                                                            #\r\n";
 			sconf += "#                    Willy Bot Config File                   #\r\n";
 			sconf += "#                                                            #\r\n";
-			sconf += "#                                                            #\r\n";
-			sconf += "#      For help check https://github.com/JWDouglas/Willy     #\r\n";
+			sconf += "#     For help check https://github.com/laravieira/Willy     #\r\n";
 			sconf += "#                                                            #\r\n";
 			sconf += "# ---------------------------------------------------------- #\r\n";
-			sconf += "\r\n";
-			sconf += "\r\n";
-			sconf += "# General Config #\r\n";
-			sconf += "willy_name: Willy\r\n";
-			sconf += "willy_aliases:\r\n";
-			sconf += "    - willy\r\n";
-			sconf += "    - Wily\r\n";
-			sconf += "    - wily\r\n";
-			sconf += "    - Wil\r\n";
-			sconf += "    - wil\r\n";
-			sconf += "    - illy\r\n";
-			sconf += "    - ily\r\n";
-			sconf += "\r\n";
-			sconf += "user_context_life_time: 1h\r\n";
-			sconf += "\r\n";
-			sconf += "clear_public_chats: true\r\n";
-			sconf += "clear_after_wait: 20m\r\n";
-			sconf += "\r\n";
-			sconf += "\r\n";
-			sconf += "# Watson Assistant Config #\r\n";
-			sconf += "watson_assistant:\r\n";
-			sconf += "    session_live: 5m\r\n";
-			sconf += "    keep_alive: false\r\n";
-			sconf += "    api_date: 2019-07-25\r\n";
-			sconf += "    assistant_id: \r\n";
-			sconf += "    credentials_password: \r\n";
-			sconf += "\r\n";
-			sconf += "\r\n";
-			sconf += "# Chats Config #\r\n";
-			sconf += "discord:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    client_id: \r\n";
-			sconf += "    token: \r\n";
-			sconf += "    verbuse: \r\n";
-			sconf += "    keep_willy_nick: true\r\n";
-			sconf += "    keep_master_nick: \r\n";
-			sconf += "\r\n";
-			sconf += "whatsapp:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    shared_chat: false\r\n";
-			sconf += "\r\n";
-			sconf += "telegram:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    token: \r\n";
-			sconf += "\r\n";
-			sconf += "\r\n";
-			sconf += "# Features Config #\r\n";
-			sconf += "audio_player:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    change_activity: true\r\n";
-			sconf += "    command_default_channel_id: \r\n";
-			sconf += "    \r\n";
-			sconf += "    blends_for_play:\r\n";
-			sconf += "        - Willy play\r\n";
-			sconf += "        - Willy toca\r\n";
-			sconf += "        - Willy adiciona\r\n";
-			sconf += "        - Willy reproduz\r\n";
-			sconf += "        - Willy reproduza\r\n";
-			sconf += "        - Willy toque\r\n";
-			sconf += "        - Willy coloca\r\n";
-			sconf += "\r\n";
-			sconf += "bitly:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    token: \r\n";
-			sconf += "\r\n";
-			sconf += "youtube_downloader:\r\n";
-			sconf += "    enable: false\r\n";
-			sconf += "    willy_vpn: false\r\n";
-			sconf += "    use_bitly: false\r\n";
-			sconf += "\r\n";
-			sconf += "web_server:\r\n";
-			sconf += "    enable: true\r\n";
-			sconf += "    uri: http://localhost/\r\n";
-			sconf += "    port: 80\r\n";
-			sconf += "\r\n";
 
 			try {
 				FileWriter confWriter = new FileWriter(confFile);
@@ -109,106 +141,74 @@ public class Config {
 				Willy.getLogger().warning("Config file has been created on application directory.");
 				Willy.getLogger().warning("Setup config file and restart this application to apply new configs.");
 				Willy.getWilly().stop();
-				return;
 			} catch (IOException e) {
 				Willy.getLogger().severe("Can't create the config file, please check write and read system permissions.");
 				Willy.getLogger().severe(e.getMessage());
 				Willy.getWilly().stop();
-				return;
 			}
 		}
-	}
-
-	private final Map<String, Object> yaml = new HashMap<>();
-
-	Config(String path, boolean resource) {
-		try {
-			InputStream stream;
-			if(resource)
-				stream = Config.class.getClassLoader().getResource(path).openStream();
-			else
-				stream = new FileInputStream(path);
-			Load load = new Load(LoadSettings.builder().build());
-			yaml.putAll((Map<String, Object>)load.loadFromInputStream(stream));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	Config(Object object) {
-		yaml.putAll((Map<String, Object>)object);
-	}
-
-	private Object parse(String path) {
-		String[] keywords = path.split("\\.");
-		Object object = this.yaml;
-		for(String keyword : keywords) {
-			if(object instanceof Map) {
-				Config yaml = new Config(object);
-				object = yaml.has(keyword)?yaml.asObject(keyword):object;
-			}
-		}
-		return object;
 	}
 
 	private static long parseTime(String time) {
+		if(time == null)
+			return 0;
 		long value = 0; time = time.toLowerCase();
 		if((time.contains("s") && Integer.parseInt(time.split("s")[0]) > 0)) {
-			value = 1000*Integer.parseInt(time.split("s")[0]);
+			value = 1000L * Integer.parseInt(time.split("s")[0]);
 		}else if((time.contains("m") && Integer.parseInt(time.split("m")[0]) > 0)) {
-			value = 60000*Integer.parseInt(time.split("m")[0]);
+			value = 60000L * Integer.parseInt(time.split("m")[0]);
 		}else if((time.contains("h") && Integer.parseInt(time.split("h")[0]) > 0)) {
-			value = 3600000*Integer.parseInt(time.split("h")[0]);
+			value = 3600000L * Integer.parseInt(time.split("h")[0]);
 		}else if((time.contains("d") && Integer.parseInt(time.split("d")[0]) > 0)) {
-			value = 86400000*Integer.parseInt(time.split("d")[0]);
+			value = 86400000L * Integer.parseInt(time.split("d")[0]);
 		}
 		return value;
 	}
 
-	public boolean has(String keyword) {
-		return yaml.containsKey(keyword);
+	public static boolean has(String keyword) {
+		return settings.containsKey(keyword);
 	}
 
-	public Object asObject(String keyword) {
-		return yaml.get(keyword);
+	public static Object get(String keyword) {
+		return settings.get(keyword);
 	}
-	public Config get(String keyword) {
-		return new Config(parse(keyword));
+	public static String getString(String keyword) {
+		return (String)settings.get(keyword);
 	}
-	public String asString(String keyword) {
-		return (String)parse(keyword);
-	}
-	public int asInt(String keyword) {
-		return (int)parse(keyword);
-	}
-	public long asLong(String keyword) {return Long.valueOf(""+parse(keyword));}
-	public long asTimestamp(String keyword) {return parseTime((String)parse(keyword));}
-	public float asFloat(String keyword) {
-		return (float)parse(keyword);
-	}
-	public boolean asBoolean(String keyword) {
-		return (boolean)parse(keyword);
-	}
-	public List asList(String keyword) {
-		return (List)parse(keyword);
+	public static int getInt(String keyword) {
+		return (int)settings.get(keyword);
 	}
 
-	public boolean isString(String keyword) {
-		return parse(keyword) instanceof String;
+	public static long getLong(String keyword) {
+		return Long.parseLong(""+settings.get(keyword));
 	}
-	public boolean isInt(String keyword) {
-		return parse(keyword) instanceof Integer;
+
+	public static float getFloat(String keyword) {
+		return (float)settings.get(keyword);
 	}
-	public boolean isLong(String keyword) {
-		return parse(keyword) instanceof Long;
+	public static boolean getBoolean(String keyword) {
+		return (boolean)settings.get(keyword);
 	}
-	public boolean isFloat(String keyword) {
-		return parse(keyword) instanceof Float;
+	public static List getList(String keyword) {
+		return (List)settings.get(keyword);
 	}
-	public boolean isBoolean(String keyword) {
-		return parse(keyword) instanceof Boolean;
+
+	public static boolean isString(String keyword) {
+		return settings.get(keyword) instanceof String;
 	}
-	public boolean isList(String keyword) {
-		return parse(keyword) instanceof List;
+	public static boolean isInt(String keyword) {
+		return settings.get(keyword) instanceof Integer;
+	}
+	public static boolean isLong(String keyword) {
+		return settings.get(keyword) instanceof Long;
+	}
+	public static boolean isFloat(String keyword) {
+		return settings.get(keyword) instanceof Float;
+	}
+	public static boolean isBoolean(String keyword) {
+		return settings.get(keyword) instanceof Boolean;
+	}
+	public static boolean isList(String keyword) {
+		return settings.get(keyword) instanceof List;
 	}
 }

@@ -4,6 +4,7 @@ import it.auties.whatsapp4j.manager.WhatsappDataManager;
 import it.auties.whatsapp4j.whatsapp.WhatsappAPI;
 import it.auties.whatsapp4j.whatsapp.WhatsappConfiguration;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Whatsapp implements WillyChat {
@@ -12,7 +13,7 @@ public class Whatsapp implements WillyChat {
 
     @Override
     public void connect() {
-        if(!Willy.getConfig().asBoolean("whatsapp.enable"))
+        if(!Config.getBoolean("whatsapp.enable"))
             return;
         WhatsappConfiguration configuration = WhatsappConfiguration.builder()
                 .description("Willy by L4R4V131R4")

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.DiscordContext;
+import me.laravieira.willy.internal.Config;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.utils.URIBuilder;
@@ -34,7 +35,7 @@ public class DiscordPlayer {
 	private AudioPlayer player = null;
 	
 	public static void load() {
-		if (!Willy.getConfig().asBoolean("audio-player.enable"))
+		if (!Config.getBoolean("ap.enable"))
 			return;
 		//manager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
 		manager.setHttpRequestConfigurator((config) -> RequestConfig.copy(config).setConnectTimeout(10000).build());
@@ -49,7 +50,7 @@ public class DiscordPlayer {
 		}else
 			player = players.get(channel.getGuildId());
 		
-		if(!player.getChannel().isMemberConnected(Snowflake.of(Willy.getConfig().asString("discord.client-id"))).block()) {
+		if(!player.getChannel().isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block()) {
 			player.getChannel().join(spec -> spec.setProvider(player.getProvider())).block();
 			Willy.getLogger().getConsole().info("Joined on "+player.getChannel().getName()+" ("+player.getChannel().getId().asString()+").");
 		}return player;
@@ -127,7 +128,7 @@ public class DiscordPlayer {
 		trackScheduler.clearQueue();
 		player.destroy();
 		players.remove(channel.getGuildId());
-		if(channel.isMemberConnected(Snowflake.of(Willy.getConfig().asString("discord.client-id"))).block())
+		if(channel.isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block())
 			channel.sendDisconnectVoiceState().block();
 	}
 	
@@ -162,7 +163,7 @@ public class DiscordPlayer {
 		if(players.containsKey(guild)) {
 			Flux<VoiceState> voiceStates = event.getOld().get().getChannel().block().getVoiceStates();
 			if(voiceStates.count().block() == 1) {
-				if(voiceStates.blockFirst().getUserId().equals(Snowflake.of(Willy.getConfig().asString("discord.client-id")))) {
+				if(voiceStates.blockFirst().getUserId().equals(Snowflake.of(Config.getString("discord.client_id")))) {
 					players.get(guild).destroy();
 					Willy.getLogger().getConsole().info("Willy was alone on a voice channel, player instance destroed.");
 				}

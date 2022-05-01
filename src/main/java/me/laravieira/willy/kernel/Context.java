@@ -14,12 +14,13 @@ import com.ibm.watson.assistant.v2.model.MessageContextSkill;
 import com.ibm.watson.assistant.v2.model.MessageContextSkillSystem;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.watson.WatsonMessage;
 import org.apache.commons.lang3.NotImplementedException;
 
 public class Context {
 	private static final Map<String, Context> contexts = new HashMap<>();
-	private static long contextLifeTimestamp = Willy.getConfig().asTimestamp("context-life-time");
+	private static long contextLifeTimestamp = Config.getLong("context_lifetime");
 
 	private MessageContext context;
 	private WatsonMessage watson_message;

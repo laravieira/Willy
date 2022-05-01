@@ -4,6 +4,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.kernel.Context;
 
 import java.util.Date;
@@ -42,8 +43,8 @@ public class DiscordContext extends Context {
     }
 
     public void autoDeleteMessage(Message message) {
-        if(Willy.getConfig().asBoolean("discord.clear-public-chats") && getDeleteMessages()) {
-            long expire = Willy.getConfig().asTimestamp("discord.clear-after-wait") + new Date().getTime();
+        if(Config.getBoolean("discord.clear_public_chats") && getDeleteMessages()) {
+            long expire = Config.getLong("discord.clear_after_wait") + new Date().getTime();
             DiscordListener.autoDeleteMessage(expire, message);
         }
     }

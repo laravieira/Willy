@@ -7,28 +7,22 @@ import discord4j.core.event.domain.guild.MemberUpdateEvent;
 import discord4j.core.event.domain.lifecycle.DisconnectEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.presence.Activity;
-import discord4j.core.object.presence.ClientActivity;
-import discord4j.core.object.presence.ClientPresence;
-import discord4j.core.object.presence.Presence;
-import discord4j.discordjson.json.ActivityData;
-import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.gateway.intent.IntentSet;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.kernel.Kernel;
 import me.laravieira.willy.feature.player.DiscordPlayer;
-import reactor.core.publisher.Mono;
 
 public class Discord implements WillyChat {
 
-	private static DiscordClient client = DiscordClient.create(Willy.getConfig().asString("discord.token"));
+	private static DiscordClient client = DiscordClient.create(Config.getString("discord.token"));
 	private static GatewayDiscordClient gateway;
 	private static boolean ready = false;
 
 	@Override
 	public void connect() {
-		if(!Willy.getConfig().asBoolean("discord.enable"))
+		if(!Config.getBoolean("discord.enable"))
 			return;
 		gateway = client
 				.gateway()

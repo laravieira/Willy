@@ -13,6 +13,7 @@ import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
+import me.laravieira.willy.internal.Config;
 
 public class TrackScheduler extends AudioEventAdapter {
 	private BlockingQueue<AudioTrack> queue;
@@ -55,7 +56,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	public void onTrackStart(AudioPlayer player, AudioTrack track) {
 		String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
 		Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
-		if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		if(Config.getBoolean("ap.change_activity"))
 			try {
 				Thread.sleep(500);
 				Discord.getBotGateway()
@@ -69,7 +70,7 @@ public class TrackScheduler extends AudioEventAdapter {
 		AudioTrack track = player.getPlayingTrack();
 		String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
 		Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
-		if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		if(Config.getBoolean("ap.change_activity"))
 			try {
 				Thread.sleep(500);
 				Discord.getBotGateway()
@@ -80,7 +81,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	
 	@Override
 	public void onPlayerPause(AudioPlayer player) {
-		if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		if(Config.getBoolean("ap.change_activity"))
 			Discord.getBotGateway().updatePresence(ClientPresence.online()).block();
 	}
 	
@@ -88,21 +89,21 @@ public class TrackScheduler extends AudioEventAdapter {
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
 		if(endReason.mayStartNext)
 			nextTrack();
-		else if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		else if(Config.getBoolean("ap.change_activity"))
 				Discord.getBotGateway().updatePresence(ClientPresence.online()).block();
 	}
 	
 	@Override
 	public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
 		Willy.getLogger().getConsole().info("Track error:"+exception.getMessage());
-		if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		if(Config.getBoolean("ap.change_activity"))
 			Discord.getBotGateway().updatePresence(ClientPresence.online()).block();
 	}
 	
 	@Override
 	public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
 		Willy.getLogger().getConsole().info("Track stuck.");
-		if(Willy.getConfig().asBoolean("audio-player.change-activity"))
+		if(Config.getBoolean("ap.change_activity"))
 			Discord.getBotGateway().updatePresence(ClientPresence.online()).block();
 	}
 }

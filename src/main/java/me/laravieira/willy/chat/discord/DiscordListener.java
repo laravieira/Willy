@@ -9,6 +9,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel.Type;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.kernel.Kernel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -71,20 +72,20 @@ public class DiscordListener {
 	}
 	
 	private static String parseWillyId(String message) {
-		Long id = Willy.getConfig().asLong("discord.client-id");
-		String name = Willy.getConfig().asString("willy-name");
+		Long id = Config.getLong("discord.client_id");
+		String name = Config.getString("willy-name");
 		return message.replaceAll("<@"+ id +">", name);
 	}
 	
 	private static boolean startWith(String message) {
-		for(String prefix : (List<String>)Willy.getConfig().asList("ignore-start-with"))
+		for(String prefix : (List<String>)Config.getList("ignore_if_start_with"))
 			if(message.startsWith(prefix))
 				return true;
 		return false;
 	}
 
 	public static void refresh() {
-		if(Willy.getConfig().asBoolean("discord.clear-public-chats")) {
+		if(Config.getBoolean("discord.clear_public_chats")) {
 			Long now = new Date().getTime();
 			Map<Long, Message> toRemove = new HashMap<Long, Message>();
 			messages.forEach((key, value) -> {
@@ -112,26 +113,26 @@ public class DiscordListener {
 	}
 	
 	private static void floodChat(MessageChannel channel) {
-		long clearTime = Willy.getConfig().asTimestamp("discord.clear-after-wait");
+		long clearTime = Config.getLong("discord.clear_after_wait");
 		try {Message response = null;
 			
 			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://jwdouglas.net/willy_files/helps.png");
+				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png");
 			});}).block(); messages.put(new Date().getTime()+clearTime, response);
 			
 			response = channel.createMessage(specs -> { specs.addEmbed(
-				embed -> {embed.setImage("https://jwdouglas.net/willy_files/help.png");
+				embed -> {embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/help.png");
 			});}).block(); messages.put(new Date().getTime()+clearTime, response);
 
 			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://jwdouglas.net/willy_files/be-help.png");
+				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png");
 			});}).block(); messages.put(new Date().getTime()+clearTime, response);
 
 			response = channel.createMessage(specs -> {	specs.addEmbed(embed -> {
-				embed.setThumbnail("https://jwdouglas.net/willy_files/piscadela.jpg");
+				embed.setThumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg");
 			});}).block(); messages.put(new Date().getTime()+clearTime, response);
 			
-			Willy.getLogger().info("Chat flood send to "+channel.getId().asString()+".");
+			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
 			
 		}catch(RuntimeException e) {
 			Willy.getLogger().warning("Flood failure by an exception: "+e.getMessage());

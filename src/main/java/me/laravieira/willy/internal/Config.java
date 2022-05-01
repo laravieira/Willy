@@ -142,7 +142,7 @@ public class Config {
 				confWriter.close();
 				Willy.getLogger().warning("Config file has been created on application directory.");
 				Willy.getLogger().warning("Setup config file and restart this application to apply new configs.");
-				Willy.getWilly().stop();
+				loadConfigFile();
 			} catch (IOException e) {
 				Willy.getLogger().severe("Can't create the config file, please check write and read system permissions.");
 				Willy.getLogger().severe(e.getMessage());

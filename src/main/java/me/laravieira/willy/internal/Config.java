@@ -55,7 +55,7 @@ public class Config {
 		set("wa.password",     "WILLY_WA_PASSWORD",     "watson.credentials-password", TYPE_STRING,  null);
 
 		// Discord settings
-		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, false);
+		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, true);
 		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
 		set("discord.token",              "WILLY_DISCORD_TOKEN",                    "discord.token",                   TYPE_STRING,  null);
 		set("discord.verbose",            "WILLY_DISCORD_VERBOSE",                  "discord.verbose-channel",         TYPE_STRING,  null);
@@ -69,7 +69,7 @@ public class Config {
 		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, true);
 
 		// Telegram Settings
-		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, false);
+		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, true);
 		set("telegram.token",  "WILLY_TELEGRAM_TOKEN",  "telegram.token",  TYPE_STRING,  null);
 
 		// Audio Player Settings
@@ -133,6 +133,8 @@ public class Config {
 			sconf += "#     For help check https://github.com/laravieira/Willy     #\r\n";
 			sconf += "#                                                            #\r\n";
 			sconf += "# ---------------------------------------------------------- #\r\n";
+			sconf += "\r\n";
+			sconf += "willy-name: Willy\r\n";
 
 			try {
 				FileWriter confWriter = new FileWriter(confFile);

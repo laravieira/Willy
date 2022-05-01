@@ -56,6 +56,8 @@ public class WhatsappListener implements it.auties.whatsapp4j.listener.WhatsappL
             graphics2D.drawImage(scaled, 0, 0, null);
             graphics2D.dispose();
 
+            // TODO Implement a QR Code usable on Heroku
+
             String folder = (new File(".").getCanonicalPath());
             File file = new File(folder+File.separator+"whatsapp-qrcode.png");
             if(file.exists()) {

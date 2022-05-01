@@ -1,7 +1,9 @@
 /target/
 /.settings/
 /.git/
-/config.yml
 /logs/
-/Procfile
+/config.yml
 /start.bat
+/.idea/
+/whatsapp.json
+/whatsapp-qrcode.png

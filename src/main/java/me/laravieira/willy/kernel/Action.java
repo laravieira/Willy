@@ -3,52 +3,47 @@ package me.laravieira.willy.kernel;
 import com.ibm.watson.assistant.v2.model.DialogNodeAction;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackState;
 
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
-import me.laravieira.willy.bitly.Bitly;
-import me.laravieira.willy.player.DiscordPlayer;
-import me.laravieira.willy.youtube.Youtube;
+import me.laravieira.willy.feature.bitly.Bitly;
+import me.laravieira.willy.chat.discord.DiscordContext;
+import me.laravieira.willy.feature.player.DiscordPlayer;
+import me.laravieira.willy.feature.youtube.Youtube;
 
 public class Action {
 	private DialogNodeAction action = null;
 	private Context context = null;
 	
-	public Action(String context) {
+	public Action(DialogNodeAction action, String context) {
 		this.context = Context.getContext(context);
-		execute();
-	}
-	
-	public Action(Context context) {
-		this.context = context;
+		this.action = action;
 		execute();
 	}
 
 	private void execute() {
 		Thread actionTask = new Thread(() -> {
-			context.getWatsonMessager().getActions().forEach((action) -> {
-				this.action = action;
-				if(action.getName().equals("get_youtube_link"))
-					getYoutubeLink();
-				else if(action.getName().equals("short"))
-					shortLink();
-				else if(action.getName().equals("music_add"))
-					musicAdd();
-				else if(action.getName().equals("music_play"))
-					musicPlay();
-				else if(action.getName().equals("music_resume"))
-					musicResume();
-				else if(action.getName().equals("music_pause"))
-					musicPause();
-				else if(action.getName().equals("music_stop"))
-					musicStop();
-				else if(action.getName().equals("music_next"))
-					musicNext();
-				else if(action.getName().equals("music_clear"))
-					musicClear();
-				else if(action.getName().equals("music_destroy"))
-					musicDestroy();
-				else if(action.getName().equals("music_info"))
-					musicInfo();
-			});
+			if(action.getName().equals("get_youtube_link"))
+				getYoutubeLink();
+			else if(action.getName().equals("short"))
+				shortLink();
+			else if(action.getName().equals("music_add"))
+				musicAdd();
+			else if(action.getName().equals("music_play"))
+				musicPlay();
+			else if(action.getName().equals("music_resume"))
+				musicResume();
+			else if(action.getName().equals("music_pause"))
+				musicPause();
+			else if(action.getName().equals("music_stop"))
+				musicStop();
+			else if(action.getName().equals("music_next"))
+				musicNext();
+			else if(action.getName().equals("music_clear"))
+				musicClear();
+			else if(action.getName().equals("music_destroy"))
+				musicDestroy();
+			else if(action.getName().equals("music_info"))
+				musicInfo();
 		});
 		actionTask.setDaemon(true);
 		actionTask.start();
@@ -67,7 +62,7 @@ public class Action {
 	private void shortLink() {
 		if(Bitly.canUse) {
 			String fullLink  = action.getParameters().get("link").toString();
-			String shortLink = new Bitly(fullLink).getShorted();
+			String shortLink = new Bitly(fullLink).getShort();
 			if(shortLink != null && shortLink != fullLink && !shortLink.isEmpty())
 				context.getWatsonMessager().sendActionMessage("short_link", shortLink);
 			else
@@ -77,7 +72,7 @@ public class Action {
 	}
 	
 	private void musicAdd() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			if(action.getParameters().containsKey("link"))
 				player.add(action.getParameters().get("link").toString());
@@ -88,7 +83,7 @@ public class Action {
 	}
 	
 	private void musicPlay() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.play();
 		}else
@@ -96,7 +91,7 @@ public class Action {
 	}
 
 	private void musicResume() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.resume();
 		}else
@@ -104,7 +99,7 @@ public class Action {
 	}
 
 	private void musicPause() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.pause();
 		}else
@@ -112,7 +107,7 @@ public class Action {
 	}
 
 	private void musicStop() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.stop();
 		}else
@@ -120,7 +115,7 @@ public class Action {
 	}
 
 	private void musicNext() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.next();
 		}else
@@ -128,7 +123,7 @@ public class Action {
 	}
 
 	private void musicClear() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.clear();
 		}else
@@ -136,7 +131,7 @@ public class Action {
 	}
 
 	private void musicDestroy() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
 			player.destroy();
 		}else
@@ -144,28 +139,27 @@ public class Action {
 	}
 
 	private void musicInfo() {
-		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext((DiscordContext) context);
 		if(player != null) {
-			Messager messager = new Messager(context);
-			messager.sendDiscordEmbedMessage(spec -> {
-				spec.setColor(Color.of(27, 161, 121));
+			EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder();
+				embed.color(Color.of(27, 161, 121));
 
 				if(player.getPlayer().getPlayingTrack() == null)
-					spec.setTitle("Atualmente Parado.");
+					embed.title("Atualmente Parado.");
 				else if(player.getPlayer().isPaused())
-					spec.setTitle("Atualmente Pausado.");
+					embed.title("Atualmente Pausado.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.FINISHED))
-					spec.setTitle("Atualmente Parado.");
+					embed.title("Atualmente Parado.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.INACTIVE))
-					spec.setTitle("Atualmente Parado.");
+					embed.title("Atualmente Parado.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.LOADING))
-					spec.setTitle("Atualmente Carregando.");
+					embed.title("Atualmente Carregando.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.PLAYING))
-					spec.setTitle("Atualmente Reproduzindo.");
+					embed.title("Atualmente Reproduzindo.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.SEEKING))
-					spec.setTitle("Atualmente Parado.");
+					embed.title("Atualmente Parado.");
 				else if(player.getPlayer().getPlayingTrack().getState().equals(AudioTrackState.STOPPING))
-					spec.setTitle("Atualmente Parado.");
+					embed.title("Atualmente Parado.");
 				
 				
 				if(player.getPlayer().getPlayingTrack() != null) {
@@ -176,7 +170,7 @@ public class Action {
 					title = (title.length() > 35)?title.substring(0, 35).trim()+"...":title.trim();
 					author = (author.length() > 35)?author.substring(0, 35).trim()+"...":author.trim();
 					String body = title + "\r\n" + author + "\r\n" + position/60+":"+position%60 + (duration>3600?"":" de "+duration/60+":"+duration%60);
-					spec.addField("Faixa atual", body, true);
+					embed.addField("Faixa atual", body, true);
 				}
 				
 				if(player.getTrackScheduler().getNext() != null) {
@@ -186,22 +180,22 @@ public class Action {
 					title = (title.length() > 35)?title.substring(0, 35).trim()+"...":title.trim();
 					author = (author.length() > 35)?author.substring(0, 35).trim()+"...":author.trim();
 					String body = title + "\r\n" + author + "\r\n" + (duration>3600?"> 1h":duration/60+":"+duration%60);
-					spec.addField("Próxima", body, true);
+					embed.addField("Próxima", body, true);
 				}
 
 				if(player.getTrackScheduler().getQueue().size() == 0)
-					spec.addField("Não há músicas na fila.", "\u200B", false);
+					embed.addField("Não há músicas na fila.", "\u200B", false);
 				else if(player.getTrackScheduler().getQueue().size() == 1)
-					spec.addField("Não há mais músicas na fila.", "\u200B", false);
+					embed.addField("Não há mais músicas na fila.", "\u200B", false);
 				else if(player.getTrackScheduler().getQueue().size() == 2)
-					spec.addField("Tem mais 1 música em espera.", "\u200B", false);
+					embed.addField("Tem mais 1 música em espera.", "\u200B", false);
 				else {
 					int size = player.getTrackScheduler().getQueue().size();
-					spec.addField("Tem mais " + (size-1) + " músicas em espera.", "\u200B", false);
+					embed.addField("Tem mais " + (size-1) + " músicas em espera.", "\u200B", false);
 				}
 				
-				spec.setFooter("On "+player.getChannel().getName(), null);
-			});
+				embed.footer("On "+player.getChannel().getName(), null);
+			((DiscordContext) context).getSender().sendEmbedMessage(embed.build());
 		}else
 			context.getWatsonMessager().sendActionMessage("music_info", "null");
 	}

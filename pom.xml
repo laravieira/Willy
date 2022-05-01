@@ -5,22 +5,32 @@
 
   <groupId>me.laravieira</groupId>
   <artifactId>willy</artifactId>
-  <version>0.13.0</version>
+  <version>0.14.0</version>
   <packaging>jar</packaging>
 
   <name>Willy</name>
   <description>A cute discord bot</description>
 
   <properties>
-  	<maven.compiler.source>1.8</maven.compiler.source>
-  	<maven.compiler.target>1.8</maven.compiler.target>
-	<project.java.version>1.8</project.java.version>
+  	<maven.compiler.source>17</maven.compiler.source>
+  	<maven.compiler.target>17</maven.compiler.target>
+	<project.java.version>17</project.java.version>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
-  
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <compilerArgs>
+            <arg>--enable-preview</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -48,20 +58,10 @@
   
   <repositories>
     <repository>
-      <id>maven-yaml</id>
-      <name>Yaml Repository</name>
-      <url>https://mvnrepository.com/artifact/org.yaml/snakeyaml</url>
-    </repository>
-    <repository>
       <id>jcentral-bitly</id>
       <name>Bitly Repository</name>
       <url>https://jcenter.bintray.com</url>
     </repository>
-  	<repository>
-      <id>maven-discord4j</id>
-  	  <name>Discord4j Repository</name>
-  	  <url>https://mvnrepository.com/artifact/com.discord4j/discord4j-core</url>
-  	</repository>
   	<repository>
       <id>maven-lavaplayer</id>
   	  <name>Lava Player Repository</name>
@@ -69,17 +69,23 @@
   	</repository>
   	<repository>
       <id>jitpack.io</id>
-      <name>Youtube Downloader Repository</name>
+      <name>Youtube Downloader and Whatsapp Repository</name>
       <url>https://jitpack.io</url>
     </repository>
-  	<repository>
-      <id>maven-watson-assistant</id>
-  	  <name>IBM Watson Assistant Repository</name>
-  	  <url>https://mvnrepository.com/artifact/com.ibm.watson/assistant</url>
-  	</repository>
+    <repository>
+      <id>sonatype-public</id>
+      <name>SnakeYAML repository</name>
+      <url>http://oss.sonatype.org/content/groups/public/</url>
+    </repository>
   </repositories>
 
   <dependencies>
+    <dependency>
+      <!-- https://search.maven.org/artifact/com.google.code.gson/gson/2.8.8/jar -->
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.9</version>
+    </dependency>
     <dependency>
       <!-- https://github.com/sealedtx/java-youtube-downloader -->
       <groupId>com.github.sealedtx</groupId>
@@ -103,17 +109,28 @@
       <artifactId>junit</artifactId>
       <version>4.13.2</version>
     </dependency>
-	<dependency>
-	  <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.29</version>
-	</dependency>
+    <dependency>
+      <groupId>org.snakeyaml</groupId>
+      <artifactId>snakeyaml-engine</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
+      <!-- https://github.com/pengrad/java-telegram-bot-api -->
+      <groupId>com.github.pengrad</groupId>
+      <artifactId>java-telegram-bot-api</artifactId>
+      <version>6.0.0</version>
+    </dependency>
+    <dependency>
+      <!-- https://github.com/Auties00/WhatsappWeb4j -->
+      <groupId>com.github.auties00</groupId>
+      <artifactId>whatsappweb4j</artifactId>
+      <version>2.2.7</version>
+    </dependency>
     <dependency>
       <!-- https://github.com/Discord4J/Discord4J -->
       <groupId>com.discord4j</groupId>
       <artifactId>discord4j-core</artifactId>
-      <version>3.1.7</version>
+      <version>3.2.2</version>
     </dependency>
     <dependency>
       <!-- https://github.com/sedmelluq/lavaplayer -->
@@ -125,7 +142,35 @@
       <!-- https://mvnrepository.com/artifact/com.ibm.watson/assistant -->
       <groupId>com.ibm.watson</groupId>
       <artifactId>assistant</artifactId>
-      <version>9.2.0</version>
+      <version>10.0.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+
+      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.13.0-rc2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.13.0-rc2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>2.13.0-rc2</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
 </project>

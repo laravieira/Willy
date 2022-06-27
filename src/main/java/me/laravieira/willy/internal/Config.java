@@ -64,8 +64,12 @@ public class Config {
 		set("discord.clear_public_chats", "WILLY_DISCORD_CLEAR_PUBLIC_CHATS",       "discord.clear-public-chats",      TYPE_BOOLEAN, true);
 		set("discord.clear_after_wait",   "WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER", "discord.clear-after-wait",        TYPE_TIME,    parseTime("10m"));
 
+		// OpenAI settings
+		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, true);
+		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
+
 		// Whatsapp Settings
-		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, false);
+		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, true);
 		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, true);
 
 		// Telegram Settings

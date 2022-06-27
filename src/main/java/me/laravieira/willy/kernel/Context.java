@@ -26,6 +26,7 @@ public class Context {
 	private WatsonMessage watson_message;
 	private String id;
 
+	private String userLanguage = "default";
 	private int consecutive_calls = 0;
 	private boolean del_msgs = true;
 	private boolean debug_msg = false;
@@ -119,6 +120,8 @@ public class Context {
 		context.skills().put("main skill", mainSkill);
 	}
 
+	public void setUserLanguage(String userLanguage) {this.userLanguage = userLanguage;}
+
 	public void setWatsonMessage(WatsonMessage messager) {
 		this.watson_message = messager;
 	}
@@ -158,7 +161,9 @@ public class Context {
 	public Map<String, Object> getUserDefined() {
 		return context.skills().get("main skill").userDefined();
 	}
-	
+
+	public String getUserLanguage() {return userLanguage;}
+
 	public long getContextExpire() {
 		return expire;
 	}

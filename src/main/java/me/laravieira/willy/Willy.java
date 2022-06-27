@@ -1,5 +1,6 @@
 package me.laravieira.willy;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -10,6 +11,7 @@ import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.telegram.Telegram;
 import me.laravieira.willy.internal.logger.WillyLogger;
 import me.laravieira.willy.kernel.Context;
+import me.laravieira.willy.openai.OpenAi;
 import me.laravieira.willy.watson.Watson;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 
@@ -51,6 +53,7 @@ public class Willy {
 	public boolean getStop() {return stop;}
 
 	private void registryChats() {
+		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Watson());
 		willy.addWillyChatInstance(new Discord());
 		willy.addWillyChatInstance(new Whatsapp());
@@ -107,4 +110,6 @@ public class Willy {
 	public void removeWillyChatInstance(String name) {
 		chats.remove(name);
 	}
+
+	public ArrayList<WillyChat> getWillyChatInstances() {return chats;}
 }

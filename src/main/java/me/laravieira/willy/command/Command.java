@@ -10,7 +10,8 @@ import java.util.logging.Logger;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import it.auties.whatsapp4j.protobuf.chat.Chat;
+import it.auties.whatsapp.model.chat.Chat;
+import it.auties.whatsapp.model.contact.ContactJid;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.chat.discord.Discord;
@@ -18,6 +19,7 @@ import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.chat.discord.DiscordNoADM;
 import me.laravieira.willy.feature.player.DiscordPlayer;
+import me.laravieira.willy.openai.OpenAiMessage;
 import me.laravieira.willy.web.Server;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.feature.youtube.Youtube;
@@ -39,7 +41,8 @@ public class Command {
 			}else if(command.equals("player"))   {player(args);
 			}else if(command.equals("noadm"))    {noadm(args);
 			}else if(command.equals("user"))     {user(args);
-			}else if(command.equals("whats"))     {whatsapp(args);
+			}else if(command.equals("whats"))    {whatsapp(args);
+			}else if(command.equals("openai"))   {openai(args);
 			}else if(command.equals("help"))     {help(args);
 			}else {unknow();}
 		});
@@ -239,15 +242,24 @@ public class Command {
 		if(args[1].equals("chats"))
 			Whatsapp.chats();
 		if(args[1].equals("talk") && args.length > 3) {
-			Chat chat = Whatsapp.getApi().manager().findChatByName(args[2]).get();
+			Chat chat = Whatsapp.getApi().store().findChatByJid(ContactJid.of(args[2])).get();
 			try {
 				Whatsapp.getApi().sendMessage(chat, args[3]).get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}else {unknow();}
+	}
+
+	private static void openai(String[] args) {
+		if(args.length < 2) {
+			console.info("This command needs a message, type 'help' to see usage.");
+			return;
+		}
+		String message = "";
+		for(int i = 1; i < args.length; i++)
+			message += " "+args[i];
+		new OpenAiMessage().sendMessage(message, "Cosole");
 	}
 
 	private static void help(String[] args) {

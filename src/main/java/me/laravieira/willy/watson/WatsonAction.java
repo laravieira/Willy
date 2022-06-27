@@ -1,4 +1,4 @@
-package me.laravieira.willy.kernel;
+package me.laravieira.willy.watson;
 
 import com.ibm.watson.assistant.v2.model.DialogNodeAction;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackState;
@@ -9,12 +9,14 @@ import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.chat.discord.DiscordContext;
 import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.feature.youtube.Youtube;
+import me.laravieira.willy.kernel.Context;
+import me.laravieira.willy.openai.OpenAiMessage;
 
-public class Action {
+public class WatsonAction {
 	private DialogNodeAction action = null;
 	private Context context = null;
 	
-	public Action(DialogNodeAction action, String context) {
+	public WatsonAction(DialogNodeAction action, String context) {
 		this.context = Context.getContext(context);
 		this.action = action;
 		execute();
@@ -22,7 +24,10 @@ public class Action {
 
 	private void execute() {
 		Thread actionTask = new Thread(() -> {
-			if(action.getName().equals("get_youtube_link"))
+			if(action.getName().equals("openai"))
+				//TODO Watson needs to pass the message to Open AI
+				new OpenAiMessage().sendTextMessage("", context);
+			else if(action.getName().equals("get_youtube_link"))
 				getYoutubeLink();
 			else if(action.getName().equals("short"))
 				shortLink();

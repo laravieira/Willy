@@ -4,7 +4,6 @@ import com.ibm.watson.assistant.v2.model.DialogNodeAction;
 import com.ibm.watson.assistant.v2.model.MessageResponse;
 import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.kernel.Action;
 import me.laravieira.willy.kernel.Context;
 
 public class WatsonListener {
@@ -17,7 +16,7 @@ public class WatsonListener {
     public void onActionResponse(MessageResponse response, DialogNodeAction action, String ctxId) {
         Context context = Context.getContext(ctxId);
         context.setWatsonContext(response.getContext());
-        new Action(action, ctxId);
+        new WatsonAction(action, ctxId);
     }
 
     public void onErrorResponse(MessageResponse response) {

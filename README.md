@@ -12,7 +12,7 @@ Willy is your best, beautiful, little and cute friend. He will help you to do ev
 
 #### Start Willy for the first time
 To begin you need to run the app a first time. To run, you can start Willy by using the built file on the folder *target/* with the following command on cmd:
-> java -jar willy-0.13.0-jar-with-dependencies.jar
+> java -jar willy-0.16.0-jar-with-dependencies.jar
 
 After running, Willy will create a log *folder/*, containing the log files and a **config.yml** file and then close with an error that you can ignore for now.
 

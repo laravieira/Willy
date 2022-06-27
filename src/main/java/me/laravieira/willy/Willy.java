@@ -18,7 +18,7 @@ import me.laravieira.willy.chat.whatsapp.Whatsapp;
 public class Willy {
 	
 	private static final String my_name    = "Willy";
-	private static final int[]  my_version = {0,15,1};
+	private static final int[]  my_version = {0,16,0};
 	private static final String my_release = "SNAPSHOT";
 	private static final String my_descrpt = "Willy it's your best, beautiful, little and cute friend. He will help to do everything possible.";
 	private static final String my_image   = "/src/main/resources/profile.jpg";

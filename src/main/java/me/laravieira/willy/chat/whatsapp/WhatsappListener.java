@@ -15,7 +15,6 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import it.auties.whatsapp.api.QrHandler;
-import it.auties.whatsapp.model.action.Action;
 import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.standard.TextMessage;
 import me.laravieira.willy.Willy;
@@ -33,11 +32,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener {
-
-    @Override
-    public void onAction(Action action) {
-        it.auties.whatsapp.api.WhatsappListener.super.onAction(action);
-    }
 
     @Override
     public void onNewMessage(MessageInfo info) {
@@ -79,7 +73,7 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .title("Willy likes Whatsapp")
                         .description("Read this QR Code on your WhatsApp app to let Willy use it")
-                        .thumbnail("https://png.pngtree.com/element_origin_min_pic/00/00/05/31574d5cbd9f117.jpg")
+                        .thumbnail("https://github.com/laravieira/Willy/raw/master/assets/whatsapp.png")
                         .image("attachment://whatsapp-qrcode.png")
                         .color(Color.GREEN)
                         .build();

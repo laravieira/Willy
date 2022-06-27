@@ -57,14 +57,16 @@ public class DiscordSender extends Sender {
         }
     }
 
-    public void sendSpecMessage(MessageCreateSpec message) {
+    public Message sendSpecMessage(MessageCreateSpec message) {
         try {
             Message msg = context.getChannel().createMessage(message).block();
             context.autoDeleteMessage(msg);
+            return msg;
         }catch (NullPointerException e) {
             new Discord().connect();
             Message msg = context.getChannel().createMessage(message).block();
             context.autoDeleteMessage(msg);
+            return msg;
         }
     }
 }

@@ -1,7 +1,7 @@
 package me.laravieira.willy.chat.whatsapp;
 
-import it.auties.whatsapp4j.protobuf.chat.Chat;
-import it.auties.whatsapp4j.protobuf.info.MessageInfo;
+import it.auties.whatsapp.model.chat.Chat;
+import it.auties.whatsapp.model.info.MessageInfo;
 import me.laravieira.willy.kernel.Context;
 
 public class WhatsappContext extends Context{

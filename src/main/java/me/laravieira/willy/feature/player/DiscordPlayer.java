@@ -3,10 +3,14 @@ package me.laravieira.willy.feature.player;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+import discord4j.core.object.entity.Message;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.discord.DiscordContext;
+import me.laravieira.willy.chat.discord.DiscordMessage;
 import me.laravieira.willy.internal.Config;
+import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.storage.MessageStorage;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.utils.URIBuilder;
@@ -171,10 +175,9 @@ public class DiscordPlayer {
 		}
 	}
 	
-	public static DiscordPlayer getDiscordPlayerFromContext(DiscordContext context) {
-		if(context.getMessage() == null)
-			return null;
-		Member member = context.getMessage().getAuthorAsMember().block();
+	public static DiscordPlayer getDiscordPlayerFromContext(UUID context) {
+		Message message = (Message) ContextStorage.of(context).getLastMessage().getContent();
+		Member member = message.getAuthorAsMember().block();
 		if(member != null) {
 			VoiceState voiceState = member.getVoiceState().block();
 			if(voiceState != null) {

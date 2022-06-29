@@ -43,7 +43,7 @@ public class Config {
 		// Overall Settings
 		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, "Willy");
 		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,    aliases);
-		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("1m"));
+		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("5m"));
 		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,    ignore);
 
 		// Watson Assistant settings

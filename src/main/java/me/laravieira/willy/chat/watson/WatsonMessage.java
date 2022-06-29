@@ -1,6 +1,5 @@
-package me.laravieira.willy.watson;
+package me.laravieira.willy.chat.watson;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import com.ibm.watson.assistant.v2.model.RuntimeIntent;
 import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import com.ibm.watson.assistant.v2.model.SearchResult;
 
-import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 
 public class WatsonMessage {
@@ -60,7 +58,7 @@ public class WatsonMessage {
 				.input(input).context(context).build();
 
 		MessageResponse response = Watson.getService().message(options).execute().getResult();
-		Watson.setSessionTimestamp(new Date().getTime());
+		Watson.resetTimeout();
 
 		callWatsonListener(response);
 	}

@@ -1,32 +1,34 @@
 package me.laravieira.willy.chat.discord;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel.Type;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.kernel.Kernel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.internal.WillyUtils;
+import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.utils.PassedInterval;
+import org.jetbrains.annotations.NotNull;
 
 public class DiscordListener {
-	
-	private static Map<Long, Message> messages = new HashMap<Long, Message>();
-
 	public static void onMessage(Message message) {
 		try {
-			if(message.getAuthor().isPresent() && message.getContent() instanceof String) {
+			if(message.getAuthor().isPresent()) {
+				message.getContent();
 				MessageChannel channel = message.getChannel().block();
 				User author = message.getAuthor().get();
-				if(author.isBot()) return;
-				
-				if(channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
+				if (author.isBot()) return;
+
+				assert channel != null;
+				if (channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
 					onPrivateTextChannelMessage(channel, author, message);
 				else
 					onPublicTextChannelMessage(channel, author, message);
@@ -38,41 +40,52 @@ public class DiscordListener {
 		}
 	}
 	
-	public static void onPrivateTextChannelMessage(MessageChannel channel, User user, Message message) {
-		String content = parseWillyId(message.getContent());
-		String id = "discord-"+user.getId().asString();
+	public static void onPrivateTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+		String content = parseWillyDiscordId(message.getContent());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 		if(startWith(content)) return;
 
-		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-		
-		DiscordContext context = DiscordContext.getContext(channel, message, user, id);
-		context.setDeleteMessages(false);
-		context.getWatsonMessager().sendTextMessage(content);
+		content = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
+
+		new WatsonSender(id).sendText(content);
 		Willy.getLogger().info("Message transaction in a private chat.");
 	}
-	
-	public static void onPublicTextChannelMessage(MessageChannel channel, User user, Message message) {
-		String content = parseWillyId(message.getContent());
-		String id = "discord-"+user.getId().asString();
+
+	@NotNull
+	private static String clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
+		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
+
+		DiscordSender sender = new DiscordSender(id, channel, expire);
+
+		ContextStorage.of(id).setSender(sender);
+		DiscordMessage discordMessage = new DiscordMessage(id, user, message, expire);
+		MessageStorage.add(discordMessage);
+		return content;
+	}
+
+	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+		long expire = Config.getBoolean("discord.clear_public_chats") ? Config.getLong("discord.clear_after_wait") : PassedInterval.DISABLE;
+		String content = parseWillyDiscordId(message.getContent());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 		
 		if(content.startsWith("!help")) {
 			content = content.substring(5);
-			floodChat(channel);
+			floodChat(channel, user);
 		}else if(startWith(content)) return;
 		if(content.isEmpty()) return;
 		
-		if(!WillyUtils.hasWillyCall(content) && !Context.getContexts().containsKey(id)) return;
+		if(!WillyUtils.hasWillyCall(content) && !ContextStorage.has(id)) return;
 
-		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-		
-		DiscordContext context = DiscordContext.getContext(channel, message, user, id);
-		if(!Kernel.checkForPlayQuestion(context, content))
-			context.getWatsonMessager().sendTextMessage(content);
+		content = clearContent(channel, user, message, content, id, expire);
+
+		if(!Kernel.checkForPlayQuestion(id, content))
+			new WatsonSender(id).sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
 	
-	private static String parseWillyId(String message) {
-		Long id = Config.getLong("discord.client_id");
+	@NotNull
+	private static String parseWillyDiscordId(@NotNull String message) {
+		long id = Config.getLong("discord.client_id");
 		String name = Config.getString("willy-name");
 		return message.replaceAll("<@"+ id +">", name);
 	}
@@ -83,55 +96,35 @@ public class DiscordListener {
 				return true;
 		return false;
 	}
+	private static void floodChat(MessageChannel channel, User user) {
+		try {
+			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
+			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.clear_after_wait"));
 
-	public static void refresh() {
-		if(Config.getBoolean("discord.clear_public_chats")) {
-			Long now = new Date().getTime();
-			Map<Long, Message> toRemove = new HashMap<Long, Message>();
-			messages.forEach((key, value) -> {
-				if(key < now) {
-					try {
-						value.delete("Time expired.").block();
-						Willy.getLogger().info("Message deleted from a public chat.");
-					}catch(RuntimeException e) {}
-					toRemove.put(key, value);
-				}
-			});
-			toRemove.forEach((key, value) -> {
-				messages.remove(key, value);
-			});
-			
-		}
-	}
-
-	public static Map<Long, Message> getMessages() {
-		return messages;
-	}
-	
-	public static void autoDeleteMessage(long timestamp, Message message) {
-		messages.put(timestamp, message);
-	}
-	
-	private static void floodChat(MessageChannel channel) {
-		long clearTime = Config.getLong("discord.clear_after_wait");
-		try {Message response = null;
-			
-			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-			
-			response = channel.createMessage(specs -> { specs.addEmbed(
-				embed -> {embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/help.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-
-			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-
-			response = channel.createMessage(specs -> {	specs.addEmbed(embed -> {
-				embed.setThumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-			
+			sender.sendEmbed(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png")
+							.build())
+					.build()
+			);
+			sender.sendEmbed(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/help.png")
+							.build())
+					.build()
+			);
+			sender.sendEmbed(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png")
+							.build())
+					.build()
+			);
+			sender.sendEmbed(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.thumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg")
+							.build())
+					.build()
+			);
 			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
 			
 		}catch(RuntimeException e) {

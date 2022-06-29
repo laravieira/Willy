@@ -8,7 +8,6 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -19,10 +18,13 @@ import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.standard.TextMessage;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
-import me.laravieira.willy.chat.discord.DiscordContext;
+import me.laravieira.willy.chat.discord.DiscordSender;
+import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.kernel.Context;
 import me.laravieira.willy.internal.WillyUtils;
+import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.utils.PassedInterval;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,22 +37,27 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
 
     @Override
     public void onNewMessage(MessageInfo info) {
-        Willy.getLogger().info("Message received.");
+        Willy.getLogger().info("Message received from Whatsapp.");
         if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty() || info.chat().isEmpty())
             return;
 
-        String id = "whatsapp-"+info.chatJid().user().substring(0, info.chatJid().user().indexOf('@'));
+        UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.chatJid().user().substring(0, info.chatJid().user().indexOf('@'))).getBytes());
         String content = message.text();
 
         if(Config.getBoolean("whatsapp.shared_chat")
         && !WillyUtils.hasWillyCall(content)
-        && !Context.getContexts().containsKey(id))
+        && !ContextStorage.has(id))
             return;
 
         content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-        WhatsappContext context = WhatsappContext.getContext(info.chat().get(), info, id);
-        context.getWatsonMessager().sendTextMessage(content);
+        WhatsappSender sender = new WhatsappSender(id, info.chat().get(), PassedInterval.DISABLE);
+        ContextStorage.of(id).setSender(sender);
+
+        WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, PassedInterval.DISABLE);
+        MessageStorage.add(whatsappMessage);
+
+        new WatsonSender(id).sendText(content);
     }
 
     @Override
@@ -67,8 +74,9 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
                 Snowflake masterSnowflake = Snowflake.of(Config.getString("discord.keep_master_nick"));
                 User master = Discord.getBotGateway().getUserById(masterSnowflake).block();
                 MessageChannel masterChannel = master.getPrivateChannel().block();
-                String id = "discord-"+master.getId().asString();
-                DiscordContext discordContext = new DiscordContext(masterChannel, null, master, id);
+                UUID id = UUID.nameUUIDFromBytes(("discord-"+master.getId().asString()).getBytes());
+
+                DiscordSender sender = new DiscordSender(id, masterChannel, PassedInterval.DISABLE);
 
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .title("Willy likes Whatsapp")
@@ -77,12 +85,10 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
                         .image("attachment://whatsapp-qrcode.png")
                         .color(Color.GREEN)
                         .build();
-                MessageCreateSpec message = MessageCreateSpec.builder()
+                sender.sendEmbed(MessageCreateSpec.builder()
                         .addEmbed(embed)
                         .addFile("whatsapp-qrcode.png", new FileInputStream(path.toFile()))
-                        .build();
-
-                Message result = discordContext.getSender().sendSpecMessage(message);
+                        .build());
             } catch (IOException | WriterException exception) {
                 Willy.getLogger().warning("Unable to handle WhatsApp QR Code.");
             }

@@ -1,6 +1,6 @@
-package me.laravieira.willy.watson;
+package me.laravieira.willy.chat.watson;
 
-import java.util.Date;
+import java.util.UUID;
 
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.cloud.sdk.core.service.exception.NotFoundException;
@@ -12,35 +12,26 @@ import com.ibm.watson.assistant.v2.model.SessionResponse;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
-import me.laravieira.willy.kernel.Context;
+import me.laravieira.willy.utils.PassedInterval;
 
 public class Watson implements WillyChat {
-
-	private static long expireTimestamp = Config.getLong("wa.session_live");
-	private static boolean keepAlive = Config.getBoolean("wa.keep_alive");
 
 	private static boolean   registered = false;
 	private static Assistant service    = null;
 	private static String    session    = null;
-	private static long      expire     = 0;
+	private static final PassedInterval expire = new PassedInterval(Config.getLong("wa.session_live"));
 
 	public static void registrySession() {
 		CreateSessionOptions cso = new CreateSessionOptions.Builder().assistantId(Config.getString("wa.assistant_id")).build();
 		SessionResponse sessionResponse = Watson.getService().createSession(cso).execute().getResult();
-		expire = new Date().getTime()+expireTimestamp;
+		expire.reset();
 		session = sessionResponse.getSessionId();
 		registered = true;
 		Willy.getLogger().info("Watson instance opened.");
 	}
 
-	public static void setRegisty(SessionResponse sessionResponse) {
-		expire = new Date().getTime()+expireTimestamp;
-		session = sessionResponse.getSessionId();
-		registered = true;
-	}
-
-	public static void setSessionTimestamp(long timestamp) {
-		expire = timestamp+expireTimestamp;
+	public static void resetTimeout() {
+		expire.reset();
 	}
 
 	public static Assistant getService() {
@@ -51,16 +42,12 @@ public class Watson implements WillyChat {
 		return session;
 	}
 
-	public static long getSessionExpiration() {
-		return expire;
-	}
-
 	@Override
 	public void refresh() {
-		long now = new Date().getTime()+10000;
-		if(expire < now && keepAlive) {
-			Context.getContext("willy-refresh").getWatsonMessager().sendTextMessage(null);
-		}else if(expire < now) {
+		if(Config.getBoolean("wa.keep_alive") && expire.hasPassedInterval()) {
+			UUID context = UUID.nameUUIDFromBytes("willy-refresh".getBytes());
+			new WatsonSender(context).sendText(null);
+		}else if(expire.hasPassedInterval()) {
 			registered = false;
 			session = null;
 		}
@@ -71,8 +58,9 @@ public class Watson implements WillyChat {
 		IamAuthenticator iamAuth = new IamAuthenticator(Config.getString("wa.password"));
 		service = new Assistant(Config.getString("wa.api_date"), iamAuth);
 		service.setServiceUrl(Config.getString("wa.server_url"));
-		if(keepAlive)
+		if(Config.getBoolean("wa.keep_alive"))
 			registrySession();
+		expire.start();
 		Willy.getLogger().info("Watson instance opened.");
 	}
 

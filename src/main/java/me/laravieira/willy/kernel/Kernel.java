@@ -3,26 +3,28 @@ package me.laravieira.willy.kernel;
 import discord4j.core.event.domain.guild.MemberUpdateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.discord.DiscordContext;
 import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
+import me.laravieira.willy.storage.ContextStorage;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Kernel {
 
 	private static MessageChannel verbuse = null;
 
-	public static boolean checkForPlayQuestion(DiscordContext context, String content) {
+	public static boolean checkForPlayQuestion(UUID context, String content) {
+		//TODO Fix context on music player
 		for(String key : (List<String>) Config.getList("ap.blends_for_play"))
 			if(content.toLowerCase().startsWith(key.toLowerCase())) {
-				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context);
+				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(null);
 				String data = content.substring(key.length()).trim();
 				System.out.println(data);
 				if(player != null && !data.isEmpty())
 					player.search(data);
 				else
-					context.getSender().send("Desculpa, acho que eu não peguei seu pedido. 🐕");
+					ContextStorage.of(context).getSender().sendText("Desculpa, acho que eu não peguei seu pedido. 🐕");
 				return true;
 			}
 		return false;

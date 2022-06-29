@@ -1,11 +1,11 @@
 package me.laravieira.willy.internal;
 
-import me.laravieira.willy.Willy;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class WillyUtils {
-    public static boolean hasWillyCall(String message) {
+    public static boolean hasWillyCall(@NotNull String message) {
         if(message.contains(Config.getString("name")))
             return true;
         for(String alias : (List<String>)Config.getList("aliases"))

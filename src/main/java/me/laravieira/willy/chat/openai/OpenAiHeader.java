@@ -1,11 +1,8 @@
-package me.laravieira.willy.openai;
+package me.laravieira.willy.chat.openai;
 
-import me.laravieira.willy.kernel.Context;
+import me.laravieira.willy.storage.ContextStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class OpenAiHeader {
     private static final Map<String, List<String>> HEADER_BASE_LIST = new HashMap<>();
@@ -27,9 +24,10 @@ public class OpenAiHeader {
         this.connector = CONNECTOR_LIST.get("default");
     }
 
-    OpenAiHeader(Context context) {
-        this.header.addAll(HEADER_BASE_LIST.getOrDefault(context.getUserLanguage(), HEADER_BASE_LIST.get("default")));
-        this.connector = CONNECTOR_LIST.getOrDefault(context.getUserLanguage(), CONNECTOR_LIST.get("default"));
+    OpenAiHeader(UUID context) {
+        String language = ContextStorage.of(context).getLanguage();
+        this.header.addAll(HEADER_BASE_LIST.getOrDefault(language, HEADER_BASE_LIST.get("default")));
+        this.connector = CONNECTOR_LIST.getOrDefault(language, CONNECTOR_LIST.get("default"));
     }
 
     public String build() {

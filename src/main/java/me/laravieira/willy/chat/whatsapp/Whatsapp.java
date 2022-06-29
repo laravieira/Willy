@@ -19,12 +19,13 @@ public class Whatsapp implements WillyChat {
             return;
 
         try {
-            WhatsappOptions.newOptions()
-                .id(willyId)
-                .description("Willy by L4R4V131R4")
-                .serialization(false)
-                .create();
-            whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
+            if(it.auties.whatsapp.api.Whatsapp.listConnections().isEmpty()) {
+                WhatsappOptions options = WhatsappOptions.newOptions()
+                        .description("Willy by L4R4V131R4")
+                        .create();
+                whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
+            }else whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
+
             whatsapp.registerListener(new WhatsappListener());
             whatsapp.connect().get();
         }catch(InterruptedException | ExecutionException e) {

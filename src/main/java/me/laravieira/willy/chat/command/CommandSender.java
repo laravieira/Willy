@@ -1,25 +1,12 @@
-package me.laravieira.willy.chat.whatsapp;
+package me.laravieira.willy.chat.command;
 
-import it.auties.whatsapp.model.chat.Chat;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 
 import java.io.File;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-public class WhatsappSender implements SenderInterface {
-    private final UUID context;
-    private final Chat chat;
-    private final long expire;
-
-    public WhatsappSender(UUID context, Chat chat, long expire) {
-        this.context = context;
-        this.chat = chat;
-        this.expire = expire;
-    }
-
+public class CommandSender implements SenderInterface {
     @Override
     public void send(Object message) {
 
@@ -27,11 +14,7 @@ public class WhatsappSender implements SenderInterface {
 
     @Override
     public void sendText(String message) {
-        try {
-            Whatsapp.getApi().sendMessage(chat, message).get();
-        } catch (InterruptedException | ExecutionException e) {
-            Willy.getLogger().warning("Fail when sending Whatsapp message.");
-        }
+        Willy.getLogger().info(message);
     }
 
     @Override

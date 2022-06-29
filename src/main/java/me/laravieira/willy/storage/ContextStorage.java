@@ -23,14 +23,7 @@ public class ContextStorage {
                 if (context.getExpire().hasPassedInterval())
                     delete.add(id);
             });
-            delete.forEach(id -> {
-                Context context = contexts.get(id);
-                contexts.remove(id);
-                context.getMessages().forEach(messageId -> {
-                    if (!MessageStorage.of(messageId).getExpire().isEnable())
-                        MessageStorage.remove(messageId);
-                });
-            });
+            delete.forEach(ContextStorage::remove);
         }catch (RuntimeException ignored) {}
     }
 
@@ -40,5 +33,14 @@ public class ContextStorage {
 
     public static Map<UUID, Context> all() {
         return contexts;
+    }
+
+    public static void remove(UUID id) {
+        Context context = contexts.get(id);
+        contexts.remove(id);
+        context.getMessages().forEach(messageId -> {
+            if (!MessageStorage.of(messageId).getExpire().isEnable())
+                MessageStorage.remove(messageId);
+        });
     }
 }

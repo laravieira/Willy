@@ -1,6 +1,7 @@
 package me.laravieira.willy.chat.discord;
 
 import discord4j.core.object.entity.User;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.utils.PassedInterval;
 
@@ -15,6 +16,7 @@ public class DiscordMessage extends Message {
         this.content = message.getContent();
         this.text = message.getContent();
         this.from = user.getUsername();
+        this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);
         this.expire.start();
     }

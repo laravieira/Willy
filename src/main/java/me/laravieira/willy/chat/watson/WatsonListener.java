@@ -19,7 +19,7 @@ public class WatsonListener {
 
         Message message = new Message(context);
         message.setExpire(PassedInterval.DISABLE);
-        message.setFrom("Willy");
+        message.setFrom(Willy.getWilly().getName());
         message.setTo(ContextStorage.of(context).getLastMessage().getFrom());
         message.setText(generic.text());
         message.setContent(generic);

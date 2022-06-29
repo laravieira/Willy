@@ -10,9 +10,7 @@ import me.laravieira.willy.storage.MessageStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class OpenAiSender implements SenderInterface {
     private final UUID context;
@@ -21,15 +19,22 @@ public class OpenAiSender implements SenderInterface {
         this.context = context;
     }
 
-    public String buildConversation(@NotNull List<UUID> messages) {
+    public String buildConversation(@NotNull LinkedList<UUID> messages) {
         StringBuilder conversation = new StringBuilder();
-        for(int i = 0; i < 5 && i < messages.size(); i++) {
-            Message message = MessageStorage.of(messages.get(i));
+        LinkedList<UUID> lastMessages = new LinkedList<>(messages);
+        LinkedList<Message> descendingHistory = new LinkedList<>();
+        for(int i = 0; i < lastMessages.size() && i < OpenAi.HISTORY_SIZE; i++)
+            descendingHistory.add(MessageStorage.of(lastMessages.pollLast()));
+        Iterator<Message> history = descendingHistory.descendingIterator();
+        while(history.hasNext()) {
+            Message message = history.next();
             conversation.append(message.getFrom());
             conversation.append(": ");
             conversation.append(message.getText());
             conversation.append("\r\n");
         }
+        conversation.append(Willy.getWilly().getName());
+        conversation.append(": ");
         return conversation.toString();
     }
 
@@ -38,15 +43,26 @@ public class OpenAiSender implements SenderInterface {
 
     }
 
+    private CompletionResult sendCompletion(CompletionRequest request) {
+        try {
+            return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
+        }catch(RuntimeException e) {
+            if(e.getMessage().contains("timed out"))
+                e.printStackTrace();
+            return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
+        }
+    }
+
     @Override
     public void sendText(String message) {
         OpenAiHeader headerBuilder = new OpenAiHeader(context);
-        List<UUID> messages = ContextStorage.of(context).getMessages();
+        LinkedList<UUID> messages = ContextStorage.of(context).getMessages();
         List<String> stopList = new ArrayList<>();
         stopList.add(ContextStorage.of(context).getLastMessage().getFrom());
+        stopList.add(ContextStorage.of(context).getLastMessage().getTo());
         String prompt = headerBuilder.build()+buildConversation(messages);
 
-        CompletionRequest completionRequest = CompletionRequest.builder()
+        CompletionResult result = sendCompletion(CompletionRequest.builder()
                 .prompt(prompt)
                 .bestOf(OpenAi.BEST_OF)
                 .maxTokens(prompt.length()/4 + OpenAi.MAX_TOKENS)
@@ -56,10 +72,7 @@ public class OpenAiSender implements SenderInterface {
                 .topP(OpenAi.TOP_P)
                 .echo(OpenAi.ECHO)
                 .stop(stopList)
-                .build();
-        CompletionResult result = OpenAi.getService().createCompletion(OpenAi.ENGINE, completionRequest);
-        Willy.getLogger().info(prompt);
-        Willy.getLogger().info(result.getChoices().get(0).getText());
+                .build());
         new OpenAiListener().onCompletionResponse(result, context);
     }
 

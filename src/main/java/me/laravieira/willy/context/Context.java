@@ -10,7 +10,7 @@ import java.util.*;
 public class Context implements ContextInterface {
     private final PassedInterval expire = new PassedInterval(Config.getLong("context_lifetime"));
     private final UUID id;
-    private final List<UUID> history = new ArrayList<>();
+    private final LinkedList<UUID> history = new LinkedList<>();
     private final WatsonContext watson;
     private SenderInterface sender;
     private String language = "default";
@@ -22,7 +22,7 @@ public class Context implements ContextInterface {
     }
 
     @Override
-    public List<UUID> getMessages() {
+    public LinkedList<UUID> getMessages() {
         return history;
     }
 
@@ -33,7 +33,7 @@ public class Context implements ContextInterface {
 
     @Override
     public Message getLastMessage() {
-        return MessageStorage.of(history.get(history.size() - 1));
+        return MessageStorage.of(history.getLast());
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Context implements ContextInterface {
     @Override
     public void addMessage(UUID id) {
         expire.reset();
-        history.add(id);
+        history.addLast(id);
     }
 
     @Override

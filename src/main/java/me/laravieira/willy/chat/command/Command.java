@@ -17,7 +17,7 @@ public class Command implements WillyChat {
 				case "talk" -> CommandListener.talk(args);
 				case "youtube" -> CommandListener.youtube(args);
 				case "short" -> CommandListener.shortLink(args);
-				case "contexts" -> CommandListener.contexts();
+				case "context" -> CommandListener.context(args);
 				case "player" -> CommandListener.player(args);
 				case "noadm" -> CommandListener.noadm(args);
 				case "user" -> CommandListener.user(args);

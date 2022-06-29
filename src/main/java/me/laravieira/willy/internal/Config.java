@@ -23,7 +23,7 @@ public class Config {
 		loadConfigFile();
 
 		List<String> aliases = new ArrayList<>();
-		aliases.add("willy");
+		aliases.add(Willy.getWilly().getName().toLowerCase());
 
 		List<String> ignore = new ArrayList<>();
 		ignore.add("!");
@@ -35,16 +35,16 @@ public class Config {
 		ignore.add("#");
 
 		List<String> apBlends = new ArrayList<>();
-		apBlends.add("Willy play");
-		apBlends.add("Willy toca");
-		apBlends.add("Willy adiciona");
-		apBlends.add("Willy reproduz");
-		apBlends.add("Willy reproduza");
-		apBlends.add("Willy toque");
-		apBlends.add("Willy coloca");
+		apBlends.add(Willy.getWilly().getName() + " play");
+		apBlends.add(Willy.getWilly().getName() + " toca");
+		apBlends.add(Willy.getWilly().getName() + " adiciona");
+		apBlends.add(Willy.getWilly().getName() + " reproduz");
+		apBlends.add(Willy.getWilly().getName() + " reproduza");
+		apBlends.add(Willy.getWilly().getName() + " toque");
+		apBlends.add(Willy.getWilly().getName() + " coloca");
 
 		// Overall Settings
-		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, "Willy");
+		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, Willy.getWilly().getName());
 		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,    aliases);
 		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("5m"));
 		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,    ignore);

@@ -10,6 +10,7 @@ import me.laravieira.willy.chat.discord.DiscordNoADM;
 import me.laravieira.willy.chat.openai.OpenAiSender;
 import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
+import me.laravieira.willy.context.Context;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.feature.player.DiscordPlayer;
@@ -20,7 +21,9 @@ import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -76,10 +79,17 @@ public class CommandListener {
         }else console.info("Bitly is not enabled, check config file.");
     }
 
-    static void contexts() {
-        console.info("-------------------------- Contexts ---------------------------");
-        ContextStorage.all().forEach((identifier, context) -> console.info("Context "+identifier+" expire in "+(context.getExpire().remaining()/1000)+"s."));
-        console.info("---------------------------------------------------------------");
+    static void context(@NotNull String[] args) {
+        if(args.length > 1) {
+            if(args[1].equalsIgnoreCase("clear")) {
+                List<UUID> contexts = new ArrayList<>(ContextStorage.all().keySet());
+                contexts.forEach(ContextStorage::remove);
+            }
+        }else {
+            console.info("-------------------------- Contexts ---------------------------");
+            ContextStorage.all().forEach((identifier, context) -> console.info("Context " + identifier + " expire in " + (context.getExpire().remaining() / 1000) + "s."));
+            console.info("---------------------------------------------------------------");
+        }
     }
 
     @NotNull
@@ -91,7 +101,7 @@ public class CommandListener {
         message.setContent(text);
         message.setText(text);
         message.setFrom("Console");
-        message.setTo("Willy");
+        message.setTo(Willy.getWilly().getName());
         MessageStorage.add(message);
         return message;
     }

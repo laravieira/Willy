@@ -1,5 +1,6 @@
 package me.laravieira.willy.chat.telegram;
 
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.utils.PassedInterval;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ public class TelegramMessage extends Message {
         this.content = message;
         this.text = message.text();
         this.from = message.chat().username();
+        this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);
         this.expire.start();
     }

@@ -30,7 +30,7 @@ class LogFileHandler extends Handler {
 
             fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             File logFile = new File(LOGS_FOLDER+fileName+".log");
-            if((logFile.exists() && logFile.isFile()) || logFile.createNewFile())
+            if((logFile.exists() && !logFile.isFile()) || logFile.createNewFile())
                 return;
             fileHandler = new FileHandler(LOGS_FOLDER+fileName+".log", true);
         } catch (IOException e) {

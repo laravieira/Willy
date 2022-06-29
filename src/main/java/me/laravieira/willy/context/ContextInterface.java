@@ -7,7 +7,7 @@ import java.util.*;
 
 public interface ContextInterface {
     // Message storage
-    List<UUID> getMessages();
+    LinkedList<UUID> getMessages();
     Message getMessage(UUID id);
     Message getLastMessage();
     @SuppressWarnings("unused")

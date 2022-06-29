@@ -7,11 +7,13 @@ import com.ibm.cloud.sdk.core.service.exception.NotFoundException;
 import com.ibm.watson.assistant.v2.Assistant;
 import com.ibm.watson.assistant.v2.model.CreateSessionOptions;
 import com.ibm.watson.assistant.v2.model.DeleteSessionOptions;
+import com.ibm.watson.assistant.v2.model.MessageOptions;
 import com.ibm.watson.assistant.v2.model.SessionResponse;
 
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
+import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.utils.PassedInterval;
 
 public class Watson implements WillyChat {
@@ -42,11 +44,15 @@ public class Watson implements WillyChat {
 		return session;
 	}
 
+	public static MessageOptions.Builder getMessageBuilder() {
+		return new MessageOptions.Builder(Config.getString("wa.assistant_id"), Watson.getSessionId());
+	}
+
 	@Override
 	public void refresh() {
 		if(Config.getBoolean("wa.keep_alive") && expire.hasPassedInterval()) {
 			UUID context = UUID.nameUUIDFromBytes("willy-refresh".getBytes());
-			new WatsonSender(context).sendText(null);
+			ContextStorage.of(context).getWatson().getSender().sendText(null);
 		}else if(expire.hasPassedInterval()) {
 			registered = false;
 			session = null;

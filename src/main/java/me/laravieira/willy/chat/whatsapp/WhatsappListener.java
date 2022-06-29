@@ -19,12 +19,12 @@ import it.auties.whatsapp.model.message.standard.TextMessage;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.discord.DiscordSender;
-import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import java.util.UUID;
 public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener {
 
     @Override
-    public void onNewMessage(MessageInfo info) {
+    public void onNewMessage(@NotNull MessageInfo info) {
         Willy.getLogger().info("Message received from Whatsapp.");
         if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty() || info.chat().isEmpty())
             return;
@@ -54,10 +54,9 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
         WhatsappSender sender = new WhatsappSender(info.chat().get());
         ContextStorage.of(id).setSender(sender);
 
-        WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, PassedInterval.DISABLE);
+        WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
         MessageStorage.add(whatsappMessage);
-
-        new WatsonSender(id).sendText(content);
+        ContextStorage.of(whatsappMessage.getContext()).getWatson().getSender().sendText(whatsappMessage.getText());
     }
 
     @Override

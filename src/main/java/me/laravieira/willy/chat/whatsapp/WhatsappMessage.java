@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public class WhatsappMessage extends Message {
 
-    public WhatsappMessage(UUID context, @NotNull MessageInfo message, long expire) {
+    public WhatsappMessage(UUID context, @NotNull MessageInfo message, String text, long expire) {
         super(context);
         this.content = message;
-        this.text = ((TextMessage)message.message().content()).text();
+        this.text = text;
         this.from = message.senderName();
         this.expire = new PassedInterval(expire);
         this.expire.start();

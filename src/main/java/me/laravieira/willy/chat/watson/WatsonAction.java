@@ -66,9 +66,9 @@ public class WatsonAction {
 		Youtube youtube = new Youtube(action.getParameters().get("id").toString());
 		if(youtube.getVideo()) {
 			youtube.autoChooseOnlyVideoWithAudioFormat(null);
-			context.getWatson().getWatsonMessager().sendActionMessage("youtube", youtube.getDownloadLink());
+			context.getWatson().getSender().sendAction("youtube", youtube.getDownloadLink());
 		}else {
-			context.getWatson().getWatsonMessager().sendActionMessage("youtube", "null");
+			context.getWatson().getSender().sendAction("youtube", "null");
 		}
 	}
 	
@@ -77,11 +77,11 @@ public class WatsonAction {
 			String fullLink  = action.getParameters().get("link").toString();
 			String shortLink = new Bitly(fullLink).getShort();
 			if(shortLink != null && !shortLink.equals(fullLink) && !shortLink.isEmpty())
-				context.getWatson().getWatsonMessager().sendActionMessage("short_link", shortLink);
+				context.getWatson().getSender().sendAction("short_link", shortLink);
 			else
-				context.getWatson().getWatsonMessager().sendActionMessage("short_link", "null");
+				context.getWatson().getSender().sendAction("short_link", "null");
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("short_link", "false");
+			context.getWatson().getSender().sendAction("short_link", "false");
 	}
 	
 	private void musicAdd() {
@@ -92,7 +92,7 @@ public class WatsonAction {
 			else
 				player.play();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_add", "null");
+			context.getWatson().getSender().sendAction("music_add", "null");
 	}
 	
 	private void musicPlay() {
@@ -100,7 +100,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.play();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_play", "null");
+			context.getWatson().getSender().sendAction("music_play", "null");
 	}
 
 	private void musicResume() {
@@ -108,7 +108,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.resume();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_resume", "null");
+			context.getWatson().getSender().sendAction("music_resume", "null");
 	}
 
 	private void musicPause() {
@@ -116,7 +116,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.pause();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_pause", "null");
+			context.getWatson().getSender().sendAction("music_pause", "null");
 	}
 
 	private void musicStop() {
@@ -124,7 +124,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.stop();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_stop", "null");
+			context.getWatson().getSender().sendAction("music_stop", "null");
 	}
 
 	private void musicNext() {
@@ -132,7 +132,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.next();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_next", "null");
+			context.getWatson().getSender().sendAction("music_next", "null");
 	}
 
 	private void musicClear() {
@@ -140,7 +140,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.clear();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_clear", "null");
+			context.getWatson().getSender().sendAction("music_clear", "null");
 	}
 
 	private void musicDestroy() {
@@ -148,7 +148,7 @@ public class WatsonAction {
 		if(player != null) {
 			player.destroy();
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_destroy", "null");
+			context.getWatson().getSender().sendAction("music_destroy", "null");
 	}
 
 	private void musicInfo() {
@@ -212,6 +212,6 @@ public class WatsonAction {
 					.addEmbed(embed.build())
 					.build());
 		}else
-			context.getWatson().getWatsonMessager().sendActionMessage("music_info", "null");
+			context.getWatson().getSender().sendAction("music_info", "null");
 	}
 }

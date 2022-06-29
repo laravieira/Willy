@@ -8,7 +8,7 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class WatsonContext {
     private MessageContext context;
-    private WatsonMessage watson_message;
+    private WatsonSender watsonSender;
 
     public WatsonContext(@NotNull UUID context) {
 
@@ -36,7 +36,7 @@ public class WatsonContext {
                 .skills(messagesContextSkill)
                 .build();
 
-        watson_message = new WatsonMessage(this.context, context.toString());
+        watsonSender = new WatsonSender(context, this.context);
     }
 
     public void setWatsonContext(MessageContext context) {
@@ -59,8 +59,8 @@ public class WatsonContext {
         context.skills().put("main skill", mainSkill);
     }
 
-    public void setWatsonMessage(WatsonMessage messager) {
-        this.watson_message = messager;
+    public void setWatsonSender(WatsonSender sender) {
+        this.watsonSender = sender;
     }
 
     public MessageContext getWatsonContext() {
@@ -75,8 +75,8 @@ public class WatsonContext {
         return context.skills().get("main skill");
     }
 
-    public WatsonMessage getWatsonMessager() {
-        return watson_message;
+    public WatsonSender getSender() {
+        return watsonSender;
     }
 
     public Map<String, Object> getUserDefined() {

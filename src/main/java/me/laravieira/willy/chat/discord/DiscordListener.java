@@ -11,7 +11,6 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -48,22 +47,21 @@ public class DiscordListener {
 		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 		if(startWith(content)) return;
 
-		content = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
+		DiscordMessage discordMessage = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
 
-		new WatsonSender(id).sendText(content);
-		Willy.getLogger().info("Message transaction in a private chat.");
+		ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
 	}
 
 	@NotNull
-	private static String clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
+	private static DiscordMessage clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
 		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
 		DiscordSender sender = new DiscordSender(id, channel, expire);
 
 		ContextStorage.of(id).setSender(sender);
-		DiscordMessage discordMessage = new DiscordMessage(id, user, message, expire);
+		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
 		MessageStorage.add(discordMessage);
-		return content;
+		return discordMessage;
 	}
 
 	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
@@ -79,10 +77,10 @@ public class DiscordListener {
 		
 		if(!WillyUtils.hasWillyCall(content) && !ContextStorage.has(id)) return;
 
-		content = clearContent(channel, user, message, content, id, expire);
+		DiscordMessage discordMessage= clearContent(channel, user, message, content, id, expire);
 
 		if(!checkForPlayQuestion(id, content))
-			new WatsonSender(id).sendText(content);
+			ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
 	

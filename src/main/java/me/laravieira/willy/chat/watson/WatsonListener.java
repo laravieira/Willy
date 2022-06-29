@@ -13,8 +13,24 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class WatsonListener {
-    public void onTextMessageResponse(MessageResponse response, RuntimeResponseGeneric generic, String ctxId) {
-        UUID context = UUID.fromString(ctxId);
+    public void onMessageResponse(@NotNull MessageResponse response, UUID context) {
+        if(response.getContext() == null || response.getOutput() == null) {
+            Willy.getLogger().warning("Watson response fail.");
+            return;
+        }
+
+        if(response.getOutput().getGeneric() != null && !response.getOutput().getGeneric().isEmpty())
+            response.getOutput().getGeneric().forEach((generic) -> {
+                if(generic.responseType().equalsIgnoreCase("text"))
+                    new WatsonListener().onTextResponse(response, generic, context);
+            });
+
+        if(response.getOutput().getActions() != null && !response.getOutput().getActions().isEmpty())
+            response.getOutput().getActions().forEach(
+                    (action) -> new WatsonListener().onActionResponse(response, action, context));
+    }
+
+    private void onTextResponse(@NotNull MessageResponse response, @NotNull RuntimeResponseGeneric generic, UUID context) {
         ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
 
         Message message = new Message(context);
@@ -28,13 +44,8 @@ public class WatsonListener {
         ContextStorage.of(context).getSender().sendText(message.getText());
     }
 
-    public void onActionResponse(@NotNull MessageResponse response, DialogNodeAction action, String ctxId) {
-        UUID context = UUID.fromString(ctxId);
+    private void onActionResponse(@NotNull MessageResponse response, DialogNodeAction action, UUID context) {
         ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
         new WatsonAction(action, context);
-    }
-
-    public void onErrorResponse() {
-        Willy.getLogger().warning("Watson response fail.");
     }
 }

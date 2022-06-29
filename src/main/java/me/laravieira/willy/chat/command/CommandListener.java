@@ -8,9 +8,7 @@ import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.discord.DiscordNoADM;
 import me.laravieira.willy.chat.openai.OpenAiSender;
-import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
-import me.laravieira.willy.context.Context;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.feature.player.DiscordPlayer;
@@ -112,13 +110,13 @@ public class CommandListener {
             for(int i = 2; i < args.length; i++)
                 text.append(" ").append(args[i]);
             Message message = messageBuilder(text.toString().trim());
-            new WatsonSender(message.getContext()).sendText(message.getText());
+            ContextStorage.of(message.getContext()).getWatson().getSender().sendText(message.getText());
         }else if(args.length > 1) {
             StringBuilder text = new StringBuilder();
             for(int i = 1; i < args.length; i++)
                 text.append(" ").append(args[i]);
             Message message = messageBuilder(text.toString().trim());
-            new WatsonSender(message.getContext()).sendText(message.getText());
+            ContextStorage.of(message.getContext()).getWatson().getSender().sendText(message.getText());
         }else {
             console.info("You need to type a message after 'talk' command.");
         }

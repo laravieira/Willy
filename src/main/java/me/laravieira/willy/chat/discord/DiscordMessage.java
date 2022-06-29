@@ -10,11 +10,11 @@ import java.util.UUID;
 public class DiscordMessage extends Message {
     private final discord4j.core.object.entity.Message message;
 
-    public DiscordMessage(UUID context, User user, discord4j.core.object.entity.Message message, long expire) {
+    public DiscordMessage(UUID context, User user, discord4j.core.object.entity.Message message, String text, long expire) {
         super(context);
         this.message = message;
         this.content = message.getContent();
-        this.text = message.getContent();
+        this.text = text;
         this.from = user.getUsername();
         this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);

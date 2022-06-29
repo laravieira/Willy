@@ -8,6 +8,7 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -27,13 +28,13 @@ public class WatsonListener {
         ContextStorage.of(context).getSender().sendText(message.getText());
     }
 
-    public void onActionResponse(MessageResponse response, DialogNodeAction action, String ctxId) {
+    public void onActionResponse(@NotNull MessageResponse response, DialogNodeAction action, String ctxId) {
         UUID context = UUID.fromString(ctxId);
         ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
         new WatsonAction(action, context);
     }
 
-    public void onErrorResponse(MessageResponse response) {
+    public void onErrorResponse() {
         Willy.getLogger().warning("Watson response fail.");
     }
 }

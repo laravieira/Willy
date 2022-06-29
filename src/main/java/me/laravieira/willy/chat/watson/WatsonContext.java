@@ -1,16 +1,16 @@
 package me.laravieira.willy.chat.watson;
 
 import com.ibm.watson.assistant.v2.model.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class WatsonContext {
-    private UUID globalContext;
     private MessageContext context;
     private WatsonMessage watson_message;
 
-    public WatsonContext(UUID context) {
-        this.globalContext = context;
+    public WatsonContext(@NotNull UUID context) {
 
         MessageContextGlobalSystem system = new MessageContextGlobalSystem.Builder()
                 .timezone(TimeZone.getDefault().getID())
@@ -52,7 +52,7 @@ public class WatsonContext {
         context.skills().put("main skill", skill);
     }
 
-    public void setUserDefined(Map<String, Object> userDefined) {
+    public void setUserDefined(@NotNull Map<String, Object> userDefined) {
         MessageContextSkill mainSkill = context.skills().get("main skill");
         userDefined.putAll(mainSkill.userDefined());
         mainSkill.userDefined().putAll(userDefined);

@@ -76,7 +76,7 @@ public class WatsonAction {
 		if(Bitly.canUse) {
 			String fullLink  = action.getParameters().get("link").toString();
 			String shortLink = new Bitly(fullLink).getShort();
-			if(shortLink != null && shortLink != fullLink && !shortLink.isEmpty())
+			if(shortLink != null && !shortLink.equals(fullLink) && !shortLink.isEmpty())
 				context.getWatson().getWatsonMessager().sendActionMessage("short_link", shortLink);
 			else
 				context.getWatson().getWatsonMessager().sendActionMessage("short_link", "null");

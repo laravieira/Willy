@@ -26,7 +26,7 @@ public class TelegramListener implements UpdatesListener {
         Message msg = update.message();
         UUID id = UUID.nameUUIDFromBytes(("telegram-"+msg.chat().id()).getBytes());
 
-        TelegramSender sender = new TelegramSender(id, msg.chat(), PassedInterval.DISABLE);
+        TelegramSender sender = new TelegramSender(msg.chat());
         ContextStorage.of(id).setSender(sender);
 
         TelegramMessage message = new TelegramMessage(id, msg, PassedInterval.DISABLE);

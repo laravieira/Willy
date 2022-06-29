@@ -2,20 +2,23 @@ package me.laravieira.willy.chat.discord;
 
 import java.util.*;
 
+import discord4j.core.event.domain.guild.MemberUpdateEvent;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel.Type;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.watson.WatsonSender;
+import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.kernel.Kernel;
 import discord4j.core.object.entity.channel.MessageChannel;
-import me.laravieira.willy.internal.WillyUtils;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
+import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class DiscordListener {
@@ -78,7 +81,7 @@ public class DiscordListener {
 
 		content = clearContent(channel, user, message, content, id, expire);
 
-		if(!Kernel.checkForPlayQuestion(id, content))
+		if(!checkForPlayQuestion(id, content))
 			new WatsonSender(id).sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
@@ -91,11 +94,62 @@ public class DiscordListener {
 	}
 	
 	private static boolean startWith(String message) {
-		for(String prefix : (List<String>)Config.getList("ignore_if_start_with"))
+		for(String prefix : Config.getStringList("ignore_if_start_with"))
 			if(message.startsWith(prefix))
 				return true;
 		return false;
 	}
+
+	public static boolean checkForPlayQuestion(UUID context, String content) {
+		//TODO Fix context on music player
+		for(String key : Config.getStringList("ap.blends_for_play"))
+			if(content.toLowerCase().startsWith(key.toLowerCase())) {
+				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(null);
+				String data = content.substring(key.length()).trim();
+				System.out.println(data);
+				if(player != null && !data.isEmpty())
+					player.search(data);
+				else
+					ContextStorage.of(context).getSender().sendText("Desculpa, acho que eu não peguei seu pedido. 🐕");
+				return true;
+			}
+		return false;
+	}
+
+	public static void onMemberUpdate(MemberUpdateEvent event) {
+		String master = Config.getString("discord.keep_master_nick");
+		boolean willy = Config.getBoolean("discord.keep_willy_nick");
+
+		try {
+			if(master != null && event.getMemberId().asString().equals(master) && event.getCurrentNickname().isPresent()) {
+				Member member = event.getMember().block();
+				if(member != null) {
+					member.edit(GuildMemberEditSpec.builder()
+							.nicknameOrNull(null)
+							.build())
+						.doOnError(data -> Willy.getLogger().warning("Master nickname reset failed caused by: "+data.getMessage()))
+						.block();
+				}
+			}
+
+			if(willy && event.getMemberId().asString().equals(Config.getString("discord.client_id")) && event.getCurrentNickname().isPresent()) {
+				Member member = event.getMember().block();
+				if(member != null) {
+					member.edit(GuildMemberEditSpec.builder()
+									.nicknameOrNull(null)
+									.build())
+							.doOnError(data -> Willy.getLogger().warning("Willy nickname reset failed caused by: "+data.getMessage()))
+							.block();
+				}
+			}
+		}catch(RuntimeException e) {
+			if(e.getMessage().contains("Missing Permissions"))
+				Willy.getLogger().warning("Nickname reset failed caused by missing permission.");
+			else
+				Willy.getLogger().warning("Nickname reset exception: "+e.getMessage());
+		}
+	}
+
 	private static void floodChat(MessageChannel channel, User user) {
 		try {
 			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());

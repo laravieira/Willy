@@ -1,10 +1,13 @@
 package me.laravieira.willy.internal;
 
 import me.laravieira.willy.Willy;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class Config {
 	private final static int TYPE_INT = 1;
 	private final static int TYPE_STRING = 2;
@@ -111,7 +114,6 @@ public class Config {
 		}
 		if(System.getenv().get(envKey) != null) {
 			switch (type) {
-				case TYPE_STRING  -> settings.put(key, System.getenv(envKey));
 				case TYPE_INT     -> settings.put(key, Integer.parseInt(System.getenv(envKey)));
 				case TYPE_LONG    -> settings.put(key, Long.parseLong(System.getenv(envKey)));
 				case TYPE_BOOLEAN -> settings.put(key, Boolean.parseBoolean(System.getenv(envKey)));
@@ -178,9 +180,11 @@ public class Config {
 	public static Object get(String keyword) {
 		return settings.get(keyword);
 	}
+
 	public static String getString(String keyword) {
 		return (String)settings.get(keyword);
 	}
+
 	public static int getInt(String keyword) {
 		return (int)settings.get(keyword);
 	}
@@ -192,28 +196,50 @@ public class Config {
 	public static float getFloat(String keyword) {
 		return (float)settings.get(keyword);
 	}
+
 	public static boolean getBoolean(String keyword) {
 		return (boolean)settings.get(keyword);
 	}
-	public static List getList(String keyword) {
-		return (List)settings.get(keyword);
+
+	@NotNull
+	@Contract("_ -> new")
+	public static List<Object> getList(String keyword) {
+		Object raw = settings.get(keyword);
+		if(raw instanceof List list)
+			return new ArrayList<Object>(list);
+		return new ArrayList<>();
+	}
+
+	@NotNull
+	@Contract("_ -> new")
+	@SuppressWarnings("unchecked")
+	public static List<String> getStringList(String keyword) {
+		Object raw = settings.get(keyword);
+		if(raw instanceof List list)
+			return new ArrayList<String>(list);
+		return new ArrayList<>();
 	}
 
 	public static boolean isString(String keyword) {
 		return settings.get(keyword) instanceof String;
 	}
+
 	public static boolean isInt(String keyword) {
 		return settings.get(keyword) instanceof Integer;
 	}
+
 	public static boolean isLong(String keyword) {
 		return settings.get(keyword) instanceof Long;
 	}
+
 	public static boolean isFloat(String keyword) {
 		return settings.get(keyword) instanceof Float;
 	}
+
 	public static boolean isBoolean(String keyword) {
 		return settings.get(keyword) instanceof Boolean;
 	}
+
 	public static boolean isList(String keyword) {
 		return settings.get(keyword) instanceof List;
 	}

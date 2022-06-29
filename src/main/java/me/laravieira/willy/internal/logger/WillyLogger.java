@@ -1,11 +1,7 @@
 package me.laravieira.willy.internal.logger;
 
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -14,44 +10,39 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import me.laravieira.willy.Willy;
+import org.jetbrains.annotations.NotNull;
 
 
 public class WillyLogger extends Logger {
+	private static final Formatter LOG_FORMATTER = new Formatter() {
+		@Override
+		public String format(@NotNull LogRecord record) {
+			return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
+		}
+	};
+	static {
+		System.setProperty("java.util.logging.SimpleFormatter.format", "[%2$tT][%4$s] %5$s %n");
+	}
 
 	private Logger  consoleLogger  = null;
-	private Handler fileHandler    = null;
-	private Handler consoleHandler = null;
 	
 	public WillyLogger() {
 		super(Willy.class.getCanonicalName(), Logger.getGlobal().getResourceBundleName());
 
 		try {
 			LogManager.getLogManager().reset();
-			System.setProperty("java.util.logging.SimpleFormatter.format", "[%2$tT][%4$s] %5$s %n");
+
 			Handler[] handlers = Logger.getLogger(Willy.class.getCanonicalName()).getParent().getHandlers();
 			for(Handler handler : handlers)
 				Logger.getLogger(Willy.class.getCanonicalName()).getParent().removeHandler(handler);
 
-			// Create a format for loggers
-			Formatter fileFormatter = new Formatter() {
-				@Override
-				public String format(LogRecord record) {
-					return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
-				}
-			};
-			Formatter consoleFormatter = new Formatter() {
-				@Override
-				public String format(LogRecord record) {
-					return String.format("[%1$tT][%2$s] %3$s %n", record.getMillis(), record.getLevel(), record.getMessage());
-				}
-			};
-			fileHandler    = new LogFileHandler();
-			consoleHandler = new ConsoleHandler();
+			Handler fileHandler = new LogFileHandler();
+			Handler consoleHandler = new ConsoleHandler();
 			
 			fileHandler.setLevel(Level.ALL);
 			consoleHandler.setLevel(Level.INFO);
-			fileHandler.setFormatter(fileFormatter);
-			consoleHandler.setFormatter(consoleFormatter);
+			fileHandler.setFormatter(LOG_FORMATTER);
+			consoleHandler.setFormatter(LOG_FORMATTER);
 
 			consoleLogger = Logger.getLogger(Willy.class.getCanonicalName()+"-console");
 			

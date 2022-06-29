@@ -1,7 +1,7 @@
 package me.laravieira.willy.context;
 
 import me.laravieira.willy.utils.PassedInterval;
-;
+
 import java.util.*;
 
 public class Message {
@@ -38,6 +38,7 @@ public class Message {
 
     public void delete() {}
 
+    @SuppressWarnings("unused")
     public void setType(int type) {
         this.type = type;
     }
@@ -66,6 +67,7 @@ public class Message {
         return context;
     }
 
+    @SuppressWarnings("unused")
     public int getType() {
         return type;
     }

@@ -21,10 +21,10 @@ import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.discord.DiscordSender;
 import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.internal.WillyUtils;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
+import me.laravieira.willy.utils.WillyUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
 
         content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-        WhatsappSender sender = new WhatsappSender(id, info.chat().get(), PassedInterval.DISABLE);
+        WhatsappSender sender = new WhatsappSender(info.chat().get());
         ContextStorage.of(id).setSender(sender);
 
         WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, PassedInterval.DISABLE);
@@ -73,6 +73,10 @@ public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener
 
                 Snowflake masterSnowflake = Snowflake.of(Config.getString("discord.keep_master_nick"));
                 User master = Discord.getBotGateway().getUserById(masterSnowflake).block();
+                if(master == null) {
+                    Willy.getLogger().warning("Unable to send Whatsapp QR-Code to Discord master.");
+                    return;
+                }
                 MessageChannel masterChannel = master.getPrivateChannel().block();
                 UUID id = UUID.nameUUIDFromBytes(("discord-"+master.getId().asString()).getBytes());
 

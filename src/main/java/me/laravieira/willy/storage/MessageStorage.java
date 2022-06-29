@@ -1,12 +1,14 @@
 package me.laravieira.willy.storage;
 
 import me.laravieira.willy.context.Message;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class MessageStorage {
     private static final Map<UUID, Message> messages = new HashMap<>();
 
+    @SuppressWarnings("unused")
     public static Map<UUID, Message> all() {
         return messages;
     }
@@ -19,7 +21,7 @@ public class MessageStorage {
         return messages.containsKey(id);
     }
 
-    public static UUID add(Message message) {
+    public static UUID add(@NotNull Message message) {
         if(ContextStorage.has(message.getContext())) {
             ContextStorage.of(message.getContext()).addMessage(message.getId());
         }
@@ -46,6 +48,7 @@ public class MessageStorage {
         }catch (RuntimeException ignored) {}
     }
 
+    @SuppressWarnings("unused")
     public static int size() {
         return messages.size();
     }

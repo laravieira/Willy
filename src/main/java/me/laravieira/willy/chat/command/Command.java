@@ -2,32 +2,30 @@ package me.laravieira.willy.chat.command;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.logging.Logger;
 
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Command implements WillyChat {
-	private Logger console = Willy.getLogger().getConsole();
 	private static Thread line = null;
-	private boolean connected = false;
 
 	public void onCommand(String command, String[] args) {
 		Thread thread = new Thread(() -> {
-			if(command.equals("stop"))           {
-                Willy.getWilly().stop();
-			}else if(command.equals("status"))   {CommandListener.status(args);
-			}else if(command.equals("talk"))     {CommandListener.talk(args);
-			}else if(command.equals("youtube"))  {CommandListener.youtube(args);
-			}else if(command.equals("short"))    {CommandListener.shortLink(args);
-			}else if(command.equals("contexts")) {CommandListener.contexts(args);
-			}else if(command.equals("player"))   {CommandListener.player(args);
-			}else if(command.equals("noadm"))    {CommandListener.noadm(args);
-			}else if(command.equals("user"))     {CommandListener.user(args);
-			}else if(command.equals("whats"))    {CommandListener.whatsapp(args);
-			}else if(command.equals("openai"))   {CommandListener.openai(args);
-			}else if(command.equals("help"))     {CommandListener.help(args);
-			}else {CommandListener.unknow();}
+			switch (command) {
+				case "stop" -> Willy.getWilly().stop();
+				case "status" -> CommandListener.status();
+				case "talk" -> CommandListener.talk(args);
+				case "youtube" -> CommandListener.youtube(args);
+				case "short" -> CommandListener.shortLink(args);
+				case "contexts" -> CommandListener.contexts();
+				case "player" -> CommandListener.player(args);
+				case "noadm" -> CommandListener.noadm(args);
+				case "user" -> CommandListener.user(args);
+				case "whats" -> CommandListener.whatsapp(args);
+				case "openai" -> CommandListener.openai(args);
+				case "help" -> CommandListener.help();
+				default -> CommandListener.unknow();
+			}
 		});
 		thread.setDaemon(true);
 		thread.start();

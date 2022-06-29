@@ -1,14 +1,17 @@
 package me.laravieira.willy.internal;
 
+import org.jetbrains.annotations.NotNull;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.io.*;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class Yaml {
 	private final Map<String, Object> yaml = new HashMap<>();
 
+	@SuppressWarnings("unchecked")
 	Yaml(String path, boolean resource) {
 		try {
 			InputStream stream;
@@ -17,17 +20,20 @@ public class Yaml {
 			else
 				stream = new FileInputStream(path);
 			Load load = new Load(LoadSettings.builder().build());
-			yaml.putAll((Map<String, Object>)load.loadFromInputStream(stream));
+			if(load.loadFromInputStream(stream) instanceof Map map)
+				yaml.putAll(map);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	Yaml(Object object) {
-		yaml.putAll((Map<String, Object>)object);
+		if(object instanceof Map map)
+			yaml.putAll(map);
 	}
 
-	private Object parse(String path) {
+	private Object parse(@NotNull String path) {
 		String[] keywords = path.split("\\.");
 		Object object = this.yaml;
 		for(String keyword : keywords) {
@@ -39,7 +45,7 @@ public class Yaml {
 		return object;
 	}
 
-	public boolean has(String path) {
+	public boolean has(@NotNull String path) {
 		String[] keywords = path.split("\\.");
 		Object object = this.yaml;
 		boolean hasKey = false;
@@ -58,41 +64,62 @@ public class Yaml {
 	public Object asObject(String keyword) {
 		return yaml.get(keyword);
 	}
+
 	public Yaml get(String keyword) {
 		return new Yaml(parse(keyword));
 	}
+
 	public String asString(String keyword) {
 		return (String)parse(keyword);
 	}
+
 	public int asInt(String keyword) {
 		return (int)parse(keyword);
 	}
+
 	public long asLong(String keyword) {return Long.parseLong(""+parse(keyword));}
+
 	public float asFloat(String keyword) {
 		return (float)parse(keyword);
 	}
+
 	public boolean asBoolean(String keyword) {
 		return (boolean)parse(keyword);
 	}
-	public List asList(String keyword) {
-		return (List)parse(keyword);
+
+	public List<Object> asList(String keyword) {
+		if(parse(keyword) instanceof List list)
+			return new ArrayList<Object>(list);
+		return new ArrayList<>();
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> getStringList(String keyword) {
+		if(parse(keyword) instanceof List list)
+			return new ArrayList<String>(list);
+		return new ArrayList<>();
 	}
 
 	public boolean isString(String keyword) {
 		return parse(keyword) instanceof String;
 	}
+
 	public boolean isInt(String keyword) {
 		return parse(keyword) instanceof Integer;
 	}
+
 	public boolean isLong(String keyword) {
 		return parse(keyword) instanceof Long;
 	}
+
 	public boolean isFloat(String keyword) {
 		return parse(keyword) instanceof Float;
 	}
+
 	public boolean isBoolean(String keyword) {
 		return parse(keyword) instanceof Boolean;
 	}
+
 	public boolean isList(String keyword) {
 		return parse(keyword) instanceof List;
 	}

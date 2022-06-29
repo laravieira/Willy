@@ -8,8 +8,8 @@ public class OpenAiHeader {
     private static final Map<String, List<String>> HEADER_BASE_LIST = new HashMap<>();
     private static final Map<String, String> CONNECTOR_LIST = new HashMap<>();
 
-    private List<String> header = new ArrayList<>();
-    private String connector = null;
+    private final List<String> header = new ArrayList<>();
+    private String connector;
 
     public static void setHeaderBaseList(Map<String, List<String>> headerBaseList) {
         HEADER_BASE_LIST.putAll(headerBaseList);
@@ -17,11 +17,6 @@ public class OpenAiHeader {
 
     public static void setConnectorList(Map<String, String> connectorList) {
         CONNECTOR_LIST.putAll(connectorList);
-    }
-
-    OpenAiHeader() {
-        this.header.addAll(HEADER_BASE_LIST.get("default"));
-        this.connector = CONNECTOR_LIST.get("default");
     }
 
     OpenAiHeader(UUID context) {

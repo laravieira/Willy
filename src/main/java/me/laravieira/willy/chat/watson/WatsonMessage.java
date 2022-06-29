@@ -21,12 +21,13 @@ import com.ibm.watson.assistant.v2.model.RuntimeResponseGeneric;
 import com.ibm.watson.assistant.v2.model.SearchResult;
 
 import me.laravieira.willy.internal.Config;
+import org.jetbrains.annotations.NotNull;
 
 public class WatsonMessage {
 
-	private MessageResponse response = null;
-	private MessageContext context = null;
-	private String id = null;
+	private final MessageResponse response = null;
+	private final MessageContext context;
+	private final String id;
 
 	public WatsonMessage(MessageContext context, String id) {
 		this.context = context;
@@ -35,7 +36,7 @@ public class WatsonMessage {
 
 	private void callWatsonListener(MessageResponse response) {
 		if(response.getContext() == null || response.getOutput() == null) {
-			new WatsonListener().onErrorResponse(response);
+			new WatsonListener().onErrorResponse();
 			return;
 		}
 
@@ -86,7 +87,9 @@ public class WatsonMessage {
 		sendMessage(input);
 	}
 
-	public void debug(Logger log) {
+	@SuppressWarnings("unused")
+	public void debug(@NotNull Logger log) {
+		assert false;
 		MessageOutput output = response.getOutput();
 		log.info(" ▪ Timezone: "+context.global().system().timezone());
 		log.info(" ▪ TurnCount: "+context.global().system().turnCount());
@@ -94,30 +97,22 @@ public class WatsonMessage {
 		Map<String, MessageContextSkill> skills = context.skills();
 		if(skills != null) {
 			log.info(" ▪ Skills: "+skills.size());
-			skills.forEach((name, skill) -> {
-				log.info("       - "+name+": "+skill.toString());
-			});
+			skills.forEach((name, skill) -> log.info("       - "+name+": "+skill.toString()));
 		}else log.info(" ▪ Skills: null");
-		Map<String, Object> userDefined = (Map<String, Object>)output.getUserDefined();
+		Map<String, Object> userDefined = output.getUserDefined();
 		if(userDefined != null) {
 			log.info(" ▪ UserVariables: "+userDefined.size());
-			userDefined.forEach((key, value) -> {
-				log.info("       - "+key+": "+value.toString());
-			});
+			userDefined.forEach((key, value) -> log.info("       - "+key+": "+value.toString()));
 		}else log.info(" ▪ UserVariables: null");
 		List<RuntimeIntent> intents = output.getIntents();
 		if(intents != null) {
 			log.info(" • Intents: "+intents.size());
-			intents.forEach((intent) -> {
-				log.info("       - "+intent.intent());
-			});
+			intents.forEach((intent) -> log.info("       - "+intent.intent()));
 		}else log.info(" • Intents: null");
 		List<RuntimeEntity> entities = output.getEntities();
 		if(entities != null) {
 			log.info(" • Entities: "+entities.size());
-			entities.forEach((entity) -> {
-				log.info("       - "+entity.entity()+": "+entity.value());
-			});
+			entities.forEach((entity) -> log.info("       - "+entity.entity()+": "+entity.value()));
 		}else log.info(" • Entities: null");
 		List<DialogNodeAction> actions = output.getActions();
 		if(actions != null) {
@@ -127,12 +122,10 @@ public class WatsonMessage {
 				log.info("             + Type: "       +action.getType());
 				log.info("             + Result: "     +action.getResultVariable());
 				log.info("             + Credentials: "+action.getCredentials());
-				Map<String, Object> parameters = (Map<String, Object>)action.getParameters();
+				Map<String, Object> parameters = action.getParameters();
 				if(parameters != null) {
 					log.info("             + Parameters: "+parameters.size());
-					parameters.forEach((key, value) -> {
-						log.info("                - "+(key==null?"null":key)+": "+(value==null?"null":value.toString()));
-					});
+					parameters.forEach((key, value) -> log.info("                - "+(key==null?"null":key)+": "+(value==null?"null":value.toString())));
 				}else log.info("             + Parameters: null");
 			});
 		}else log.info(" • Actions: null");
@@ -143,7 +136,7 @@ public class WatsonMessage {
 				log.info("       - "+dialog.getClass().toGenericString());
 				String space = "             ";
 
-				Map<String, String> subDialog = new HashMap<String, String>();
+				Map<String, String> subDialog = new HashMap<>();
 				subDialog.put("Header",        dialog.header());
 				subDialog.put("Title",         dialog.title());
 				subDialog.put("Topic",         dialog.topic());
@@ -165,23 +158,17 @@ public class WatsonMessage {
 				List<DialogNodeOutputOptionsElement> options = dialog.options();
 				if(options != null) {
 					log.info(space+"• Options: "+options.size());
-					options.forEach((option) -> {
-						log.info(space+"      - "+option.getLabel()+": "+option.getValue());
-					});
+					options.forEach((option) -> log.info(space+"      - "+option.getLabel()+": "+option.getValue()));
 				}else log.info(" • Options: null");
 				List<SearchResult> results = dialog.primaryResults();
 				if(results != null) {
 					log.info(space+"• Results: "+results.size());
-					results.forEach((result) -> {
-						log.info(space+"      - "+result.getTitle()+": "+result.getBody());
-					});
+					results.forEach((result) -> log.info(space+"      - "+result.getTitle()+": "+result.getBody()));
 				}else log.info(" • Results: null");
 				List<DialogSuggestion> suggestions = dialog.suggestions();
 				if(suggestions != null) {
 					log.info(space+"• Suggestions: "+suggestions.size());
-					suggestions.forEach((suggestion) -> {
-						log.info(space+"      - "+suggestion.getLabel()+": "+suggestion.getValue());
-					});
+					suggestions.forEach((suggestion) -> log.info(space+"      - "+suggestion.getLabel()+": "+suggestion.getValue()));
 				}else log.info(" • Suggestions: null");
 			});
 		}else log.info(" • Dialogs: null");

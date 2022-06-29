@@ -3,7 +3,6 @@ package me.laravieira.willy.chat.command;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import it.auties.whatsapp.model.chat.Chat;
 import it.auties.whatsapp.model.contact.ContactJid;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
@@ -19,6 +18,7 @@ import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.UUID;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class CommandListener {
     private static final Logger console = Willy.getLogger();
 
-    static void status(String[] args) {
+    static void status() {
         console.info("-------------------------- Status ----------------------------");
         console.info("Discord: "+(new Discord().isConnected()?"Connected":"Disconnected"));
         console.info("Contexts: "+ ContextStorage.size()+" in use");
@@ -39,8 +39,8 @@ public class CommandListener {
         console.info("---------------------------------------------------------------");
     }
 
-    static void youtube(String[] args) {
-        Youtube ytd = null;
+    static void youtube(@NotNull String[] args) {
+        Youtube ytd;
         if(args.length == 2 && args[1].startsWith("https") && args[1].contains("youtube.com") && args[1].contains("v=")) {
             ytd = new Youtube(args[1]);
             if(ytd.getVideo()) {
@@ -69,59 +69,56 @@ public class CommandListener {
             if(args.length > 1 && args[1].length() > 10
                     && args[1].startsWith("http") && args[1].contains(".") && args[1].contains("/")) {
                 String shortLink = new Bitly(args[1]).getShort();
-                if(shortLink == null || shortLink == args[1] || shortLink.isEmpty())
+                if(shortLink == null || shortLink.equals(args[1]) || shortLink.isEmpty())
                     console.info("Can't short link, maybe it's already short enouth.");
                 else console.info("Smallest link: "+shortLink);
             }else console.info("This entered argument it's not a valid link.");
         }else console.info("Bitly is not enabled, check config file.");
     }
 
-    static void contexts(String[] args) {
-        long   now = new Date().getTime()+10000;
+    static void contexts() {
         console.info("-------------------------- Contexts ---------------------------");
-        ContextStorage.all().forEach((identifier, context) -> {
-            console.info("Context "+identifier+" expire in "+(context.getExpire().remaining()/1000)+"s.");
-        });
+        ContextStorage.all().forEach((identifier, context) -> console.info("Context "+identifier+" expire in "+(context.getExpire().remaining()/1000)+"s."));
         console.info("---------------------------------------------------------------");
     }
 
-    static void talk(String[] args) {
+    @NotNull
+    static Message messageBuilder(String text) {
+        UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
+        ContextStorage.of(context).setSender(new CommandSender());
+        Message message = new Message(context);
+        message.setExpire(PassedInterval.DISABLE);
+        message.setContent(text);
+        message.setText(text);
+        message.setFrom("Console");
+        message.setTo("Willy");
+        MessageStorage.add(message);
+        return message;
+    }
+
+    static void talk(@NotNull String[] args) {
         if(args.length > 2 && args[1].equalsIgnoreCase("debug")) {
             StringBuilder text = new StringBuilder();
             for(int i = 2; i < args.length; i++)
                 text.append(" ").append(args[i]);
-            UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-            ContextStorage.of(context).setSender(new CommandSender());
-            Message message = new Message(context);
-            message.setExpire(PassedInterval.DISABLE);
-            message.setContent(text.toString().trim());
-            message.setText(text.toString().trim());
-            message.setFrom("Console");
-            message.setTo("Willy");
-            MessageStorage.add(message);
-            new WatsonSender(context).sendText(text.toString());
+            Message message = messageBuilder(text.toString().trim());
+            new WatsonSender(message.getContext()).sendText(message.getText());
         }else if(args.length > 1) {
             StringBuilder text = new StringBuilder();
             for(int i = 1; i < args.length; i++)
                 text.append(" ").append(args[i]);
-            UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-            ContextStorage.of(context).setSender(new CommandSender());
-            Message message = new Message(context);
-            message.setExpire(PassedInterval.DISABLE);
-            message.setContent(text.toString().trim());
-            message.setText(text.toString().trim());
-            message.setFrom("Console");
-            message.setTo("Willy");
-            MessageStorage.add(message);
-            new WatsonSender(context).sendText(text.toString());
+            Message message = messageBuilder(text.toString().trim());
+            new WatsonSender(message.getContext()).sendText(message.getText());
         }else {
             console.info("You need to type a message after 'talk' command.");
         }
     }
 
-    static void player(String[] args) {
+    static void player(@NotNull String[] args) {
         if(args.length > 1) {
             VoiceChannel channel = (VoiceChannel)Discord.getBotGateway().getChannelById(Snowflake.of(Config.getString("ap.command_default_channel_id"))).block();
+            if(channel == null)
+                return;
             DiscordPlayer player = DiscordPlayer.createDiscordPlayer(channel);
             if(args.length > 2 && args[1].equalsIgnoreCase("add")) {
                 player.add(args[2]);
@@ -145,7 +142,7 @@ public class CommandListener {
                 console.info("Playing track: "+(player.getPlayer().getPlayingTrack() == null?"EMPTY":player.getPlayer().getPlayingTrack().getInfo().title));
                 console.info("Next track: "+(player.getTrackScheduler().getNext() == null?"EMPTY":player.getTrackScheduler().getNext().getInfo().title));
                 console.info("Queue size: "+player.getTrackScheduler().getQueue().size());
-                console.info("Channel status: "+(player.getChannel().isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block()?"CONNECTED":"DISCONNECTED"));
+                console.info("Channel status: "+(DiscordPlayer.isMemberConnectedTo(player.getChannel(), Snowflake.of(Config.getString("discord.client_id")))?"CONNECTED":"DISCONNECTED"));
                 console.info("Channel identifier: "+player.getChannel().getName()+" ("+player.getChannel().getId().asString()+")");
                 console.info("---------------------------------------------------------------");
             }else {
@@ -156,7 +153,8 @@ public class CommandListener {
         }
     }
 
-    static void noadm(String[] args) {
+    @SuppressWarnings("StatementWithEmptyBody")
+    static void noadm(@NotNull String[] args) {
         if(args.length > 1) {
             if(args.length > 3 && args[1].equalsIgnoreCase("ban")) {
                 String reason = "";
@@ -186,40 +184,26 @@ public class CommandListener {
         }
     }
 
-    static void user(String[] args) {
+    static void user(@NotNull String[] args) {
         if(args.length > 1) {
             Snowflake userId = Snowflake.of(args[1]);
             console.info("User: -----------------------");
-            User user = Discord.getBotGateway().getUserById(userId).block();
-            console.info("uAvatar: "+user.getAvatarUrl());
-            console.info("uDefaultAvatar: "+user.getDefaultAvatarUrl());
-            console.info("uDiscriminator: "+user.getDiscriminator());
-            console.info("uMention: "+user.getMention());
-            console.info("uTag: "+user.getTag());
-            console.info("uUsername: "+user.getUsername());
-            console.info("uID: "+user.getId().asString());
-
-//			console.info("User Data: ------------------");
-//			UserData data = user.getUserData();
-//			console.info("Discriminator: "+data.discriminator());
-//			console.info("Username: "+data.username());
-//			console.info("Avatar: "+(data.avatar().orElse(null)));
-//			Possible<Boolean> isBot = data.bot();
-//			console.info("Is Bot: "+(isBot.toOptional().orElse(null)));
-//			Possible<Optional<String>> email = data.email();
-//			console.info("Email: "+(email.toOptional().orElse(null).orElse(null)));
-//			console.info("ID: "+data.id());
-//			console.info("locate: "+(data.locale().toOptional().orElse(null)));
-//			console.info("MFA: "+data.mfaEnabled());
-//			console.info("Premium: "+(data.premiumType().toOptional().orElse(null)));
-//			console.info("Sytem: "+(data.system().toOptional().orElse(null)));
-//			console.info("Verified: "+(data.verified().toOptional().orElse(null)));
+            Object raw = Discord.getBotGateway().getUserById(userId).block();
+            if(raw instanceof User user) {
+                console.info("uAvatar: " + user.getAvatarUrl());
+                console.info("uDefaultAvatar: " + user.getDefaultAvatarUrl());
+                console.info("uDiscriminator: " + user.getDiscriminator());
+                console.info("uMention: " + user.getMention());
+                console.info("uTag: " + user.getTag());
+                console.info("uUsername: " + user.getUsername());
+                console.info("uID: " + user.getId().asString());
+            }
         }else {
             console.info("This command need an user id, type 'help' to see usage.");
         }
     }
 
-    static void whatsapp(String[] args) {
+    static void whatsapp(@NotNull String[] args) {
         if(args.length < 2) {
             console.info("This command need an user id, type 'help' to see usage.");
             return;
@@ -235,16 +219,17 @@ public class CommandListener {
         if(args[1].equals("chats"))
             Whatsapp.chats();
         if(args[1].equals("talk") && args.length > 3) {
-            Chat chat = Whatsapp.getApi().store().findChatByJid(ContactJid.of(args[2])).get();
-            try {
-                Whatsapp.getApi().sendMessage(chat, args[3]).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+            Whatsapp.getApi().store().findChatByJid(ContactJid.of(args[2])).ifPresent(chat -> {
+                try {
+                    Whatsapp.getApi().sendMessage(chat, args[3]).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            });
         }else {unknow();}
     }
 
-    static void openai(String[] args) {
+    static void openai(@NotNull String[] args) {
         if(args.length < 2) {
             console.info("This command needs a message, type 'help' to see usage.");
             return;
@@ -252,20 +237,11 @@ public class CommandListener {
         StringBuilder text = new StringBuilder();
         for(int i = 1; i < args.length; i++)
             text.append(" ").append(args[i]);
-        UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-        ContextStorage.of(context).setSender(new CommandSender());
-        Message message = new Message(context);
-        message.setExpire(PassedInterval.DISABLE);
-        message.setContent(text.toString().trim());
-        message.setText(text.toString().trim());
-        message.setFrom("Console");
-        message.setTo("Willy");
-        MessageStorage.add(message);
-        OpenAiSender sender = new OpenAiSender(context);
-        sender.sendText(message.getText());
+        Message message = messageBuilder(text.toString().trim());
+        new OpenAiSender(message.getContext()).sendText(message.getText());
     }
 
-    static void help(String[] args) {
+    static void help() {
         console.info("---------------------------------------------------------------");
         console.info("---                        Help Page                        ---");
         console.info("---------------------------------------------------------------");

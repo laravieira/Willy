@@ -7,6 +7,7 @@ import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.UUID;
@@ -42,18 +43,6 @@ public class DiscordSender implements SenderInterface {
 
     @Override
     public void send(Object message) {
-        switch(0) {
-            case Message.LINK -> sendLink((Message)message);
-            case Message.CONTACT -> sendContact((Message)message);
-            case Message.LOCATION -> sendLocation((Message)message);
-            case Message.STICK -> sendStick((Message)message);
-            case Message.IMAGE -> sendImage((Message)message);
-            case Message.GIF -> sendGif((Message)message);
-            case Message.VIDEO -> sendVideo((Message)message);
-            case Message.AUDIO -> sendAudio((Message)message);
-            case Message.FILE -> sendFile((File)message);
-            default -> sendText((String)message);
-        }
     }
 
     @Override
@@ -62,7 +51,7 @@ public class DiscordSender implements SenderInterface {
     }
 
     @Override
-    public void sendLink(Message message) {
+    public void sendLink(@NotNull Message message) {
         String content = (String)message.getContent();
         sendMessage(MessageCreateSpec.builder().content(content).build());
     }

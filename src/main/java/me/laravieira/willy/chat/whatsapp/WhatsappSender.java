@@ -6,18 +6,13 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 
 import java.io.File;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class WhatsappSender implements SenderInterface {
-    private final UUID context;
     private final Chat chat;
-    private final long expire;
 
-    public WhatsappSender(UUID context, Chat chat, long expire) {
-        this.context = context;
+    public WhatsappSender(Chat chat) {
         this.chat = chat;
-        this.expire = expire;
     }
 
     @Override

@@ -7,17 +7,12 @@ import me.laravieira.willy.context.SenderInterface;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.File;
-import java.util.UUID;
 
 public class TelegramSender implements SenderInterface {
-    private final UUID context;
     private final Chat chat;
-    private final long expire;
 
-    public TelegramSender(UUID context, Chat channel, long expire) {
-        this.context = context;
+    public TelegramSender(Chat channel) {
         this.chat = channel;
-        this.expire = expire;
     }
 
     @Override

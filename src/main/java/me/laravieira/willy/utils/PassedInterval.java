@@ -5,7 +5,7 @@ import java.util.Date;
 public class PassedInterval {
     public static final long DISABLE = -1;
 
-    private long interval = -1;
+    private final long interval;
     private long begin = 0;
     private boolean enable = false;
 
@@ -20,6 +20,7 @@ public class PassedInterval {
         this.enable = true;
     }
 
+    @SuppressWarnings("unused")
     public void disable() {
         enable = false;
     }
@@ -36,6 +37,7 @@ public class PassedInterval {
         return enable && begin + interval <= new Date().getTime();
     }
 
+    @SuppressWarnings("unused")
     public long passed() {
         return new Date().getTime() - begin;
     }

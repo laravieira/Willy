@@ -1,17 +1,13 @@
 package me.laravieira.willy.feature.youtube;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+import java.util.function.Consumer;
 
 import com.github.kiulian.downloader.model.videos.formats.AudioFormat;
 import com.github.kiulian.downloader.model.videos.formats.VideoWithAudioFormat;
 import com.github.kiulian.downloader.model.videos.formats.Format;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
-import com.github.kiulian.downloader.model.videos.quality.AudioQuality;
-import com.github.kiulian.downloader.model.videos.quality.VideoQuality;
+import org.jetbrains.annotations.Nullable;
 
 public class YoutubeFormatter {
 	
@@ -92,162 +88,76 @@ public class YoutubeFormatter {
 	    // Dash webm Audio with Opus
 	    aGoodQualities.add(251); aPoorQualities.add(249); aPoorQualities.add(250);
 	}
-	
+
+	private final Consumer<Integer> qualityFinder = quality -> {
+		if(!formats.containsKey(quality))
+			format = formats.get(quality);
+	};
+
+	@Nullable
 	private Format getSomeFormat() {
 		if(!formats.isEmpty()) {
-			
-			avGoodQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			avBestQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			avHalfQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			avPoorQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			
-			vGoodQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			vBestQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			vHalfQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			vPoorQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			
-			aGoodQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			aBestQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			aPoorQualities.forEach((quality) -> {
-				if(formats.containsKey(quality))
-					format = formats.get(quality);
-			}); if(format != null) return format;
-			
+			Queue<Queue<Integer>> queue = new LinkedList<>();
+			queue.add(avBestQualities);
+			queue.add(avGoodQualities);
+			queue.add(avHalfQualities);
+			queue.add(avPoorQualities);
+
+			queue.add(vBestQualities);
+			queue.add(vGoodQualities);
+			queue.add(vHalfQualities);
+			queue.add(vPoorQualities);
+
+			queue.add(aBestQualities);
+			queue.add(aGoodQualities);
+			queue.add(aPoorQualities);
+
+			queue.forEach(formatList -> formatList.forEach(qualityFinder));
+			return format;
+
 		}else return null;
-		return null;
+	}
+
+	private Format getFormatByQuality(List<Format> formats, Queue<Integer> best, Queue<Integer> good, Queue<Integer> medium, Queue<Integer> poor, String quality) {
+		if(quality == null) quality = "any";
+		if(quality.equalsIgnoreCase("best")) {
+			formats.forEach((format) -> {
+				if(best.contains(format.itag().id()))
+					this.formats.put(format.itag().id(), format);
+			}); return getSomeFormat();
+		}else if(quality.equalsIgnoreCase("good")) {
+			formats.forEach((format) -> {
+				if(good.contains(format.itag().id()))
+					this.formats.put(format.itag().id(), format);
+			}); return getSomeFormat();
+		}else if(quality.equalsIgnoreCase("medium")) {
+			formats.forEach((format) -> {
+				if(medium.contains(format.itag().id()))
+					this.formats.put(format.itag().id(), format);
+			}); return getSomeFormat();
+		}else if(quality.equalsIgnoreCase("poor")) {
+			formats.forEach((format) -> {
+				if(poor.contains(format.itag().id()))
+					this.formats.put(format.itag().id(), format);
+			}); return getSomeFormat();
+		}else {
+			formats.forEach((format) -> this.formats.put(format.itag().id(), format));
+			return getSomeFormat();
+		}
 	}
 
 	public Format getVideoWithAudioFormat(List<VideoWithAudioFormat> formats, String quality) {
-		if(quality == null) quality = "any";
-		if(quality.equalsIgnoreCase("best")) {
-			formats.forEach((format) -> {
-				if(avBestQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("good")) {
-			formats.forEach((format) -> {
-				if(avGoodQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("medium")) {
-			formats.forEach((format) -> {
-				if(avHalfQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("poor")) {
-			formats.forEach((format) -> {
-				if(avPoorQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else {
-			formats.forEach((format) -> this.formats.put(format.itag().id(), format));
-			return getSomeFormat();
-		}
+		List<Format> rawFormats = new ArrayList<>(formats);
+		return getFormatByQuality(rawFormats, avBestQualities, avGoodQualities, avHalfQualities, avPoorQualities, quality);
 	}
 
 	public Format getVideoOnlyFormat(List<VideoFormat> formats, String quality) {
-		if(quality == null) quality = "any";
-		if(quality.equalsIgnoreCase("best")) {
-			formats.forEach((format) -> {
-				if(vBestQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("good")) {
-			formats.forEach((format) -> {
-				if(vGoodQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("medium")) {
-			formats.forEach((format) -> {
-				if(vHalfQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("poor")) {
-			formats.forEach((format) -> {
-				if(vPoorQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else {
-			formats.forEach((format) -> this.formats.put(format.itag().id(), format));
-			return getSomeFormat();
-		}
+		List<Format> rawFormats = new ArrayList<>(formats);
+		return getFormatByQuality(rawFormats, vBestQualities, vGoodQualities, vHalfQualities, vPoorQualities, quality);
 	}
 
 	public Format getAudioOnlyFormat(List<AudioFormat> formats, String quality) {
-		if(quality == null) quality = "any";
-		if(quality.equalsIgnoreCase("best")) {
-			formats.forEach((format) -> {
-				if(aBestQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("good") || quality.equalsIgnoreCase("medium")) {
-			formats.forEach((format) -> {
-				if(aGoodQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else if(quality.equalsIgnoreCase("poor")) {
-			formats.forEach((format) -> {
-				if(aPoorQualities.contains(format.itag().id()))
-					this.formats.put(format.itag().id(), format);
-			}); return getSomeFormat();
-		}else {
-			formats.forEach((format) -> this.formats.put(format.itag().id(), format));
-			return getSomeFormat();
-		}
-	}
-	
-	public Format getVideoWithAudioFormatFromQuality(List<VideoWithAudioFormat> formats, VideoQuality vQuality, AudioQuality aQuality) {
-		formats.forEach((format) -> {
-			if(vQuality != null || !format.videoQuality().equals(vQuality)) {}
-			else if(aQuality != null || !format.audioQuality().equals(aQuality)) {}
-			else this.formats.put(format.itag().id(), format);
-		});
-		return getSomeFormat();
-	}
-	
-	public Format getVideoOnlyFormatFromQuality(List<VideoFormat> formats, VideoQuality quality) {
-		formats.forEach((format) -> {
-			if(quality != null || !format.videoQuality().equals(quality)) {}
-			else this.formats.put(format.itag().id(), format);
-		});
-		return getSomeFormat();
-	}
-	
-	public Format getAudioOnlyFormatFromQuality(List<AudioFormat> formats, AudioQuality quality) {
-		formats.forEach((format) -> {
-			if(quality != null || !format.audioQuality().equals(quality)) {}
-			else this.formats.put(format.itag().id(), format);
-		});
-		return getSomeFormat();
+		List<Format> rawFormats = new ArrayList<>(formats);
+		return getFormatByQuality(rawFormats, aBestQualities, aGoodQualities, aGoodQualities, aPoorQualities, quality);
 	}
 }

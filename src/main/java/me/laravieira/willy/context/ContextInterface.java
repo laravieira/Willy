@@ -1,6 +1,5 @@
 package me.laravieira.willy.context;
 
-import me.laravieira.willy.chat.watson.WatsonSender;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.chat.watson.WatsonContext;
 
@@ -11,12 +10,14 @@ public interface ContextInterface {
     List<UUID> getMessages();
     Message getMessage(UUID id);
     Message getLastMessage();
+    @SuppressWarnings("unused")
     boolean hasMessage(UUID id);
     void addMessage(UUID id);
     void removeMessage(UUID id);
 
     // User language
     String getLanguage();
+    @SuppressWarnings("unused")
     void setLanguage(String language);
 
     // Context data

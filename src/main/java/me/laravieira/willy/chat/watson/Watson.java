@@ -55,7 +55,7 @@ public class Watson implements WillyChat {
 
 	@Override
 	public void connect() {
-		IamAuthenticator iamAuth = new IamAuthenticator(Config.getString("wa.password"));
+		IamAuthenticator iamAuth = new IamAuthenticator.Builder().apikey(Config.getString("wa.password")).build();
 		service = new Assistant(Config.getString("wa.api_date"), iamAuth);
 		service.setServiceUrl(Config.getString("wa.server_url"));
 		if(Config.getBoolean("wa.keep_alive"))

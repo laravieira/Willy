@@ -8,10 +8,7 @@ import me.laravieira.willy.internal.WillyChat;
 import java.util.concurrent.ExecutionException;
 
 public class Whatsapp implements WillyChat {
-    private static final int willyId = 571549554;
     private static it.auties.whatsapp.api.Whatsapp whatsapp;
-//    private static final PassedInterval privateChatCheckInterval = new PassedInterval(1000);
-//    private static String privateChatLastMessage = null;
 
     @Override
     public void connect() {
@@ -55,20 +52,6 @@ public class Whatsapp implements WillyChat {
 
     @Override
     public void refresh() {
-//        if(!privateChatCheckInterval.hasPassedInterval() || !this.isConnected())
-//            return;
-//        privateChatCheckInterval.reset();
-//
-//        whatsapp.store().findChatByJid(ContactJid.of("553298000810")).ifPresent((chat) -> {
-//            MessageInfo lastMessage = chat.messages().get(0);
-//            if(chat.lastMessage().isEmpty())
-//                return;
-//            if(!Objects.equals(privateChatLastMessage, lastMessage))
-//                return;
-//
-//            Willy.getLogger().info("New Private message: "+lastMessage);
-//            //privateChatLastMessage = lastMessage;
-//        });
     }
 
     public static void reconnect() {

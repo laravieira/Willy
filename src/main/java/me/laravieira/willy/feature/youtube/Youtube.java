@@ -2,7 +2,6 @@ package me.laravieira.willy.feature.youtube;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
@@ -19,13 +18,12 @@ import com.github.kiulian.downloader.model.videos.formats.Format;
 
 import me.laravieira.willy.feature.bitly.Bitly;
 
+@SuppressWarnings("unused")
 public class Youtube {
-	
-	private String       youtube  = null;
+
 	private String       video_id = null;
 	private VideoInfo    video    = null;
 	private Format       format   = null;
-	private File         file     = null;
 	private String       link     = null;
 	
 	
@@ -36,14 +34,9 @@ public class Youtube {
 			for (NameValuePair set : builder.getQueryParams())
 				if(set.getName().equalsIgnoreCase("v"))
 					video_id = set.getValue();
-			youtube = builder.build().toString();
 		} catch (URISyntaxException e) {
 			Willy.getLogger().getConsole().info(e.getMessage());
 		}
-	}
-	
-	public String getYouTubeLink() {
-		return youtube;
 	}
 	
 	public String getId() {
@@ -52,26 +45,22 @@ public class Youtube {
 	
 	public boolean getVideo() {
 		RequestVideoInfo request = new RequestVideoInfo(video_id)
-	        .callback(new YoutubeCallback<VideoInfo>() {
-	            @Override
-	            public void onFinished(VideoInfo videoInfo) {
-	                System.out.println("Finished parsing");
-	            }
-	    
-	            @Override
-	            public void onError(Throwable throwable) {
-	                System.out.println("Error: " + throwable.getMessage());
-	            }
-	        })
+	        .callback(new YoutubeCallback<>() {
+				@Override
+				public void onFinished(VideoInfo videoInfo) {
+					System.out.println("Finished parsing");
+				}
+
+				@Override
+				public void onError(Throwable throwable) {
+					System.out.println("Error: " + throwable.getMessage());
+				}
+			})
 	        .async();
         YoutubeDownloader downloader = new YoutubeDownloader();
         Response<VideoInfo> response = downloader.getVideoInfo(request);
         video = response.data();
         return true;
-	}
-	
-	public List<Format> getFormats() {
-		return video.formats();
 	}
 	
 	public boolean autoChooseAnyFormat(String quality) {
@@ -83,14 +72,13 @@ public class Youtube {
 		if(format == null || video.audioFormats() != null || !video.audioFormats().isEmpty())
 			format = formatter.getAudioOnlyFormat(video.audioFormats(), quality);
 		Willy.getLogger().getConsole().info("id: "+format.itag().id()+" quality: "+format.itag().videoQuality().name());
-		if(format != null) return true;
-		else return false;
+		return format != null;
 	}
 
-	public boolean autoChooseOnlyVideoWithAudioFormat(String quality) {
+	public void autoChooseOnlyVideoWithAudioFormat(String quality) {
 		video.videoFormats().clear();
 		video.audioFormats().clear();
-		return autoChooseAnyFormat(quality);
+		autoChooseAnyFormat(quality);
 	}
 
 	public boolean autoChooseOnlyVideoFormat(String quality) {
@@ -130,28 +118,16 @@ public class Youtube {
 	
 	private void download() {
 		File folder = new File(new File(".").getAbsolutePath()+File.pathSeparator+"web"+File.pathSeparator+"videos");
-		if(!folder.exists()) folder.mkdirs();
+		if(!folder.exists() && !folder.mkdirs())
+			return;
 		RequestVideoFileDownload request = new RequestVideoFileDownload(format)
 		    .saveTo(folder)
 		    .renameTo("video")
 		    .overwriteIfExists(true);
 		YoutubeDownloader downloader = new YoutubeDownloader();
 		Response<File> response = downloader.downloadVideoFile(request);
-		file = response.data();
+		File file = response.data();
 
-		link = Config.getString("web.uri")+"videos/"+file.getName();
+		link = Config.getString("web.uri")+"videos/"+ file.getName();
 	}
-	
-//    private static boolean isReachable(String url) {
-//        try {
-//            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-//            connection.setConnectTimeout(1000);
-//            connection.setReadTimeout(1000);
-//            connection.setRequestMethod("HEAD");
-//            int responseCode = connection.getResponseCode();
-//            return (200 <= responseCode && responseCode <= 399);
-//        } catch (IOException exception) {
-//            return false;
-//        }
-//    }
 }

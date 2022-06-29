@@ -3,6 +3,7 @@ package me.laravieira.willy;
 import java.util.ArrayList;
 import java.util.Date;
 
+import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.chat.command.Command;
 import me.laravieira.willy.internal.Config;
@@ -47,7 +48,7 @@ public class Willy {
 		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Watson());
 		willy.addWillyChatInstance(new Discord());
-		//willy.addWillyChatInstance(new Whatsapp());
+		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());
 	}
 

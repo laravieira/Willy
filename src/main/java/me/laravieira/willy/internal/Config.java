@@ -93,11 +93,6 @@ public class Config {
 		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, true);
 		set("ytd.willy_vpn", "WILLY_YTD_LOCAL",     "youtube-downloader.willy-vpn", TYPE_BOOLEAN, false);
 		set("ytd.use_bitly", "WILLY_YTD_USE_BITLY", "youtube-downloader.use-bitly", TYPE_BOOLEAN, true);
-
-		// WebServer Settings
-		set("web.enable", "WILLY_WEB_ENABLE", "web-server.enable", TYPE_BOOLEAN, false);
-		set("web.uri",    "WILLY_WEB_URI",    "web-server.uri", TYPE_STRING, "https://localhost/");
-		set("web.port",   "WILLY_WEB_PORT",   "web-server.port", TYPE_INT, 443);
 	}
 
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {

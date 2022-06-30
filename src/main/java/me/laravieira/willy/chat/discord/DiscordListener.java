@@ -152,35 +152,59 @@ public class DiscordListener {
 		try {
 			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.clear_after_wait"));
+			ContextStorage.of(id).setSender(sender);
 
-			sender.sendEmbed(MessageCreateSpec.builder()
+			me.laravieira.willy.context.Message message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
 							.image("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png")
 							.build())
-					.build()
-			);
-			sender.sendEmbed(MessageCreateSpec.builder()
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
 							.image("https://github.com/laravieira/Willy/raw/master/assets/help/help.png")
 							.build())
-					.build()
-			);
-			sender.sendEmbed(MessageCreateSpec.builder()
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
 							.image("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png")
 							.build())
-					.build()
-			);
-			sender.sendEmbed(MessageCreateSpec.builder()
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
 							.thumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg")
 							.build())
-					.build()
-			);
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
 			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
-			
 		}catch(RuntimeException e) {
-			Willy.getLogger().warning("Flood failure by an exception: "+e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

@@ -30,7 +30,6 @@ public class Whatsapp implements WillyChat {
                 it.auties.whatsapp.api.Whatsapp.listConnections().clear();
                 Willy.getLogger().warning(e.getMessage());
             }
-            Willy.getLogger().info("Connecting to Whatsapp.");
         });
         whatsappThread.setDaemon(true);
         whatsappThread.start();

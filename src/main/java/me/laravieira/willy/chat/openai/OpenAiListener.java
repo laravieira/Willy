@@ -12,15 +12,14 @@ import java.util.UUID;
 
 public class OpenAiListener {
     public void onCompletionResponse(@NotNull CompletionResult result, UUID context) {
-        String text = result.getChoices().get(0).getText();
+        String response = result.getChoices().get(0).getText().trim();
         String from = ContextStorage.of(context).getLastMessage().getFrom();
-        String response = text.substring(text.indexOf(Willy.getWilly().getName()+":")+Willy.getWilly().getName().length()).trim();
 
         Message message = new Message(context);
         message.setExpire(PassedInterval.DISABLE);
         message.setTo(from);
         message.setFrom(Willy.getWilly().getName());
-        message.setContent(text);
+        message.setContent(result.getChoices().get(0));
         message.setText(response);
         MessageStorage.add(message);
 

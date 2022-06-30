@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import me.laravieira.willy.Willy;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
@@ -32,7 +31,7 @@ public class TelegramListener implements UpdatesListener {
             TelegramSender sender = new TelegramSender(chat);
             ContextStorage.of(id).setSender(sender);
 
-            TelegramMessage message = new TelegramMessage(id, msg, PassedInterval.DISABLE);
+            TelegramMessage message = new TelegramMessage(id, msg, chat, PassedInterval.DISABLE);
             MessageStorage.add(message);
 
             ContextStorage.of(message.getContext()).getWatson().getSender().sendText(message.getText());

@@ -47,7 +47,7 @@ public class OpenAiSender implements SenderInterface {
         try {
             return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
         }catch(RuntimeException e) {
-            if(e.getMessage().contains("timed out"))
+            if(!e.getMessage().contains("timed out"))
                 e.printStackTrace();
             return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
         }

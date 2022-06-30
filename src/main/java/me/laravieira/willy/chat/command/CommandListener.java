@@ -224,6 +224,14 @@ public class CommandListener {
             Whatsapp.reconnect();
         if(args[1].equals("logout"))
             Whatsapp.logout();
+        if(args[1].equals("connections"))
+            it.auties.whatsapp.api.Whatsapp.listConnections().forEach(
+                    whatsapp -> console.info(whatsapp.toString())
+            );
+        if(args[1].equals("logoutall"))
+            it.auties.whatsapp.api.Whatsapp.listConnections().forEach(
+                    it.auties.whatsapp.api.Whatsapp::logout
+            );
         if(args[1].equals("chats"))
             Whatsapp.chats();
         if(args[1].equals("talk") && args.length > 3) {

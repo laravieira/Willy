@@ -1,6 +1,5 @@
 package me.laravieira.willy.chat.whatsapp;
 
-import it.auties.whatsapp.api.WhatsappOptions;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
@@ -15,34 +14,44 @@ public class Whatsapp implements WillyChat {
         if(!Config.getBoolean("whatsapp.enable"))
             return;
 
-        try {
-            if(it.auties.whatsapp.api.Whatsapp.listConnections().isEmpty()) {
-                WhatsappOptions options = WhatsappOptions.newOptions()
-                        .description(Willy.getWilly().getName() + " by L4R4V131R4")
-                        .create();
-                whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
-            }else whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
+        Thread whatsappThread = new Thread(() -> {
+            try {
+                if(it.auties.whatsapp.api.Whatsapp.listConnections().isEmpty()) {
+                    it.auties.whatsapp.api.Whatsapp.Options options = it.auties.whatsapp.api.Whatsapp.Options.newOptions()
+                            .description(Willy.getWilly().getName() + " by L4R4")
+                            .qrHandler(new WhatsappListener().onQRCode())
+                            .create();
+                    whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
+                }else whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
 
-            whatsapp.registerListener(new WhatsappListener());
-            whatsapp.connect().get();
-        }catch(InterruptedException | ExecutionException e) {
-            Willy.getLogger().warning(e.getMessage());
-        }
-        Willy.getLogger().info("Connecting to Whatsapp.");
+                whatsapp.addListener(new WhatsappListener());
+                whatsapp.connect().get();
+            }catch(InterruptedException | ExecutionException e) {
+                it.auties.whatsapp.api.Whatsapp.listConnections().clear();
+                Willy.getLogger().warning(e.getMessage());
+            }
+            Willy.getLogger().info("Connecting to Whatsapp.");
+        });
+        whatsappThread.setDaemon(true);
+        whatsappThread.start();
     }
 
     @Override
     public void disconnect() {
-        try{
-            if(whatsapp != null)
-                whatsapp.disconnect().get();
-        }catch (IllegalStateException ignored) {
-        }catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }finally {
-            Willy.getLogger().info("Whatsapp instance was closed. ");
-        }
-        whatsapp = null;
+        Thread whatsappThread = new Thread(() -> {
+            try{
+                if(whatsapp != null)
+                    whatsapp.disconnect().get();
+            }catch (IllegalStateException ignored) {
+            }catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }finally {
+                Willy.getLogger().info("Whatsapp instance was closed. ");
+            }
+            whatsapp = null;
+        });
+        whatsappThread.setDaemon(true);
+        whatsappThread.start();
     }
 
     @Override
@@ -55,24 +64,32 @@ public class Whatsapp implements WillyChat {
     }
 
     public static void reconnect() {
-        try{
-            if(whatsapp != null)
-                whatsapp.reconnect().get();
-        }catch (IllegalStateException ignored) {
-        }catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread whatsappThread = new Thread(() -> {
+            try{
+                if(whatsapp != null)
+                    whatsapp.reconnect().get();
+            }catch (IllegalStateException ignored) {
+            }catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        whatsappThread.setDaemon(true);
+        whatsappThread.start();
     }
 
     public static void logout() {
-        try{
-            if(whatsapp != null)
-                whatsapp.logout().get();
-        }catch (IllegalStateException ignored) {
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        whatsapp = null;
+        Thread whatsappThread = new Thread(() -> {
+            try{
+                if(whatsapp != null)
+                    whatsapp.logout().get();
+            }catch (IllegalStateException ignored) {
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            whatsapp = null;
+        });
+        whatsappThread.setDaemon(true);
+        whatsappThread.start();
     }
 
     public static void chats() {

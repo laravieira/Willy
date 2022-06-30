@@ -1,7 +1,7 @@
 package me.laravieira.willy.chat.whatsapp;
 
 import it.auties.whatsapp.model.info.MessageInfo;
-import it.auties.whatsapp.model.message.standard.TextMessage;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.utils.PassedInterval;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,8 @@ public class WhatsappMessage extends Message {
         super(context);
         this.content = message;
         this.text = text;
-        this.from = message.senderName();
+        this.from = message.senderName().substring(0, message.senderName().indexOf(" "));
+        this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);
         this.expire.start();
     }

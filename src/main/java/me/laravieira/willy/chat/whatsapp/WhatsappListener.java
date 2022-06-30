@@ -14,6 +14,8 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import it.auties.whatsapp.api.QrHandler;
+import it.auties.whatsapp.listener.Listener;
+import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.standard.TextMessage;
 import me.laravieira.willy.Willy;
@@ -32,34 +34,44 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
-public class WhatsappListener implements it.auties.whatsapp.api.WhatsappListener {
+public class WhatsappListener implements Listener {
 
     @Override
     public void onNewMessage(@NotNull MessageInfo info) {
-        Willy.getLogger().info("Message received from Whatsapp.");
-        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty() || info.chat().isEmpty())
+        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
             return;
 
-        UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.chatJid().user().substring(0, info.chatJid().user().indexOf('@'))).getBytes());
-        String content = message.text();
+        Thread messageHandler = new Thread(() -> {
+            UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
+            String content = message.text();
 
-        if(Config.getBoolean("whatsapp.shared_chat")
-        && !WillyUtils.hasWillyCall(content)
-        && !ContextStorage.has(id))
-            return;
+            if(Config.getBoolean("whatsapp.shared_chat")
+            && !WillyUtils.hasWillyCall(content)
+            && !ContextStorage.has(id))
+                return;
 
-        content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
+            content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-        WhatsappSender sender = new WhatsappSender(info.chat().get());
-        ContextStorage.of(id).setSender(sender);
+            WhatsappSender sender = new WhatsappSender(info.chat().get());
+            ContextStorage.of(id).setSender(sender);
 
-        WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
-        MessageStorage.add(whatsappMessage);
-        ContextStorage.of(whatsappMessage.getContext()).getWatson().getSender().sendText(whatsappMessage.getText());
+            WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
+            MessageStorage.add(whatsappMessage);
+            ContextStorage.of(whatsappMessage.getContext()).getWatson().getSender().sendText(whatsappMessage.getText());
+        });
+
+        try {
+            Whatsapp.getApi().changePresence(info.chatJid(), ContactStatus.COMPOSING).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        messageHandler.setDaemon(true);
+        messageHandler.start();
     }
 
-    @Override
     public QrHandler onQRCode()
     {
         return (qr) -> {

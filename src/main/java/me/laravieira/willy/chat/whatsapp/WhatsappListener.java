@@ -15,6 +15,7 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import it.auties.whatsapp.api.QrHandler;
 import it.auties.whatsapp.listener.Listener;
+import it.auties.whatsapp.model.chat.Chat;
 import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.standard.TextMessage;
@@ -40,8 +41,9 @@ public class WhatsappListener implements Listener {
 
     @Override
     public void onNewMessage(@NotNull MessageInfo info) {
-        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
+        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty() || info.chat().isEmpty())
             return;
+        Chat chat = info.chat().get();
 
         Thread messageHandler = new Thread(() -> {
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
@@ -54,7 +56,7 @@ public class WhatsappListener implements Listener {
 
             content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-            WhatsappSender sender = new WhatsappSender(info.chat().get());
+            WhatsappSender sender = new WhatsappSender(chat);
             ContextStorage.of(id).setSender(sender);
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
@@ -63,7 +65,7 @@ public class WhatsappListener implements Listener {
         });
 
         try {
-            Whatsapp.getApi().changePresence(info.chatJid(), ContactStatus.COMPOSING).get();
+            Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }

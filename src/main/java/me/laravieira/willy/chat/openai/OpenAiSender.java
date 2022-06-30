@@ -58,8 +58,8 @@ public class OpenAiSender implements SenderInterface {
         OpenAiHeader headerBuilder = new OpenAiHeader(context);
         LinkedList<UUID> messages = ContextStorage.of(context).getMessages();
         List<String> stopList = new ArrayList<>();
-        stopList.add(ContextStorage.of(context).getLastMessage().getFrom());
-        stopList.add(ContextStorage.of(context).getLastMessage().getTo());
+        stopList.add("\r\n" + ContextStorage.of(context).getLastMessage().getFrom() + ": ");
+        stopList.add("\r\n" + ContextStorage.of(context).getLastMessage().getTo() + ": ");
         String prompt = headerBuilder.build()+buildConversation(messages);
 
         CompletionResult result = sendCompletion(CompletionRequest.builder()

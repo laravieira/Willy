@@ -30,10 +30,13 @@ public class MessageStorage {
     }
 
     public static void remove(UUID id) {
-        UUID context = messages.get(id).getContext();
-        if(ContextStorage.has(context))
-            ContextStorage.of(context).removeMessage(id);
-        messages.get(id).delete();
+        Message message = messages.get(id);
+        if(message.getExpire().isEnable() && !message.getExpire().hasPassedInterval())
+            return;
+        if(ContextStorage.has(message.getContext()))
+            ContextStorage.of(message.getContext()).removeMessage(id);
+        if(message.getExpire().hasPassedInterval())
+            messages.get(id).delete();
         messages.remove(id);
     }
 

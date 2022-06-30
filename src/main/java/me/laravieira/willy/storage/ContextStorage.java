@@ -38,9 +38,6 @@ public class ContextStorage {
     public static void remove(UUID id) {
         Context context = contexts.get(id);
         contexts.remove(id);
-        context.getMessages().forEach(messageId -> {
-            if (!MessageStorage.of(messageId).getExpire().isEnable())
-                MessageStorage.remove(messageId);
-        });
+        context.getMessages().forEach(MessageStorage::remove);
     }
 }

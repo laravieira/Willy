@@ -1,5 +1,6 @@
 package me.laravieira.willy.internal.logger;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -30,9 +31,9 @@ class LogFileHandler extends Handler {
 
             fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             File logFile = new File(LOGS_FOLDER+fileName+".log");
-            if((logFile.exists() && !logFile.isFile()) || logFile.createNewFile())
+            if((!logFile.exists() || !logFile.isFile()) && !logFile.createNewFile())
                 return;
-            fileHandler = new FileHandler(LOGS_FOLDER+fileName+".log", true);
+            fileHandler = new FileHandler(logFile.getPath(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }

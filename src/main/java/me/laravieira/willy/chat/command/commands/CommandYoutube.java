@@ -14,19 +14,8 @@ public class CommandYoutube implements CommandListener {
         if(count == 2 && args[1].startsWith("https") && args[1].contains("youtube.com") && args[1].contains("v=")) {
             ytd = new Youtube(args[1]);
             if(ytd.getVideo()) {
-                ytd.autoChooseAnyFormat(null);
-                console.info(" "+ytd.getDownloadLink());
-            }
-        }else if(count == 3 && (args[1].equalsIgnoreCase("any")
-                || args[1].equalsIgnoreCase("best")
-                || args[1].equalsIgnoreCase("good")
-                || args[1].equalsIgnoreCase("medium")
-                || args[1].equalsIgnoreCase("poor"))
-                && args[2].startsWith("https") && args[2].contains("youtube.com") && args[2].contains("v=")) {
-            ytd = new Youtube(args[2]);
-            if(ytd.getVideo()) {
-                ytd.autoChooseAnyFormat(args[1]);
-                console.info(" "+ytd.getDownloadLink());
+                console.info("Download link: " + ytd.getDownloadLink());
+                ytd.download();
             }
         }else if(count < 2)
             console.info("You have to enter the youtube video link.");

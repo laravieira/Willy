@@ -65,7 +65,6 @@ public class WatsonAction {
 	private void getYoutubeLink() {
 		Youtube youtube = new Youtube(action.getParameters().get("id").toString());
 		if(youtube.getVideo()) {
-			youtube.autoChooseOnlyVideoWithAudioFormat(null);
 			context.getWatson().getSender().sendAction("youtube", youtube.getDownloadLink());
 		}else {
 			context.getWatson().getSender().sendAction("youtube", "null");

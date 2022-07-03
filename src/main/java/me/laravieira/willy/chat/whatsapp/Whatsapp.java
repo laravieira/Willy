@@ -40,7 +40,7 @@ public class Whatsapp implements WillyChat {
         try{
             if(whatsapp != null)
                 whatsapp.disconnect().get();
-        }catch (IllegalStateException ignored) {
+        }catch (IllegalStateException | NullPointerException ignored) {
         }catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }finally {

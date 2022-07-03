@@ -93,6 +93,10 @@ public class Config {
 		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, true);
 		set("ytd.willy_vpn", "WILLY_YTD_LOCAL",     "youtube-downloader.willy-vpn", TYPE_BOOLEAN, false);
 		set("ytd.use_bitly", "WILLY_YTD_USE_BITLY", "youtube-downloader.use-bitly", TYPE_BOOLEAN, true);
+
+		// Willy Shadow Settings
+		set("shadow.enable", "WILLY_SHADOW_ENABLE", "shadow.enable", TYPE_BOOLEAN, false);
+		set("shadow.token",  "WILLY_SHADOW_TOKEN",  "shadow.token",  TYPE_STRING,  null);
 	}
 
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {

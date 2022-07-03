@@ -55,15 +55,15 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackStart(AudioPlayer player, @NotNull AudioTrack track) {
-		String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
-		Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
-		if(Config.getBoolean("ap.change_activity"))
-			try {
+		try {
+			String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
+			Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
+			if(Config.getBoolean("ap.change_activity"))
 				Thread.sleep(500);
 				Discord.getBotGateway()
 					.updatePresence(ClientPresence.online(ClientActivity.listening(track.getInfo().title)))
 					.block();
-			}catch (InterruptedException ignored) {}
+		}catch (InterruptedException | IllegalStateException | NullPointerException ignored) {}
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.chat.command.commands.*;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Command implements WillyChat {
@@ -12,23 +13,27 @@ public class Command implements WillyChat {
 	public void onCommand(String command, String[] args) {
 		Thread thread = new Thread(() -> {
 			switch (command) {
+				case CommandStatus.COMMAND -> new CommandStatus().execute(Willy.getLogger(), args.length, args);
+				case CommandWatson.COMMAND -> new CommandWatson().execute(Willy.getLogger(), args.length, args);
+				case CommandYoutube.COMMAND -> new CommandYoutube().execute(Willy.getLogger(), args.length, args);
+				case CommandBitly.COMMAND -> new CommandBitly().execute(Willy.getLogger(), args.length, args);
+				case CommandContext.COMMAND -> new CommandContext().execute(Willy.getLogger(), args.length, args);
+				case CommandDiscordPlayer.COMMAND -> new CommandDiscordPlayer().execute(Willy.getLogger(), args.length, args);
+				case CommandDiscordNoADM.COMMAND -> new CommandDiscordNoADM().execute(Willy.getLogger(), args.length, args);
+				case CommandDiscord.COMMAND -> new CommandDiscord().execute(Willy.getLogger(), args.length, args);
+				case CommandWhatsapp.COMMAND -> new CommandWhatsapp().execute(Willy.getLogger(), args.length, args);
+				case CommandOpenAi.COMMAND -> new CommandOpenAi().execute(Willy.getLogger(), args.length, args);
+				case CommandHelp.COMMAND -> new CommandHelp().execute(Willy.getLogger(), args.length, args);
 				case "stop" -> Willy.getWilly().stop();
-				case "status" -> CommandListener.status();
-				case "talk" -> CommandListener.talk(args);
-				case "youtube" -> CommandListener.youtube(args);
-				case "short" -> CommandListener.shortLink(args);
-				case "context" -> CommandListener.context(args);
-				case "player" -> CommandListener.player(args);
-				case "noadm" -> CommandListener.noadm(args);
-				case "user" -> CommandListener.user(args);
-				case "whats" -> CommandListener.whatsapp(args);
-				case "openai" -> CommandListener.openai(args);
-				case "help" -> CommandListener.help();
-				default -> CommandListener.unknow();
+				default -> unknow();
 			}
 		});
 		thread.setDaemon(true);
 		thread.start();
+	}
+
+	public static void unknow() {
+		Willy.getLogger().info("Unknow command, to get help type 'help'.");
 	}
 
 	@Override

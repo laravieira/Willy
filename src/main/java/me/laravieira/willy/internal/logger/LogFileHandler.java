@@ -1,6 +1,5 @@
 package me.laravieira.willy.internal.logger;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;

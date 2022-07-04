@@ -1,8 +1,14 @@
 package me.laravieira.willy.chat.discord;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import discord4j.core.event.domain.guild.MemberUpdateEvent;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -56,12 +62,33 @@ public class DiscordListener {
 	private static DiscordMessage clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
 		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
+
 		DiscordSender sender = new DiscordSender(id, channel, expire);
 
 		ContextStorage.of(id).setSender(sender);
 		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
 		MessageStorage.add(discordMessage);
+		if(!message.getAttachments().isEmpty())
+			onAttachments(discordMessage.getId(), message);
 		return discordMessage;
+	}
+
+	public static void onAttachments(UUID messageID, @NotNull Message message) {
+		Thread download = new Thread(() -> {
+			try {
+				me.laravieira.willy.context.Message msg = MessageStorage.of(messageID);
+				for (Attachment attachment : message.getAttachments()) {
+					File raw = Files.createTempFile("willy", attachment.getFilename()).toFile();
+					Files.copy(new URL(attachment.getUrl()).openStream(), raw.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					msg.addAttachment(raw);
+					Willy.getLogger().info(raw.toString());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		download.setDaemon(true);
+		download.start();
 	}
 
 	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {

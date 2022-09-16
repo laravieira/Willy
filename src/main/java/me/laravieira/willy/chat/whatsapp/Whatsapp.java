@@ -1,6 +1,7 @@
 package me.laravieira.willy.chat.whatsapp;
 
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.chat.discord.DiscordMessage;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 

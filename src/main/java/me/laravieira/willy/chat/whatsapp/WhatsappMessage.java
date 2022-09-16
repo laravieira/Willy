@@ -14,7 +14,7 @@ public class WhatsappMessage extends Message {
         super(context);
         this.content = message;
         this.text = text;
-        this.from = message.senderName().substring(0, message.senderName().indexOf(" "));
+        this.from = message.senderName().substring(0, message.senderName().contains(" ") ? message.senderName().indexOf(" ") : message.senderName().length()-1);
         this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);
         this.expire.start();

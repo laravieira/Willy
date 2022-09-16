@@ -14,6 +14,7 @@ public class Command implements WillyChat {
 		Thread thread = new Thread(() -> {
 			switch (command) {
 				case CommandStatus.COMMAND -> new CommandStatus().execute(Willy.getLogger(), args.length, args);
+				case CommandBloom.COMMAND -> new CommandBloom().execute(Willy.getLogger(), args.length, args);
 				case CommandWatson.COMMAND -> new CommandWatson().execute(Willy.getLogger(), args.length, args);
 				case CommandYoutube.COMMAND -> new CommandYoutube().execute(Willy.getLogger(), args.length, args);
 				case CommandBitly.COMMAND -> new CommandBitly().execute(Willy.getLogger(), args.length, args);

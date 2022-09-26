@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.IntFunction;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class BloomSender implements SenderInterface {
@@ -44,6 +46,8 @@ public class BloomSender implements SenderInterface {
 
     public void onResponse(@NotNull Process response, Throwable throwable) {
         String data = response.inputReader().lines().collect(Collectors.joining());
+        Willy.getLogger().info("Bloom data: " + data);
+
         JSONObject json = JSONArray.parseArray(data).getJSONObject(0);
         if(json != null && json.containsKey("generated_text"))
             new BloomListener().onMessage(json.getString("generated_text"), context);
@@ -53,7 +57,7 @@ public class BloomSender implements SenderInterface {
         if(!new Bloom().isConnected())
             return;
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", Bloom.BLOOM_PATH.toString(), "-c", prompt);
+            ProcessBuilder processBuilder = new ProcessBuilder(Bloom.buildCommand(prompt));
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();

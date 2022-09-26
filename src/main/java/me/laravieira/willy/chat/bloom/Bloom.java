@@ -1,17 +1,54 @@
 package me.laravieira.willy.chat.bloom;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 
 public class Bloom implements WillyChat {
-    public static final Path BLOOM_PATH = new File("src/main/python/me.laravieira.willy/Bloom.py").toPath();
-    private static boolean isEnabled = false;
+    public static final Path     BLOOM_PATH = new File("src/main/python/me.laravieira.willy/Bloom.py").toPath();
+    private static boolean       ENABLED = false;
+    private static final String  TOKEN = Config.getString("bloom.token");
+
+    private static final int     MAX_LENGTH = 32;
+    private static final Double  TOP_K = .0;
+    private static final int     BEAMS = 0;
+    private static final int     NO_REPEAT = 2;
+    private static final Double  TOP_P = .9;
+    private static final Double  TEMPERATURE = .7;
+    private static final int     SEED = 42;
+    private static final boolean DECODING = false;
+    private static final boolean FULL_TEXT = false;
+
+    public static String[] buildCommand(String content) {
+        Map<String, String> args = new HashMap<>();
+        List<String> prompt = new ArrayList<>();
+        prompt.add("python");
+        prompt.add(BLOOM_PATH.toString());
+
+        args.put("-m", String.valueOf(MAX_LENGTH));
+        args.put("-k", String.valueOf(TOP_K));
+        args.put("-b", String.valueOf(BEAMS));
+        args.put("-r", String.valueOf(NO_REPEAT));
+        args.put("-p", String.valueOf(TOP_P));
+        args.put("-t", String.valueOf(TEMPERATURE));
+        args.put("-s", String.valueOf(SEED));
+        args.put("-d", DECODING ? "True" : "False");
+        args.put("-f", FULL_TEXT ? "True" : "False");
+        args.put("-a", TOKEN);
+        args.put("-i", content);
+
+        args.forEach((key, value) -> {
+            prompt.add(key);
+            prompt.add(value);
+        });
+
+        return prompt.toArray(String[]::new);
+    }
 
     public Bloom() {
         List<String> portugueseHeader = new ArrayList<>();
@@ -38,17 +75,19 @@ public class Bloom implements WillyChat {
     @Override
     public void connect() {
         if(Config.getBoolean("bloom.enable"))
-            isEnabled = true;
+            ENABLED = true;
+        if(TOKEN == null || TOKEN.length() != 37)
+            ENABLED = false;
     }
 
     @Override
     public void disconnect() {
-        isEnabled = false;
+        ENABLED = false;
     }
 
     @Override
     public boolean isConnected() {
-        return isEnabled;
+        return ENABLED;
     }
 
     @Override

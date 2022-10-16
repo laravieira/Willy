@@ -11,12 +11,11 @@ import discord4j.gateway.intent.IntentSet;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
-import me.laravieira.willy.kernel.Kernel;
 import me.laravieira.willy.feature.player.DiscordPlayer;
 
 public class Discord implements WillyChat {
 
-	private static DiscordClient client = DiscordClient.create(Config.getString("discord.token"));
+	private static final DiscordClient client = DiscordClient.create(Config.getString("discord.token"));
 	private static GatewayDiscordClient gateway;
 	private static boolean ready = false;
 
@@ -30,11 +29,11 @@ public class Discord implements WillyChat {
 				.login()
 				.block();
 		DiscordPlayer.load();
-		gateway.on(ReadyEvent.class).subscribe(event -> Discord.setReady(true), error -> errorDisplay(error));
-		gateway.on(DisconnectEvent.class).subscribe(event -> Discord.setReady(false), error -> errorDisplay(error));
-		gateway.on(MemberUpdateEvent.class).subscribe(event -> Kernel.onMemberUpdate(event), error -> errorDisplay(error));
-		gateway.on(VoiceStateUpdateEvent.class).subscribe(event -> DiscordPlayer.onVoiceChannelUpdate(event), error-> errorDisplay(error));
-		gateway.on(MessageCreateEvent.class).subscribe(event -> DiscordListener.onMessage(event.getMessage()), error -> errorDisplay(error));
+		gateway.on(ReadyEvent.class).subscribe(event -> Discord.setReady(true), Discord::errorDisplay);
+		gateway.on(DisconnectEvent.class).subscribe(event -> Discord.setReady(false), Discord::errorDisplay);
+		gateway.on(MemberUpdateEvent.class).subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
+		gateway.on(VoiceStateUpdateEvent.class).subscribe(DiscordPlayer::onVoiceChannelUpdate, Discord::errorDisplay);
+		gateway.on(MessageCreateEvent.class).subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);
     	Willy.getLogger().info("Discord instance connected.");
 	}
 

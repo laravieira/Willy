@@ -1,74 +1,94 @@
 package me.laravieira.willy.chat.whatsapp;
 
-import it.auties.whatsapp4j.manager.WhatsappDataManager;
-import it.auties.whatsapp4j.whatsapp.WhatsappAPI;
-import it.auties.whatsapp4j.whatsapp.WhatsappConfiguration;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class Whatsapp implements WillyChat {
-    private static WhatsappAPI api;
-    private static WhatsappDataManager manager;
+    private static it.auties.whatsapp.api.Whatsapp whatsapp;
 
     @Override
     public void connect() {
         if(!Config.getBoolean("whatsapp.enable"))
             return;
-        WhatsappConfiguration configuration = WhatsappConfiguration.builder()
-                .description("Willy by L4R4V131R4")
-                .shortDescription("Wly")
-                .reconnectWhenDisconnected((reason) -> true)
-                .async(true)
-                .build();
-        api = new WhatsappAPI(configuration);
-        api.registerListener(new WhatsappListener());
-        Willy.getLogger().info("Waiting Whatsapp app to respond.");
-        api.connect();
-        manager = api.manager();
+
+        Thread whatsappThread = new Thread(() -> {
+            try {
+                if(it.auties.whatsapp.api.Whatsapp.listConnections().isEmpty()) {
+                    it.auties.whatsapp.api.Whatsapp.Options options = it.auties.whatsapp.api.Whatsapp.Options.newOptions()
+                            .description(Willy.getWilly().getName() + " by L4R4")
+                            .qrHandler(new WhatsappListener().onQRCode())
+                            .build();
+                    whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
+                }else whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
+
+                whatsapp.addListener(new WhatsappListener());
+                whatsapp.connect().get();
+            }catch(InterruptedException | ExecutionException e) {
+                it.auties.whatsapp.api.Whatsapp.listConnections().clear();
+                Willy.getLogger().warning(e.getMessage());
+            }
+        });
+        whatsappThread.setDaemon(true);
+        whatsappThread.start();
     }
 
     @Override
     public void disconnect() {
-        try{
-            if(api != null)
-                api.disconnect();
-        }catch (IllegalStateException ignored) {}
-        api = null;
+        try {
+            if(whatsapp != null)
+                whatsapp.disconnect().get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {}
+
+        Willy.getLogger().info("Whatsapp instance was requested to close.");
     }
 
     @Override
     public boolean isConnected() {
-        return api != null;
+        return whatsapp != null;
     }
 
     @Override
     public void refresh() {
-
     }
 
     public static void reconnect() {
-        try{
-            if(api != null)
-                api.reconnect();
-        }catch (IllegalStateException ignored) {}
+        Thread disconnect = new Thread(() -> {
+            try{
+                if(whatsapp != null)
+                    whatsapp.reconnect().get();
+            }catch (IllegalStateException ignored) {
+            }catch (ExecutionException | InterruptedException | CompletionException e) {
+                e.printStackTrace();
+            }
+        });
+        disconnect.setDaemon(false);
+        disconnect.start();
     }
 
     public static void logout() {
         try{
-            if(api != null)
-                api.logout();
-        }catch (IllegalStateException ignored) {}
-        api = null;
+            if(whatsapp != null)
+                whatsapp.logout().get();
+        }catch (IllegalStateException ignored) {
+        } catch (ExecutionException | InterruptedException | CompletionException e) {
+            e.printStackTrace();
+        }
+        whatsapp = null;
     }
 
     public static void chats() {
-        manager.chats().forEach(
-                (chat) -> Willy.getLogger().getConsole().info(chat.displayName())
+        whatsapp.store().chats().forEach(
+                (chat) -> Willy.getLogger().getConsole().info(chat.name())
         );
     }
 
-    public static WhatsappAPI getApi() {
-        return api;
+    public static it.auties.whatsapp.api.Whatsapp getApi() {
+        return whatsapp;
     }
 }

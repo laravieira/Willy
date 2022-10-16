@@ -6,10 +6,11 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import me.laravieira.willy.Willy;
+import org.jetbrains.annotations.NotNull;
 
 public class AudioLoadResult implements AudioLoadResultHandler {
 	
-	private DiscordPlayer player;
+	private final DiscordPlayer player;
 	
 	public AudioLoadResult(DiscordPlayer player) {
 		this.player = player;
@@ -24,7 +25,7 @@ public class AudioLoadResult implements AudioLoadResultHandler {
 	}
 
     @Override
-    public void playlistLoaded(AudioPlaylist playlist) {
+    public void playlistLoaded(@NotNull AudioPlaylist playlist) {
     	int added = 0;
     	for(AudioTrack track : playlist.getTracks()) {
     		if(track != null) {
@@ -43,7 +44,7 @@ public class AudioLoadResult implements AudioLoadResultHandler {
 	}
 
 	@Override
-	public void loadFailed(FriendlyException exception) {
+	public void loadFailed(@NotNull FriendlyException exception) {
 		Willy.getLogger().getConsole().info(exception.getMessage());
 	}
 }

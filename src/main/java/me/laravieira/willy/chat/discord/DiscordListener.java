@@ -1,32 +1,42 @@
 package me.laravieira.willy.chat.discord;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
+import discord4j.core.event.domain.guild.MemberUpdateEvent;
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel.Type;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.kernel.Context;
-import me.laravieira.willy.kernel.Kernel;
 import discord4j.core.object.entity.channel.MessageChannel;
-import me.laravieira.willy.internal.WillyUtils;
+import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.utils.PassedInterval;
+import me.laravieira.willy.utils.WillyUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class DiscordListener {
-	
-	private static Map<Long, Message> messages = new HashMap<Long, Message>();
-
 	public static void onMessage(Message message) {
 		try {
-			if(message.getAuthor().isPresent() && message.getContent() instanceof String) {
+			if(message.getAuthor().isPresent()) {
+				message.getContent();
 				MessageChannel channel = message.getChannel().block();
 				User author = message.getAuthor().get();
-				if(author.isBot()) return;
-				
-				if(channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
+				if (author.isBot()) return;
+
+				assert channel != null;
+				if (channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
 					onPrivateTextChannelMessage(channel, author, message);
 				else
 					onPublicTextChannelMessage(channel, author, message);
@@ -38,104 +48,191 @@ public class DiscordListener {
 		}
 	}
 	
-	public static void onPrivateTextChannelMessage(MessageChannel channel, User user, Message message) {
-		String content = parseWillyId(message.getContent());
-		String id = "discord-"+user.getId().asString();
+	public static void onPrivateTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+		String content = parseWillyDiscordId(message.getContent());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 		if(startWith(content)) return;
 
-		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-		
-		DiscordContext context = DiscordContext.getContext(channel, message, user, id);
-		context.setDeleteMessages(false);
-		context.getWatsonMessager().sendTextMessage(content);
-		Willy.getLogger().info("Message transaction in a private chat.");
+		DiscordMessage discordMessage = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
+
+		ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
 	}
-	
-	public static void onPublicTextChannelMessage(MessageChannel channel, User user, Message message) {
-		String content = parseWillyId(message.getContent());
-		String id = "discord-"+user.getId().asString();
+
+	@NotNull
+	private static DiscordMessage clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
+		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
+
+
+		DiscordSender sender = new DiscordSender(id, channel, expire);
+
+		ContextStorage.of(id).setSender(sender);
+		ContextStorage.of(id).setApp("discord");
+		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
+		MessageStorage.add(discordMessage);
+		if(!message.getAttachments().isEmpty())
+			onAttachments(discordMessage.getId(), message);
+		return discordMessage;
+	}
+
+	public static void onAttachments(UUID messageID, @NotNull Message message) {
+		Thread download = new Thread(() -> {
+			try {
+				me.laravieira.willy.context.Message msg = MessageStorage.of(messageID);
+				for (Attachment attachment : message.getAttachments()) {
+					File raw = Files.createTempFile("willy", attachment.getFilename()).toFile();
+					Files.copy(new URL(attachment.getUrl()).openStream(), raw.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					msg.addAttachment(raw);
+					Willy.getLogger().info(raw.toString());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		download.setDaemon(true);
+		download.start();
+	}
+
+	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+		long expire = Config.getBoolean("discord.clear_public_chats") ? Config.getLong("discord.clear_after_wait") : PassedInterval.DISABLE;
+		String content = parseWillyDiscordId(message.getContent());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 		
 		if(content.startsWith("!help")) {
 			content = content.substring(5);
-			floodChat(channel);
+			floodChat(channel, user);
 		}else if(startWith(content)) return;
 		if(content.isEmpty()) return;
 		
-		if(!WillyUtils.hasWillyCall(content) && !Context.getContexts().containsKey(id)) return;
+		if(!WillyUtils.hasWillyCall(content) && !ContextStorage.has(id)) return;
 
-		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-		
-		DiscordContext context = DiscordContext.getContext(channel, message, user, id);
-		if(!Kernel.checkForPlayQuestion(context, content))
-			context.getWatsonMessager().sendTextMessage(content);
+		DiscordMessage discordMessage= clearContent(channel, user, message, content, id, expire);
+
+		if(!checkForPlayQuestion(id, content))
+			ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
 	
-	private static String parseWillyId(String message) {
-		Long id = Config.getLong("discord.client_id");
-		String name = Config.getString("willy-name");
+	@NotNull
+	private static String parseWillyDiscordId(@NotNull String message) {
+		long id = Config.getLong("discord.client_id");
+		String name = Config.getString("name");
 		return message.replaceAll("<@"+ id +">", name);
 	}
 	
 	private static boolean startWith(String message) {
-		for(String prefix : (List<String>)Config.getList("ignore_if_start_with"))
+		for(String prefix : Config.getStringList("ignore_if_start_with"))
 			if(message.startsWith(prefix))
 				return true;
 		return false;
 	}
 
-	public static void refresh() {
-		if(Config.getBoolean("discord.clear_public_chats")) {
-			Long now = new Date().getTime();
-			Map<Long, Message> toRemove = new HashMap<Long, Message>();
-			messages.forEach((key, value) -> {
-				if(key < now) {
-					try {
-						value.delete("Time expired.").block();
-						Willy.getLogger().info("Message deleted from a public chat.");
-					}catch(RuntimeException e) {}
-					toRemove.put(key, value);
+	public static boolean checkForPlayQuestion(UUID context, String content) {
+		//TODO Fix context on music player
+		for(String key : Config.getStringList("ap.blends_for_play"))
+			if(content.toLowerCase().startsWith(key.toLowerCase())) {
+				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(null);
+				String data = content.substring(key.length()).trim();
+				System.out.println(data);
+				if(player != null && !data.isEmpty())
+					player.search(data);
+				else
+					ContextStorage.of(context).getSender().sendText("Desculpa, acho que eu não peguei seu pedido. 🐕");
+				return true;
+			}
+		return false;
+	}
+
+	public static void onMemberUpdate(MemberUpdateEvent event) {
+		String master = Config.getString("discord.keep_master_nick");
+		boolean willy = Config.getBoolean("discord.keep_willy_nick");
+
+		try {
+			if(master != null && event.getMemberId().asString().equals(master) && event.getCurrentNickname().isPresent()) {
+				Member member = event.getMember().block();
+				if(member != null) {
+					member.edit(GuildMemberEditSpec.builder()
+							.nicknameOrNull(null)
+							.build())
+						.doOnError(data -> Willy.getLogger().warning("Master nickname reset failed caused by: "+data.getMessage()))
+						.block();
 				}
-			});
-			toRemove.forEach((key, value) -> {
-				messages.remove(key, value);
-			});
-			
+			}
+
+			if(willy && event.getMemberId().asString().equals(Config.getString("discord.client_id")) && event.getCurrentNickname().isPresent()) {
+				Member member = event.getMember().block();
+				if(member != null) {
+					member.edit(GuildMemberEditSpec.builder()
+									.nicknameOrNull(null)
+									.build())
+							.doOnError(data -> Willy.getLogger().warning("Willy nickname reset failed caused by: "+data.getMessage()))
+							.block();
+				}
+			}
+		}catch(RuntimeException e) {
+			if(e.getMessage().contains("Missing Permissions"))
+				Willy.getLogger().warning("Nickname reset failed caused by missing permission.");
+			else
+				Willy.getLogger().warning("Nickname reset exception: "+e.getMessage());
 		}
 	}
 
-	public static Map<Long, Message> getMessages() {
-		return messages;
-	}
-	
-	public static void autoDeleteMessage(long timestamp, Message message) {
-		messages.put(timestamp, message);
-	}
-	
-	private static void floodChat(MessageChannel channel) {
-		long clearTime = Config.getLong("discord.clear_after_wait");
-		try {Message response = null;
-			
-			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-			
-			response = channel.createMessage(specs -> { specs.addEmbed(
-				embed -> {embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/help.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
+	private static void floodChat(MessageChannel channel, User user) {
+		try {
+			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
+			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.clear_after_wait"));
+			ContextStorage.of(id).setSender(sender);
 
-			response = channel.createMessage(specs -> { specs.addEmbed(embed -> {
-				embed.setImage("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
+			me.laravieira.willy.context.Message message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png")
+							.build())
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
-			response = channel.createMessage(specs -> {	specs.addEmbed(embed -> {
-				embed.setThumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg");
-			});}).block(); messages.put(new Date().getTime()+clearTime, response);
-			
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/help.png")
+							.build())
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.image("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png")
+							.build())
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
+			message = new me.laravieira.willy.context.Message(id);
+			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setContent(MessageCreateSpec.builder()
+					.addEmbed(EmbedCreateSpec.builder()
+							.thumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg")
+							.build())
+					.build());
+			message.setFrom(Willy.getWilly().getName());
+			message.setTo(user.getUsername());
+			MessageStorage.add(message);
+			sender.sendEmbed((MessageCreateSpec)message.getContent());
+
 			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
-			
 		}catch(RuntimeException e) {
-			Willy.getLogger().warning("Flood failure by an exception: "+e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

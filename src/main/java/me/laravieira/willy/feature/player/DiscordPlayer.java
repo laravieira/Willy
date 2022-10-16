@@ -3,10 +3,13 @@ package me.laravieira.willy.feature.player;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+import discord4j.core.object.entity.Message;
+import discord4j.core.spec.VoiceChannelJoinSpec;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.discord.DiscordContext;
 import me.laravieira.willy.internal.Config;
+import me.laravieira.willy.storage.ContextStorage;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.utils.URIBuilder;
@@ -22,17 +25,19 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.voice.AudioProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 public class DiscordPlayer {
 
-	private static AudioPlayerManager manager = new DefaultAudioPlayerManager();
-	private static Map<Snowflake, DiscordPlayer> players = new HashMap<Snowflake, DiscordPlayer>();
+	private static final AudioPlayerManager manager = new DefaultAudioPlayerManager();
+	private static final Map<Snowflake, DiscordPlayer> players = new HashMap<>();
 	
-	private TrackScheduler trackScheduler = null;
-	private AudioProvider provider = null;
-	private VoiceChannel channel = null;
-	private AudioPlayer player = null;
+	private final TrackScheduler trackScheduler;
+	private final AudioProvider provider;
+	private final VoiceChannel channel;
+	private final AudioPlayer player;
 	
 	public static void load() {
 		if (!Config.getBoolean("ap.enable"))
@@ -42,16 +47,18 @@ public class DiscordPlayer {
 		AudioSourceManagers.registerRemoteSources(manager);
 	}
 	
-	public static DiscordPlayer createDiscordPlayer(VoiceChannel channel) {
+	@NotNull
+	public static DiscordPlayer createDiscordPlayer(@NotNull VoiceChannel channel) {
 		DiscordPlayer player;
-		if(!players.containsKey(channel.getGuildId())) {
+		if(!players.containsKey(channel.getGuildId()))
 			players.put(channel.getGuildId(), new DiscordPlayer(channel));
-			player = players.get(channel.getGuildId());
-		}else
-			player = players.get(channel.getGuildId());
-		
-		if(!player.getChannel().isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block()) {
-			player.getChannel().join(spec -> spec.setProvider(player.getProvider())).block();
+		player = players.get(channel.getGuildId());
+		if(!isMemberConnectedTo(player.getChannel(), Snowflake.of(Config.getString("discord.client_id")))) {
+			player.getChannel()
+				.join(VoiceChannelJoinSpec.builder()
+					.provider(player.getProvider())
+					.build())
+				.block();
 			Willy.getLogger().getConsole().info("Joined on "+player.getChannel().getName()+" ("+player.getChannel().getId().asString()+").");
 		}return player;
 	}
@@ -79,16 +86,7 @@ public class DiscordPlayer {
 				if(set.getName().equalsIgnoreCase("playlist"))
 					link.addParameter(set.getName(), set.getValue());
 			}
-			
-	//		// Work around to solve YouTube music
-	//		if(link.contains("youtu") && !link.contains("list")) {
-	//			Youtube youtube = new Youtube(link);
-	//			if(youtube.getVideo()) {
-	//				youtube.autoChooseOnlyAudioFormat(null);
-	//				link = youtube.getDownloadLink();
-	//			}
-	//		}
-			
+
 			manager.loadItem(link.build().toString(), new AudioLoadResult(this));
 		} catch (URISyntaxException e) {
 			Willy.getLogger().getConsole().info(e.getMessage());
@@ -128,12 +126,13 @@ public class DiscordPlayer {
 		trackScheduler.clearQueue();
 		player.destroy();
 		players.remove(channel.getGuildId());
-		if(channel.isMemberConnected(Snowflake.of(Config.getString("discord.client_id"))).block())
+		if(isMemberConnectedTo(channel, Snowflake.of(Config.getString("discord.client_id"))))
 			channel.sendDisconnectVoiceState().block();
 	}
-	
-	public static AudioPlayerManager getManager() {
-		return manager;
+
+	public static boolean isMemberConnectedTo(@NotNull VoiceChannel channel, Snowflake member) {
+		Object raw = channel.isMemberConnected(member).block();
+		return raw instanceof Boolean isMemberConnected && isMemberConnected;
 	}
 	
 	public static Map<Snowflake, DiscordPlayer> getPlayers() {
@@ -156,14 +155,22 @@ public class DiscordPlayer {
 		return player;
 	}
 
-	public static void onVoiceChannelUpdate(VoiceStateUpdateEvent event) {
+	public static void onVoiceChannelUpdate(@NotNull VoiceStateUpdateEvent event) {
 		Snowflake guild = null;
 		if(event.getOld().isPresent())
 			guild = event.getOld().get().getGuildId();
 		if(players.containsKey(guild)) {
-			Flux<VoiceState> voiceStates = event.getOld().get().getChannel().block().getVoiceStates();
-			if(voiceStates.count().block() == 1) {
-				if(voiceStates.blockFirst().getUserId().equals(Snowflake.of(Config.getString("discord.client_id")))) {
+			VoiceChannel channel = event.getOld().get().getChannel().block();
+			if(channel == null)
+				return;
+			Flux<VoiceState> voiceStates = channel.getVoiceStates();
+			if(voiceStates == null)
+				return;
+
+			Object raw = voiceStates.count().block();
+			if(raw instanceof Long voiceStatesCount && voiceStatesCount == 1) {
+				Object rawVoiceState = voiceStates.blockFirst();
+				if(rawVoiceState instanceof VoiceState voiceState && voiceState.getUserId().equals(Snowflake.of(Config.getString("discord.client_id")))) {
 					players.get(guild).destroy();
 					Willy.getLogger().getConsole().info("Willy was alone on a voice channel, player instance destroed.");
 				}
@@ -171,14 +178,14 @@ public class DiscordPlayer {
 		}
 	}
 	
-	public static DiscordPlayer getDiscordPlayerFromContext(DiscordContext context) {
-		if(context.getMessage() == null)
-			return null;
-		Member member = context.getMessage().getAuthorAsMember().block();
+	@Nullable
+	public static DiscordPlayer getDiscordPlayerFromContext(UUID context) {
+		Message message = (Message) ContextStorage.of(context).getLastMessage().getContent();
+		Member member = message.getAuthorAsMember().block();
 		if(member != null) {
 			VoiceState voiceState = member.getVoiceState().block();
 			if(voiceState != null) {
-				VoiceChannel channel = (VoiceChannel)voiceState.getChannel().block();
+				VoiceChannel channel = voiceState.getChannel().block();
 				if(channel != null) {
 					DiscordPlayer player = createDiscordPlayer(channel);
 					if(channel.getId().equals(player.getChannel().getId()))

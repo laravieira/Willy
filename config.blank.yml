@@ -61,8 +61,3 @@ bitly:
 youtube_downloader:
     willy_vpn: false
     use_bitly: true
-
-web_server:
-    use: false
-    uri: http://localhost/
-    port: 80

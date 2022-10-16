@@ -10,26 +10,29 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 class LogFileHandler extends Handler {
+    private static String LOGS_FOLDER = null;
 
-    private String      filepath    = (new File(".").getCanonicalPath())+File.separator+"logs"+File.separator;
-    private String      fileName    = null;
+    static {
+        try {
+            LOGS_FOLDER = (new File(".").getCanonicalPath())+File.separator+"logs"+File.separator;
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String fileName = null;
     private FileHandler fileHandler = null;
 
     private void createHandler() {
-        if(!(new File(filepath).isDirectory()))
-            new File(filepath).mkdirs();
-        fileName = new SimpleDateFormat("YYYY-MM-dd").format(new Date());
-        File logFile = new File(filepath+fileName+".log");
-        if(!logFile.exists() || !logFile.isFile()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return;
-            }
-        }
         try {
-            fileHandler = new FileHandler(filepath+fileName+".log", true);
+            if(!(new File(LOGS_FOLDER).isDirectory() || new File(LOGS_FOLDER).mkdirs()))
+                return;
+
+            fileName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            File logFile = new File(LOGS_FOLDER+fileName+".log");
+            if((!logFile.exists() || !logFile.isFile()) && !logFile.createNewFile())
+                return;
+            fileHandler = new FileHandler(logFile.getPath(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,7 +44,7 @@ class LogFileHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        if(!fileName.equals(new SimpleDateFormat("YYYY-MM-dd").format(new Date()))) {
+        if(!fileName.equals(new SimpleDateFormat("yyyy-MM-dd").format(new Date()))) {
             fileHandler.flush();
             fileHandler.close();
             fileHandler = null;

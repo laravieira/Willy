@@ -14,10 +14,11 @@ import discord4j.core.object.presence.ClientPresence;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.internal.Config;
+import org.jetbrains.annotations.NotNull;
 
 public class TrackScheduler extends AudioEventAdapter {
-	private BlockingQueue<AudioTrack> queue;
-	private DiscordPlayer player;
+	private final BlockingQueue<AudioTrack> queue;
+	private final DiscordPlayer player;
 
 	public TrackScheduler(DiscordPlayer player) {
 		queue = new LinkedBlockingQueue<>();
@@ -53,30 +54,21 @@ public class TrackScheduler extends AudioEventAdapter {
 	}
 
 	@Override
-	public void onTrackStart(AudioPlayer player, AudioTrack track) {
-		String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
-		Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
-		if(Config.getBoolean("ap.change_activity"))
-			try {
+	public void onTrackStart(AudioPlayer player, @NotNull AudioTrack track) {
+		try {
+			String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
+			Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
+			if(Config.getBoolean("ap.change_activity"))
 				Thread.sleep(500);
 				Discord.getBotGateway()
 					.updatePresence(ClientPresence.online(ClientActivity.listening(track.getInfo().title)))
 					.block();
-			} catch (InterruptedException e) {}
+		}catch (InterruptedException | IllegalStateException | NullPointerException ignored) {}
 	}
-	
+
 	@Override
-	public void onPlayerResume(AudioPlayer player) {
-		AudioTrack track = player.getPlayingTrack();
-		String title = (track.getInfo().title.length() > 25)?track.getInfo().title.substring(0, 25).trim()+"...":track.getInfo().title;
-		Willy.getLogger().getConsole().info("Playing "+title+" of "+track.getInfo().author+".");
-		if(Config.getBoolean("ap.change_activity"))
-			try {
-				Thread.sleep(500);
-				Discord.getBotGateway()
-					.updatePresence(ClientPresence.online(ClientActivity.listening(track.getInfo().title)))
-					.block();
-			} catch (InterruptedException e) {}
+	public void onPlayerResume(@NotNull AudioPlayer player) {
+		onTrackStart(player, player.getPlayingTrack());
 	}
 	
 	@Override
@@ -86,7 +78,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	}
 	
 	@Override
-	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+	public void onTrackEnd(AudioPlayer player, AudioTrack track, @NotNull AudioTrackEndReason endReason) {
 		if(endReason.mayStartNext)
 			nextTrack();
 		else if(Config.getBoolean("ap.change_activity"))
@@ -94,7 +86,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	}
 	
 	@Override
-	public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+	public void onTrackException(AudioPlayer player, AudioTrack track, @NotNull FriendlyException exception) {
 		Willy.getLogger().getConsole().info("Track error:"+exception.getMessage());
 		if(Config.getBoolean("ap.change_activity"))
 			Discord.getBotGateway().updatePresence(ClientPresence.online()).block();

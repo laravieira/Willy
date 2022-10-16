@@ -10,8 +10,8 @@ import discord4j.voice.AudioProvider;
 
 public final class DiscordAudioProvider extends AudioProvider {
 
-    private MutableAudioFrame frame = new MutableAudioFrame();
-    private DiscordPlayer player;
+    private final MutableAudioFrame frame = new MutableAudioFrame();
+    private final DiscordPlayer player;
 
     public DiscordAudioProvider(DiscordPlayer player) {
         super(ByteBuffer.allocate(StandardAudioDataFormats.DISCORD_OPUS.maximumChunkSize()));

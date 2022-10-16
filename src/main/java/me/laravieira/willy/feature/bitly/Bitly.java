@@ -1,6 +1,5 @@
 package me.laravieira.willy.feature.bitly;
 
-import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import net.swisstech.bitly.BitlyClient;
 import net.swisstech.bitly.model.Response;

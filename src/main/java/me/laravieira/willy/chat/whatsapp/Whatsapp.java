@@ -1,11 +1,13 @@
 package me.laravieira.willy.chat.whatsapp;
 
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.discord.DiscordMessage;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Whatsapp implements WillyChat {
     private static it.auties.whatsapp.api.Whatsapp whatsapp;
@@ -21,7 +23,7 @@ public class Whatsapp implements WillyChat {
                     it.auties.whatsapp.api.Whatsapp.Options options = it.auties.whatsapp.api.Whatsapp.Options.newOptions()
                             .description(Willy.getWilly().getName() + " by L4R4")
                             .qrHandler(new WhatsappListener().onQRCode())
-                            .create();
+                            .build();
                     whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
                 }else whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
 
@@ -38,16 +40,12 @@ public class Whatsapp implements WillyChat {
 
     @Override
     public void disconnect() {
-        try{
+        try {
             if(whatsapp != null)
-                whatsapp.disconnect().get();
-        }catch (IllegalStateException | NullPointerException ignored) {
-        }catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }finally {
-            Willy.getLogger().info("Whatsapp instance was closed. ");
-        }
-        whatsapp = null;
+                whatsapp.disconnect().get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {}
+
+        Willy.getLogger().info("Whatsapp instance was requested to close.");
     }
 
     @Override
@@ -60,13 +58,17 @@ public class Whatsapp implements WillyChat {
     }
 
     public static void reconnect() {
-        try{
-            if(whatsapp != null)
-                whatsapp.reconnect().get();
-        }catch (IllegalStateException ignored) {
-        }catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread disconnect = new Thread(() -> {
+            try{
+                if(whatsapp != null)
+                    whatsapp.reconnect().get();
+            }catch (IllegalStateException ignored) {
+            }catch (ExecutionException | InterruptedException | CompletionException e) {
+                e.printStackTrace();
+            }
+        });
+        disconnect.setDaemon(false);
+        disconnect.start();
     }
 
     public static void logout() {
@@ -74,7 +76,7 @@ public class Whatsapp implements WillyChat {
             if(whatsapp != null)
                 whatsapp.logout().get();
         }catch (IllegalStateException ignored) {
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | CompletionException e) {
             e.printStackTrace();
         }
         whatsapp = null;

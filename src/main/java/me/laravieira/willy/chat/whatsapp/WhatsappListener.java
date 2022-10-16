@@ -13,14 +13,20 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
+import it.auties.whatsapp.api.DisconnectReason;
 import it.auties.whatsapp.api.QrHandler;
 import it.auties.whatsapp.listener.Listener;
 import it.auties.whatsapp.model.chat.Chat;
+import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.info.MessageInfo;
+import it.auties.whatsapp.model.message.model.MessageStatus;
 import it.auties.whatsapp.model.message.standard.TextMessage;
+import it.auties.whatsapp.model.request.RequestException;
+import lombok.SneakyThrows;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.discord.DiscordSender;
+import me.laravieira.willy.context.Context;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
@@ -35,15 +41,55 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class WhatsappListener implements Listener {
 
     @Override
-    public void onNewMessage(@NotNull MessageInfo info) {
-        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty() || info.chat().isEmpty())
+    public void onChats() {
+        Listener.super.onChats();
+
+        Whatsapp.getApi().store().chats().forEach(chat -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {}
+
+            if(chat.lastMessage().isEmpty() || chat.lastMessageFromMe().isEmpty())
+                return;
+
+            MessageInfo last = chat.lastMessage().get();
+            MessageInfo myLast = chat.lastMessageFromMe().get();
+
+            // chat.hasUnreadMessages() is not reliable
+            if(last == myLast || last.status() == MessageStatus.READ)
+                return;
+
+            last.key(last.key().chat(chat));
+            Willy.getLogger().info("Unread messages on chat "+chat.jid().user());
+            onNewMessage(last);
+        });
+    }
+
+    @Override
+    public void onChatMessages(Chat chat, boolean last) {
+        Listener.super.onChats();
+        if(!last)
             return;
-        Chat chat = info.chat().get();
+
+        if(chat.hasUnreadMessages() && chat.lastMessage().isPresent())
+            onNewMessage(chat.lastMessage().get());
+    }
+
+    @Override
+    public void onNewMessage(@NotNull MessageInfo info) {
+        Listener.super.onNewMessage(info);
+
+        if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
+            return;
+        Chat chat = info.chat();
 
         Thread messageHandler = new Thread(() -> {
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
@@ -58,27 +104,25 @@ public class WhatsappListener implements Listener {
 
             WhatsappSender sender = new WhatsappSender(chat);
             ContextStorage.of(id).setSender(sender);
+            ContextStorage.of(id).setApp("whatsapp");
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
             MessageStorage.add(whatsappMessage);
             ContextStorage.of(whatsappMessage.getContext()).getWatson().getSender().sendText(whatsappMessage.getText());
         });
 
-        try {
-            Thread.sleep(1000);
-            //Whatsapp.getApi().markAsRead(chat).get();
+        Thread messageStatusUpdate = new Thread(() -> {
+            try {
+                Whatsapp.getApi().markRead(chat).get(5, TimeUnit.SECONDS);
+                Whatsapp.getApi().clear(chat, false).get(5, TimeUnit.SECONDS);
+                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
+            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
+        });
 
-            Whatsapp.getApi().markAsRead(chat.jid()).get();
-            //Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get();
-            Willy.getLogger().info("Message from Whatsapp processed: "+info.status().name());
-            Willy.getLogger().info("Chat status: " + chat.hasUnreadMessages());
-            //Whatsapp.getApi().changePresence(chat, ContactStatus.AVAILABLE).get();
-            //Willy.getLogger().info("Message from Whatsapp processed 2.");
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        //messageHandler.setDaemon(true);
-        //messageHandler.start();
+        messageStatusUpdate.setDaemon(true);
+        messageStatusUpdate.start();
+        messageHandler.setDaemon(true);
+        messageHandler.start();
     }
 
     public QrHandler onQRCode()
@@ -101,6 +145,7 @@ public class WhatsappListener implements Listener {
                 UUID id = UUID.nameUUIDFromBytes(("discord-"+master.getId().asString()).getBytes());
 
                 DiscordSender sender = new DiscordSender(id, masterChannel, PassedInterval.DISABLE);
+                ContextStorage.of(id).setSender(sender);
 
                 Message message = new Message(id);
                 message.setExpire(PassedInterval.DISABLE);
@@ -126,6 +171,7 @@ public class WhatsappListener implements Listener {
         };
     }
 
+    @SneakyThrows
     @Override
     public void onLoggedIn() {
         Willy.getLogger().info("Whatsapp instance connected.");
@@ -136,13 +182,16 @@ public class WhatsappListener implements Listener {
             return;
         UUID id = UUID.nameUUIDFromBytes(("discord-"+master.getId().asString()).getBytes());
 
-        Message message = ContextStorage.of(id).getLastMessage();
-        message.delete();
-        MessageStorage.remove(message.getId());
+        if(ContextStorage.has(id)) {
+            Message message = ContextStorage.of(id).getLastMessage();
+            message.delete();
+            MessageStorage.remove(message.getId());
+        }
     }
 
     @Override
-    public void onDisconnected(boolean reconnect) {
+    public void onDisconnected(DisconnectReason reason) {
+        Listener.super.onDisconnected(reason);
         Willy.getLogger().info("Whatsapp instance disconnected.");
     }
 }

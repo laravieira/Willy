@@ -31,6 +31,8 @@ public class WatsonAction {
 		Thread actionTask = new Thread(() -> {
 			if(action.getName().equals("openai"))
 				openAi();
+			if(action.getName().equals("ping"))
+				ping();
 			if(action.getName().equals("bloom"))
 				bloom();
 			else if(action.getName().equals("get_youtube_link"))
@@ -67,6 +69,12 @@ public class WatsonAction {
 
 	private void bloom() {
 		BloomSender sender = new BloomSender(context.getId());
+		sender.sendText(context.getLastMessage().getText());
+	}
+
+	private void ping() {
+		BloomSender sender = new BloomSender(context.getId());
+		context.getLastMessage().setText("Say an welcome phrase.");
 		sender.sendText(context.getLastMessage().getText());
 	}
 

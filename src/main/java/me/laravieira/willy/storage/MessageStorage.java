@@ -22,9 +22,7 @@ public class MessageStorage {
     }
 
     public static UUID add(@NotNull Message message) {
-        if(ContextStorage.has(message.getContext())) {
-            ContextStorage.of(message.getContext()).addMessage(message.getId());
-        }
+        ContextStorage.of(message.getContext()).addMessage(message.getId());
         messages.put(message.getId(), message);
         return message.getId();
     }

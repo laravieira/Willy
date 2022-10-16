@@ -24,14 +24,14 @@
     <youtube.version>3.1.0</youtube.version>
     <bitly.version>0.8.0</bitly.version>
     <junit.version>4.13.2</junit.version>
-    <snakeyaml.version>2.3</snakeyaml.version>
-    <telegram.version>6.0.1</telegram.version>
-    <whatsapp.version>3.0-RC13</whatsapp.version>
-    <discord.bot.version>3.2.2</discord.bot.version>
+    <snakeyaml.version>2.4</snakeyaml.version>
+    <telegram.version>6.2.0</telegram.version>
+    <whatsapp.version>3.0-RC26</whatsapp.version>
+    <discord.bot.version>3.2.3</discord.bot.version>
     <discord.client.version>5.0.0-alpha.13</discord.client.version>
     <lavaplayer.version>1.3.78</lavaplayer.version>
-    <watson.version>10.0.1</watson.version>
-    <openai.version>0.6.0</openai.version>
+    <watson.version>10.1.0</watson.version>
+    <openai.version>0.8.0</openai.version>
     <maven.compile.version>3.10.1</maven.compile.version>
     <maven.assembly.version>3.3.0</maven.assembly.version>
   </properties>
@@ -183,12 +183,6 @@
       <groupId>com.theokanning.openai-gpt3-java</groupId>
       <artifactId>client</artifactId>
       <version>${openai.version}</version>
-    </dependency>
-    <!-- https://github.com/DV8FromTheWorld -->
-    <dependency>
-      <groupId>net.dv8tion</groupId>
-      <artifactId>JDA</artifactId>
-      <version>${discord.client.version}</version>
     </dependency>
   </dependencies>
   <dependencyManagement>

@@ -66,6 +66,7 @@ public class DiscordListener {
 		DiscordSender sender = new DiscordSender(id, channel, expire);
 
 		ContextStorage.of(id).setSender(sender);
+		ContextStorage.of(id).setApp("discord");
 		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
 		MessageStorage.add(discordMessage);
 		if(!message.getAttachments().isEmpty())
@@ -114,7 +115,7 @@ public class DiscordListener {
 	@NotNull
 	private static String parseWillyDiscordId(@NotNull String message) {
 		long id = Config.getLong("discord.client_id");
-		String name = Config.getString("willy-name");
+		String name = Config.getString("name");
 		return message.replaceAll("<@"+ id +">", name);
 	}
 	

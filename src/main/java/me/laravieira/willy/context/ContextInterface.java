@@ -23,6 +23,8 @@ public interface ContextInterface {
     // Context data
     UUID getId();
     PassedInterval getExpire();
+    String getApp();
+    void setApp(String app);
 
     // Sender
     SenderInterface getSender();

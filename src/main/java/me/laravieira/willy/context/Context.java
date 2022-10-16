@@ -4,6 +4,7 @@ import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.chat.watson.WatsonContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -14,6 +15,7 @@ public class Context implements ContextInterface {
     private final WatsonContext watson;
     private SenderInterface sender;
     private String language = "default";
+    private String app = "discord";
 
     public Context(UUID id) {
         this.id = id;
@@ -71,6 +73,16 @@ public class Context implements ContextInterface {
     @Override
     public PassedInterval getExpire() {
         return expire;
+    }
+
+    @Override
+    public String getApp() {
+        return app;
+    }
+
+    @Override
+    public void setApp(String app) {
+        this.app = app;
     }
 
     @Override

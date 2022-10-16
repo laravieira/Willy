@@ -7,6 +7,7 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -17,25 +18,6 @@ public class OpenAiSender implements SenderInterface {
 
     public OpenAiSender(UUID context) {
         this.context = context;
-    }
-
-    public String buildConversation(@NotNull LinkedList<UUID> messages) {
-        StringBuilder conversation = new StringBuilder();
-        LinkedList<UUID> lastMessages = new LinkedList<>(messages);
-        LinkedList<Message> descendingHistory = new LinkedList<>();
-        for(int i = 0; i < lastMessages.size() && i < OpenAi.HISTORY_SIZE; i++)
-            descendingHistory.add(MessageStorage.of(lastMessages.pollLast()));
-        Iterator<Message> history = descendingHistory.descendingIterator();
-        while(history.hasNext()) {
-            Message message = history.next();
-            conversation.append(message.getFrom());
-            conversation.append(": ");
-            conversation.append(message.getText());
-            conversation.append("\r\n");
-        }
-        conversation.append(Willy.getWilly().getName());
-        conversation.append(": ");
-        return conversation.toString();
     }
 
     @Override
@@ -56,11 +38,12 @@ public class OpenAiSender implements SenderInterface {
     @Override
     public void sendText(String message) {
         OpenAiHeader headerBuilder = new OpenAiHeader(context);
+
         LinkedList<UUID> messages = ContextStorage.of(context).getMessages();
         List<String> stopList = new ArrayList<>();
         stopList.add("\r\n" + ContextStorage.of(context).getLastMessage().getFrom() + ": ");
         stopList.add("\r\n" + ContextStorage.of(context).getLastMessage().getTo() + ": ");
-        String prompt = headerBuilder.build()+buildConversation(messages);
+        String prompt = headerBuilder.build()+WillyUtils.buildConversation(messages, OpenAi.HISTORY_SIZE);
 
         CompletionResult result = sendCompletion(CompletionRequest.builder()
                 .prompt(prompt)

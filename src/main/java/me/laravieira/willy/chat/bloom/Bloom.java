@@ -1,9 +1,7 @@
 package me.laravieira.willy.chat.bloom;
 
-import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -23,6 +21,7 @@ public class Bloom implements WillyChat {
     private static final int     SEED = 42;
     private static final boolean DECODING = false;
     private static final boolean FULL_TEXT = false;
+    public  static final int HISTORY_SIZE = 7;
 
     public static String[] buildCommand(String content) {
         Map<String, String> args = new HashMap<>();

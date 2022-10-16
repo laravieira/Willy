@@ -5,7 +5,6 @@ import java.util.Date;
 
 import me.laravieira.willy.chat.bloom.Bloom;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
-import me.laravieira.willy.feature.shadow.JDA;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.chat.command.Command;
 import me.laravieira.willy.internal.Config;
@@ -53,7 +52,6 @@ public class Willy {
 		willy.addWillyChatInstance(new Discord());
 		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());
-		willy.addWillyChatInstance(new JDA());
 	}
 
 	private void run() {

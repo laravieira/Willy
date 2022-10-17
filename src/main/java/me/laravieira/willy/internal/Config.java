@@ -18,6 +18,7 @@ public class Config {
 
 	private final static Map<String, Object> settings = new HashMap<>();
 	private static Yaml configFile;
+	private static boolean firstLoad = true;
 
 	public static void load() {
 		loadConfigFile();
@@ -151,8 +152,12 @@ public class Config {
 				confWriter.close();
 				Willy.getLogger().warning("Config file has been created on application directory.");
 				Willy.getLogger().warning("Setup config file and restart this application to apply new configs.");
-				Willy.getWilly().stop();
-			} catch (IOException e) {
+				Thread.sleep(1000);
+				if(firstLoad) {
+					firstLoad = false;
+					loadConfigFile();
+				}
+			} catch (IOException | InterruptedException e) {
 				Willy.getLogger().severe("Can't create the config file, please check write and read system permissions.");
 				Willy.getLogger().severe(e.getMessage());
 				Willy.getWilly().stop();

@@ -20,7 +20,7 @@
     <project.manifest.mainClass>me.laravieira.willy.Willy</project.manifest.mainClass>
     <slf4j.version>1.7.36</slf4j.version>
     <gson.version>2.8.9</gson.version>
-    <jackson.version>2.13.3</jackson.version>
+    <jackson.version>2.13.4.1</jackson.version>
     <youtube.version>3.1.0</youtube.version>
     <bitly.version>0.8.0</bitly.version>
     <junit.version>4.13.2</junit.version>

@@ -19,7 +19,7 @@ import me.laravieira.willy.chat.watson.Watson;
 public class Willy {
 	
 	private static final String my_name    = "Willy";
-	private static final int[]  my_version = {0,16,0};
+	private static final int[]  my_version = {0,16,1};
 	private static final long   start_time = new Date().getTime();
 
 	private static final Willy willy = new Willy();

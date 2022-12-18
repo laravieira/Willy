@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  build:
+    commands:
+      - echo Build started on `date`
+      - mvn test
+    finally:
+      - echo Build completed on `date`
+  post_build:
+    commands:
+      - echo Packaging started on `date`
+      - mvn package
+    finally:
+      - echo Packaging started on `date`
+artifacts:
+  files:
+    - target/willy-0.16.1-jar-with-dependencies.jar
+    - appspec.yml
+  discard-paths: yes

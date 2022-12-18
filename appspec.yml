@@ -1,18 +1,12 @@
 version: 0.0
 os: linux
 files:
-  - source: ./target/willy-0.16.1-jar-with-dependencies.jar
+  - source: ./willy-0.16.1-jar-with-dependencies.jar
     destination: /bin/willy
-  - source: ./codedeploy/after-install
-    destination: codedeploy/after-install
-  - source: ./codedeploy/application-start
-    destination: codedeploy/application-start
-  - source: ./codedeploy/application-stop
-    destination: codedeploy/application-stop
 hooks:
   AfterInstall:
-    - location: ./codedeploy/after-install
+    - location: codedeploy/after-install
   ApplicationStart:
-    - location: ./codedeploy/application-start
+    - location: codedeploy/application-start
   ApplicationStop:
-    - location: ./codedeploy/application-stop
+    - location: codedeploy/application-stop

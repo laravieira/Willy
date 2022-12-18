@@ -11,8 +11,8 @@ files:
     destination: ~/
 hooks:
   AfterInstall:
-    - location: ./after-install
+    - location: ~/after-install
   ApplicationStart:
-    - location: ./application-start
+    - location: ~/application-start
   ApplicationStop:
-    - location: ./application-stop
+    - location: ~/application-stop

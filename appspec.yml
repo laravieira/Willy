@@ -3,12 +3,12 @@ os: linux
 files:
   - source: ./target/willy-0.16.1-jar-with-dependencies.jar
     destination: /bin/willy
-  - source: ./after-install
-    destination: /bin/willy
-  - source: ./application-start
-    destination: /bin/willy
-  - source: ./application-stop
-    destination: /bin/willy
+  - source: ./codedeploy/after-install
+    destination: codedeploy/after-install
+  - source: ./codedeploy/application-start
+    destination: codedeploy/application-start
+  - source: ./codedeploy/application-stop
+    destination: codedeploy/application-stop
 hooks:
   AfterInstall:
     - location: ./codedeploy/after-install

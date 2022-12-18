@@ -23,4 +23,4 @@ artifacts:
     - codedeploy/application-start
     - codedeploy/application-stop
     - appspec.yml
-  discard-paths: yes
+  discard-paths: no

@@ -8,9 +8,9 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=willy
-ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar ~/willy-0.16.1-jar-with-dependencies.jar
-RuntimeDirectory=~
+User=ubuntu
+ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar /bin/willy/willy-0.16.1-jar-with-dependencies.jar
+RuntimeDirectory=/home/ubuntu
 
 [Install]
 WantedBy=multi-user.target

@@ -19,5 +19,8 @@ phases:
 artifacts:
   files:
     - target/willy-0.16.1-jar-with-dependencies.jar
+    - codedeploy/after-install
+    - codedeploy/application-start
+    - codedeploy/application-stop
     - appspec.yml
   discard-paths: yes

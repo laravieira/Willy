@@ -19,6 +19,7 @@ phases:
 artifacts:
   files:
     - target/willy-0.16.1-jar-with-dependencies.jar
+    - codebuilder/before-install.sh
     - codebuilder/after-install.sh
     - codebuilder/application-start.sh
     - codebuilder/application-stop.sh

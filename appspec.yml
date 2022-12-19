@@ -2,19 +2,19 @@ version: 0.0
 os: linux
 files:
   - source: ./willy-0.16.1-jar-with-dependencies.jar
-    destination: /bin/willy
+    destination: /
   - source: ./after-install.sh
-    destination: /bin/willy
+    destination: /
   - source: ./application-start.sh
-    destination: /bin/willy
+    destination: /
   - source: ./application-stop.sh
-    destination: /bin/willy
+    destination: /
 hooks:
   BeforeInstall:
-    - location: /bin/willy/before-install.sh
+    - location: /before-install.sh
   AfterInstall:
-    - location: /bin/willy/after-install.sh
+    - location: /after-install.sh
   ApplicationStart:
-    - location: /bin/willy/application-start.sh
+    - location: /application-start.sh
   ApplicationStop:
-    - location: /bin/willy/application-stop.sh
+    - location: /application-stop.sh

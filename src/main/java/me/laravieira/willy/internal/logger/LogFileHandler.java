@@ -44,6 +44,8 @@ class LogFileHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
+        if(fileHandler == null)
+            return;
         if(!fileName.equals(new SimpleDateFormat("yyyy-MM-dd").format(new Date()))) {
             fileHandler.flush();
             fileHandler.close();
@@ -55,17 +57,23 @@ class LogFileHandler extends Handler {
 
     @Override
     public void flush() {
+        if(fileHandler == null)
+            return;
         fileHandler.flush();
     }
 
     @Override
     public void close() throws SecurityException {
+        if(fileHandler == null)
+            return;
         fileHandler.close();
         fileHandler = null;
     }
 
     @Override
     public void setFormatter(Formatter formatter) {
+        if(fileHandler == null)
+            return;
         fileHandler.setFormatter(formatter);
     }
 

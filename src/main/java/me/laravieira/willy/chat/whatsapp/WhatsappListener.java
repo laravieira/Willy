@@ -21,12 +21,10 @@ import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.model.MessageStatus;
 import it.auties.whatsapp.model.message.standard.TextMessage;
-import it.auties.whatsapp.model.request.RequestException;
 import lombok.SneakyThrows;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.discord.DiscordSender;
-import me.laravieira.willy.context.Context;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
@@ -135,21 +133,19 @@ public class WhatsappListener implements Listener {
                 Path path = Files.createTempFile(UUID.randomUUID().toString(), ".png");
                 MatrixToImageWriter.writeToPath(matrix, "png", path);
 
-                Snowflake masterSnowflake = Snowflake.of(Config.getString("discord.keep_master_nick"));
-                User master = Discord.getBotGateway().getUserById(masterSnowflake).block();
-                if(master == null) {
-                    Willy.getLogger().warning("Unable to send Whatsapp QR-Code to Discord master.");
+                Snowflake settingsSnowflake = Snowflake.of(Config.getLong("discord.admin.command"));
+                MessageChannel masterChannel = (MessageChannel) Discord.getBotGateway().getChannelById(settingsSnowflake).block();
+                if(masterChannel == null)
                     return;
-                }
-                MessageChannel masterChannel = master.getPrivateChannel().block();
-                UUID id = UUID.nameUUIDFromBytes(("discord-"+master.getId().asString()).getBytes());
+
+                UUID id = UUID.nameUUIDFromBytes(("discord-"+masterChannel.getId().asString()).getBytes());
 
                 DiscordSender sender = new DiscordSender(id, masterChannel, PassedInterval.DISABLE);
                 ContextStorage.of(id).setSender(sender);
 
                 Message message = new Message(id);
                 message.setExpire(PassedInterval.DISABLE);
-                message.setTo(master.getUsername());
+                message.setTo(masterChannel.getId().asString());
                 message.setFrom(Willy.getWilly().getName());
                 message.setContent(MessageCreateSpec.builder()
                         .addEmbed(EmbedCreateSpec.builder()

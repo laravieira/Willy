@@ -10,9 +10,9 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=ubuntu
+User=root
 ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar /bin/willy/willy.jar
-RuntimeDirectory=/willy
+RuntimeDirectory=willy
 
 [Install]
 WantedBy=multi-user.target

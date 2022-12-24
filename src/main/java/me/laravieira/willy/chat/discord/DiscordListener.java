@@ -8,6 +8,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import discord4j.core.event.domain.guild.MemberUpdateEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -17,6 +18,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.command.Command;
 import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -27,6 +29,18 @@ import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class DiscordListener {
+
+	public static void onCommand(ChatInputInteractionEvent event) {
+		try {
+			Command.commandsList().forEach(command -> {
+				if (command.getName().equals(event.getCommandName()))
+					command.execute(event);
+			});
+		}catch(Exception e) {
+			event.reply("Something went wrong: "+e.getMessage()).subscribe();
+		}
+	}
+
 	public static void onMessage(Message message) {
 		try {
 			if(message.getAuthor().isPresent()) {

@@ -67,6 +67,9 @@ public class Config {
 		set("discord.keep_master_nick",   "WILLY_DISCORD_KEEP_NICK_MASTER",         "discord.keep-master-nick",        TYPE_STRING,  null);
 		set("discord.clear_public_chats", "WILLY_DISCORD_CLEAR_PUBLIC_CHATS",       "discord.clear-public-chats",      TYPE_BOOLEAN, true);
 		set("discord.clear_after_wait",   "WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER", "discord.clear-after-wait",        TYPE_TIME,    parseTime("10m"));
+		set("discord.admin.guild",        "WILLY_DISCORD_ADMIN_GUILD",              "discord.admin.guild",             TYPE_LONG, null);
+		set("discord.admin.command",      "WILLY_DISCORD_ADMIN_COMMAND",            "discord.admin.command",           TYPE_LONG, null);
+		set("discord.admin.log",          "WILLY_DISCORD_ADMIN_LOG",                "discord.admin.log",               TYPE_LONG, null);
 
 		// OpenAI settings
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, true);
@@ -131,6 +134,7 @@ public class Config {
 
 	public static void loadConfigFile() {
 		File confFile = new File("config.yml");
+		Willy.getLogger().info("Config path is: "+confFile.getAbsolutePath());
 		if(confFile.exists() && confFile.isFile())
 			configFile = new Yaml("config.yml", false);
 		else {

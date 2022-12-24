@@ -6,7 +6,6 @@ import java.util.Date;
 import me.laravieira.willy.chat.bloom.Bloom;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
-import me.laravieira.willy.chat.command.Command;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.telegram.Telegram;
@@ -45,7 +44,6 @@ public class Willy {
 	public boolean getStop() {return stop;}
 
 	private void registryChats() {
-		willy.addWillyChatInstance(new Command());
 		willy.addWillyChatInstance(new Bloom());
 		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Watson());

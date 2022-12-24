@@ -1,12 +1,18 @@
-package me.laravieira.willy.chat.command;
+package me.laravieira.willy.command;
 
-import me.laravieira.willy.Willy;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 
 import java.io.File;
 
 public class CommandSender implements SenderInterface {
+    private final ChatInputInteractionEvent event;
+
+    public CommandSender(ChatInputInteractionEvent event) {
+        this.event = event;
+    }
+
     @Override
     public void send(Object message) {
 
@@ -14,7 +20,7 @@ public class CommandSender implements SenderInterface {
 
     @Override
     public void sendText(String message) {
-        Willy.getLogger().info(message);
+        event.reply(message);
     }
 
     @Override

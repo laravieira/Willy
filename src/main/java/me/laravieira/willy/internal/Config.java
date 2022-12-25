@@ -63,7 +63,7 @@ public class Config {
 		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
 		set("discord.token",              "WILLY_DISCORD_TOKEN",                    "discord.token",                   TYPE_STRING,  null);
 		set("discord.verbose",            "WILLY_DISCORD_VERBOSE",                  "discord.verbose-channel",         TYPE_STRING,  null);
-		set("discord.keep_willy_nick",    "WILLY_DISCORD_KEEP_NICK_WILLY",          "discord.keep_willy_nick",         TYPE_BOOLEAN, true);
+		set("discord.keep_willy_nick",    "WILLY_DISCORD_KEEP_NICK_WILLY",          "discord.keep-willy-nick",         TYPE_BOOLEAN, true);
 		set("discord.keep_master_nick",   "WILLY_DISCORD_KEEP_NICK_MASTER",         "discord.keep-master-nick",        TYPE_STRING,  null);
 		set("discord.clear_public_chats", "WILLY_DISCORD_CLEAR_PUBLIC_CHATS",       "discord.clear-public-chats",      TYPE_BOOLEAN, true);
 		set("discord.clear_after_wait",   "WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER", "discord.clear-after-wait",        TYPE_TIME,    parseTime("10m"));
@@ -75,7 +75,7 @@ public class Config {
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, true);
 		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
 
-		// OpenAI settings
+		// Bloom settings
 		set("bloom.enable", "WILLY_BLOOM_ENABLE", "bloom.enable", TYPE_BOOLEAN, true);
 		set("bloom.token", "WILLY_BLOOM_TOKEN", "bloom.token", TYPE_STRING, null);
 

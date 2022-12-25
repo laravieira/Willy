@@ -1,127 +1,189 @@
 # Willy
-Willy is your best, beautiful, little and cute friend. He will help you to do everything possible.
+Willy is your best, beautiful, little and cute friend.
 
-![Showcase](assets/showcase.png)
+![Willy's showcase image](assets/showcase.png)
 
-## What you need
+## Is Willy on...
+* [x] [Discord](https://discordapp.com/users/604134489484165121)
+* [x] [Whatsapp](https://wa.me/qr/6RTZSIBLC6RMD1) `+19292381810`
+* [x] [Telegram](https://t.me/WillyDiscordBot)
 
- * Watson Assistant, you can create one [here](https://assistant-us-south.watsonplatform.net/).
- * Discord Bot, you can create one [here](https://discordapp.com/developers/applications/).
- * JVM 8 installed on your machine, you can download Java 8 [here](https://www.java.com/en/download/).
- * More importantly, you will need **patience**.
+###### You can share Willy through [https://willybot.carrd.co/](https://willybot.carrd.co/).
 
-## How to start
+## Where does Willy live?
+Willy is currently hosted on an AWS EC2 instance.
 
-#### Start Willy for the first time
-To begin you need to run the app a first time. To run, you can start Willy by using the built file on the folder *target/* with the following command on cmd:
-> java -jar willy-0.16.0-jar-with-dependencies.jar
+## How does Willy think?
+### Willy is a interface that passes the messages to:
+1. [Watson Assistent](https://assistant-us-south.watsonplatform.net/), who analyze the message and return an action.
+2. [Open AI - GPT-3](https://openai.com/), who builds the Willy's responses when no action is requested.
 
-After running, Willy will create a log *folder/*, containing the log files and a **config.yml** file and then close with an error that you can ignore for now.
+### Willy has support to some action like:
+* Short a link using Bitly API.
+* Give the direct link of a given YouTube video.
 
-#### Set up config.yml
-The config file is written in YAML language, this is the most simple language and very similar to human ones. You can open this file with any text editor. On *config.yml* you have to set a Willy name. His name is Willy, but you can call him anything... Do this:
->willy_name: Willy
+### Willy runs as a service and is built with:
+* Java SDK 17, with preview features enabled.
+* Maven project manager
+* Run on both Windows and Linux
 
-or any name you want
+## Can I try it?
+First need to build him:
+```shell
+maven test
+maven package
+```
+To run use:
+```shell
+java --enable-preview -jar /target/willy-0.16.1-jar-with-dependencies.jar
+```
 
->willy_name: MyChatBot
+### Configuring
+Willy can have all its configs on a *config.yml* or using environment variables:
+###### Config.yml
+```yaml
+name:                   # type: TYPE_STRING, default: "Willy"
+aliases: []             # type: TYPE_LIST,   default: ["willy"]
+context_lifetime:       # type: TYPE_TIME,   default: "5m"
+ignore_if_start_with:   # type: TYPE_LIST,   default: ["!", "?", "@", "/", "\\", "//", "#"]
 
-After setting up a name, you can set aliases to this name as follows:
->willy_aliases:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- willy<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- Wily<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- wily<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- Billy<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- billy
+// Watson Assistant settings
+watson:
+  session-live:         # type: TYPE_TIME,    default: "5m"
+  keep-alive:           # type: TYPE_BOOLEAN, default: false
+  api-date:             # type: TYPE_STRING,  default: "2021-11-27"
+  server-url:           # type: TYPE_STRING,  default: "https://api.us-south.assistant.watson.cloud.ibm.com"
+  assistant-id:         # type: TYPE_STRING,  default: null
+  credentials-password: # type: TYPE_STRING,  default: null
 
-or something like
+// Discord settings
+discord:
+  enable:             # type: TYPE_BOOLEAN, default: true
+  client-id:          # type: TYPE_STRING,  default: null
+  token:              # type: TYPE_STRING,  default: null
+  verbose-channel:    # type: TYPE_STRING,  default: null
+  keep-willy-nick:    # type: TYPE_BOOLEAN, default: true
+  keep-master-nick:   # type: TYPE_STRING,  default: null
+  clear-public-chats: # type: TYPE_BOOLEAN, default: true
+  clear-after-wait:   # type: TYPE_TIME,    default: "10m"
+  admin:
+    guild:            # type: TYPE_LONG,    default: null
+    command:          # type: TYPE_LONG,    default: null
+    log:              # type: TYPE_LONG,    default: null
 
->willy_aliases:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- mychatbot<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- MCB<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- mcb
+// OpenAI settings
+openai:
+  enable: # type: TYPE_BOOLEAN, default: true
+  token:  # type: TYPE_STRING,  default: null
 
-###### Willy's name and aliases are case sensitive, use aliases to circumvent this.
+// Bloom settings
+bloom:
+  enable: # type: TYPE_BOOLEAN, default: true
+  token:  # type: TYPE_STRING,  default: null
 
-Willy can delete all messages written to him or by him, if you want this do:
->clear_public_chats: true
+// Whatsapp Settings
+whatsapp:
+  enable:      # type: TYPE_BOOLEAN, default: true
+  shared-chat: # type: TYPE_BOOLEAN, default: false
 
-if you don't want auto clear public chat do:
->clear_public_chats: false
+// Telegram Settings
+telegram:
+  enable: # type: TYPE_BOOLEAN, default: true
+  token:  # type: TYPE_STRING,  default: null
 
-if your choice is to clear public chats, you need to set the time to wait before delete each message, write this:
-* *< number >s* to wait *< number >* seconds before delete a message;
-* *< number >m* to wait *< number >* minutes before delete a message;
-* *< number >h* to wait *< number >* hours before delete a message;
-* *< number >d* to wait *< number >* days before delete a message;
+// Audio Player Settings
+audio-player:
+  enable:                     # type: TYPE_BOOLEAN, default: true
+  change-activity:            # type: TYPE_BOOLEAN, default: true
+  command-default-channel-id: # type: TYPE_STRING,  default: null
+  blends-for-play:            # type: TYPE_LIST,    default: ["play", "toca", "adiciona", "reproduz", "reproduza", "toque", "coloca"]
 
-for example, to wait 8 minutes after send to delete a message, type:
->clear_after_wait: 8m
+// Bitly Settings
+bitly:
+  enable: # type: TYPE_BOOLEAN, default: true
+  token:  # type: TYPE_STRING,  default: null
 
-or to wait 5 hours after send to delete a message, type:
->clear_after_wait: 5h
+// YouTube Downloader Settings
+youtube-downloader:
+  enable:    # type: TYPE_BOOLEAN, default: true
+  willy-vpn: # type: TYPE_BOOLEAN, default: false
+  use-bitly: # type: TYPE_BOOLEAN, default: true
 
-Now put the Discord id and token, like this:
->discord:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;client_id: <bot_client_id><br>
->&nbsp;&nbsp;&nbsp;&nbsp;token: <bot_token>
+// Willy Shadow Settings
+shadow:
+  enable: # type: TYPE_BOOLEAN, default: false
+  token:  # type: TYPE_STRING,  default: null
+```
+###### Environment variables
+The environment variables are respectively equivalent to the *config.yml* configs, and, if set, they are prioritized.
+```shell
+WILLY_NAME
+WILLY_ALIASES
+WILLY_CONTEXT_LIFETIME
+WILLY_IGNORE_IF_START_WITH
 
-one example is:
+// Watson Assistant settings
+WILLY_WA_SESSION_LIVE
+WILLY_WA_KEEP_ALIVE
+WILLY_WA_API_DATE
+WILLY_WA_SERVER_URL
+WILLY_WA_ASSISTANT_ID
+WILLY_WA_PASSWORD
 
->discord:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;client_id: 3498573895738593<br>
->&nbsp;&nbsp;&nbsp;&nbsp;token: hj3455g3jh5g3jh3g5jhg4hj5g3hj53ghj5hj34g53jh5g3jh5g<br>
+// Discord settings
+WILLY_DISCORD_ENABLE
+WILLY_DISCORD_CLIENT_ID
+WILLY_DISCORD_TOKEN
+WILLY_DISCORD_VERBOSE
+WILLY_DISCORD_KEEP_NICK_WILLY
+WILLY_DISCORD_KEEP_NICK_MASTER
+WILLY_DISCORD_CLEAR_PUBLIC_CHATS
+WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER
+WILLY_DISCORD_ADMIN_GUILD
+WILLY_DISCORD_ADMIN_COMMAND
+WILLY_DISCORD_ADMIN_LOG
 
-And now put your Watson Assistant credentials:
+// OpenAI settings
+WILLY_OPENAI_ENABLE
+WILLY_OPENAI_TOKEN
 
->watson_assistant:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: < true or false ><br>
->&nbsp;&nbsp;&nbsp;&nbsp;api_date: <any date after 2019><br>
->&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: <assistant_id><br>
->&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: <credentials_password><br>
+// Bloom settings
+WILLY_BLOOM_ENABLE
+WILLY_BLOOM_TOKEN
 
-for example:
+// Whatsapp Settings
+WILLY_WHATSAPP_ENABLE
+WILLY_WHATSAPP_SHARED
 
->watson_assistant:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: false<br>
->&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
->&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
->&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjl�kgja�lkfgja�e45hj-e48t39th3aifghj_384tha3g34tr7
+// Telegram Settings
+WILLY_TELEGRAM_ENABLE
+WILLY_TELEGRAM_TOKEN
 
-###### *keep_alive* option will keep watson assistant session alive forever, consuming more internet data, this is not recommended and not necessary, if a session expire, Willy will create a new. Only turn *keep_alive* option true if you have problems with bad pings.
+// Audio Player Settings
+WILLY_AP_ENABLE
+WILLY_AP_CHANGE_ACTIVITY
+WILLY_AP_DEFAULT_CHANNEL
+WILLY_AP_BLENDS
 
-You can now save *config.yml* file.
+// Bitly Settings
+WILLY_BITLY_ENABLE
+WILLY_BITLY_TOKEN
 
-### Your config.yml should look like this:
+// YouTube Downloader Settings
+WILLY_YTD_ENABLE
+WILLY_YTD_LOCAL
+WILLY_YTD_USE_BITLY
 
->willy_name: Willy<br>
->willy_aliases:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- willy<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- Wily<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- wily<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- Billy<br>
->&nbsp;&nbsp;&nbsp;&nbsp;- billy<br>
-><br>
->clear_public_chats: false<br>
-><br>
->clear_after_wait: 8m<br>
-><br>
->discord:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;client_id: 3498573895738593<br>
->&nbsp;&nbsp;&nbsp;&nbsp;token: hj3455g3jh5g3jh3g5jhg4hj5g3hj53ghj5hj34g53jh5g3jh5g<br>
-><br>
->watson_assistant:<br>
->&nbsp;&nbsp;&nbsp;&nbsp;keep_alive: false<br>
->&nbsp;&nbsp;&nbsp;&nbsp;api_date: 2019-07-25<br>
->&nbsp;&nbsp;&nbsp;&nbsp;assistant_id: j3h42j34k-n34b3jh-234b2kjh-34b24kkhj4-342fsdf<br>
->&nbsp;&nbsp;&nbsp;&nbsp;credentials_password: dfklgjl�kgja�lkfgja�e45hj-e48t39th3aifghj_384tha3g34tr7<br>
->
+// Willy Shadow Settings
+WILLY_SHADOW_ENABLE
+WILLY_SHADOW_TOKEN
+```
+If a function/chat is enabled, all its `null` configurations need to be set.
 
-### Now you can run Willy again, with the same command and he will work just fine.
+## Getting/Giving help
+[Willy's Discord support server](https://discord.gg/q4yGa9G7hh)
 
-
-The license is Apache 2.0.
-
-If you want to help me, [talk to me](https://laravieira.me/).
+## Licensing
+Apache 2.0.
 
 

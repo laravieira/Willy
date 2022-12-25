@@ -24,8 +24,8 @@ public class WillyLogger extends Logger {
 		System.setProperty("java.util.logging.SimpleFormatter.format", "[%2$tT][%4$s] %5$s %n");
 	}
 
-	private Logger  consoleLogger  = null;
-	
+	private Logger consoleLogger = null;
+
 	public WillyLogger() {
 		super(Willy.class.getCanonicalName(), Logger.getGlobal().getResourceBundleName());
 
@@ -38,21 +38,29 @@ public class WillyLogger extends Logger {
 
 			Handler fileHandler = new LogFileHandler();
 			Handler consoleHandler = new ConsoleHandler();
-			
+
 			fileHandler.setLevel(Level.ALL);
 			consoleHandler.setLevel(Level.INFO);
+
 			fileHandler.setFormatter(LOG_FORMATTER);
 			consoleHandler.setFormatter(LOG_FORMATTER);
 
 			consoleLogger = Logger.getLogger(Willy.class.getCanonicalName()+"-console");
-			
+
 			this.addHandler(fileHandler);
 			this.addHandler(consoleHandler);
 			consoleLogger.addHandler(consoleHandler);
-			
+
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void registerDiscordHandler() {
+		Handler discordHandler = new DiscordHandler();
+		discordHandler.setLevel(Level.INFO);
+		discordHandler.setFormatter(LOG_FORMATTER);
+		this.addHandler(discordHandler);
 	}
 
 	public Logger getConsole() {

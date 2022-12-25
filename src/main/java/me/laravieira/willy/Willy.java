@@ -52,7 +52,18 @@ public class Willy {
 		willy.addWillyChatInstance(new Telegram());
 	}
 
+	private void onShutdown() {
+		if(!stop)
+			stop = true;
+
+		logger.info("Closing Willy!");
+		disconnectWillyChatInstances();
+		logger.info("Closing process finished.");
+		logger.close();
+	}
+
 	private void run() {
+		Runtime.getRuntime().addShutdownHook(new Thread(this::onShutdown));
 		logger.info("Starting Willy! ("+getFullVersion()+")");
 
 		Config.load();
@@ -72,12 +83,6 @@ public class Willy {
 			ContextStorage.refresh();
 			MessageStorage.refresh();
 		}
-
-		logger.info("Closing Willy!");
-		disconnectWillyChatInstances();
-		logger.info("Closing process finished.");
-		logger.close();
-		System.exit(0);
 	}
 
 	private void connectWillyChatInstances() {

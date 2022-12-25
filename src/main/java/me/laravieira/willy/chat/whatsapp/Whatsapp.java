@@ -4,8 +4,18 @@ import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
+import java.util.UUID;
+
 public class Whatsapp implements WillyChat {
+    private static final int id = UUID.nameUUIDFromBytes("willy-whatsapp".getBytes()).hashCode();
     private static it.auties.whatsapp.api.Whatsapp whatsapp;
+    private static final it.auties.whatsapp.api.Whatsapp.Options options = it.auties.whatsapp.api.Whatsapp.Options.newOptions()
+            .id(id)
+            .description(Willy.getWilly().getName() + " by L4R4")
+            .autodetectListeners(false)
+            .errorHandler(WhatsappHandler::onError)
+            .qrHandler(WhatsappHandler::onQRCode)
+            .build();
 
     @Override
     public void connect() {
@@ -13,12 +23,13 @@ public class Whatsapp implements WillyChat {
             return;
 
         Thread whatsappThread = new Thread(() -> {
-            if(it.auties.whatsapp.api.Whatsapp.listConnections().isEmpty()) {
-                Willy.getLogger().warning("There is no Whatsapp connections.");
+            if(it.auties.whatsapp.api.Whatsapp.listConnections(options).isEmpty()) {
+                it.auties.whatsapp.api.Whatsapp.deleteConnections();
+                Willy.getLogger().warning("There is no Whatsapp connection.");
                 return;
             }
 
-            whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection();
+            whatsapp = it.auties.whatsapp.api.Whatsapp.lastConnection(options);
             whatsapp.addListener(new WhatsappListener());
             whatsapp.connect().whenComplete((whatsapp, error) -> {
                 if(error == null)
@@ -37,12 +48,8 @@ public class Whatsapp implements WillyChat {
     public void disconnect() {
         if(whatsapp == null)
             return;
-        whatsapp.disconnect().whenComplete((success, error) -> {
-            if(error == null)
-                Willy.getLogger().info("Whatsapp instance was disconnected.");
-            else
-                Willy.getLogger().warning("Whatsapp instance didn't disconnected nicely: "+error.getMessage());
-        });
+        whatsapp.disconnect().join();
+        Willy.getLogger().info("Whatsapp instance was disconnected.");
     }
 
     @Override
@@ -94,10 +101,6 @@ public class Whatsapp implements WillyChat {
             it.auties.whatsapp.api.Whatsapp.listConnections().clear();
         }
 
-        it.auties.whatsapp.api.Whatsapp.Options options = it.auties.whatsapp.api.Whatsapp.Options.newOptions()
-            .description(Willy.getWilly().getName() + " by L4R4")
-            .qrHandler(new WhatsappListener().onQRCode())
-            .build();
         whatsapp = it.auties.whatsapp.api.Whatsapp.newConnection(options);
 
         whatsapp.addListener(new WhatsappListener());

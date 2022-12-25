@@ -7,10 +7,14 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import it.auties.whatsapp.model.contact.ContactJid;
+import it.auties.whatsapp.util.Preferences;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -124,20 +128,47 @@ public class CommandWhatsapp implements CommandListener {
     }
 
     private void onLogoutAll(@NotNull ChatInputInteractionEvent event) {
-        it.auties.whatsapp.api.Whatsapp.listConnections()
-                .forEach(it.auties.whatsapp.api.Whatsapp::logout);
-        event.reply("Whatsapp logout all sent.").subscribe();
+        event.reply("Loading...").subscribe();
+        StringBuilder list = new StringBuilder();
+        list.append("```yaml\r\n");
+        try {
+            Whatsapp.logout();
+            new Whatsapp().disconnect();
+            Whatsapp.getApi().await();
+            Files.walk(Preferences.home()).forEach(folder -> {
+                try {
+                    if(Files.isDirectory(folder))
+                        for(Path file : Files.walk(folder).toList())
+                            Files.deleteIfExists(file);
+                    Files.deleteIfExists(folder);
+                    StringBuilder message = new StringBuilder(list.append(folder.getFileName()).append(": deleted\r\n"));
+                    event.editReply(message.append("```").toString()).subscribe();
+                }catch(IOException ignore) {
+                    StringBuilder message = new StringBuilder(list.append(folder.getFileName()).append(": failed\r\n"));
+                    event.editReply(message.append("```").toString()).subscribe();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        event.editReply(list.append("```:white_check_mark:").toString()).subscribe();
     }
 
     private void onConnections(@NotNull ChatInputInteractionEvent event) {
         StringBuilder list = new StringBuilder();
+        event.reply("Loading...").subscribe();
         list.append("**Whatsapp connections** `").append(new Date()).append("`").append("\r\n");
-        list.append("```yaml").append("\r\n");
+        list.append("```yaml\r\n").append("\r\n");
 
         it.auties.whatsapp.api.Whatsapp.listConnections()
-                .forEach(whatsapp -> list.append(whatsapp.toString()).append("\r\n"));
+            .forEach(whatsapp -> {
+                if(whatsapp.keys() == null || !whatsapp.keys().hasPreKeys()) {
+                    return;
+                }
+                list.append(whatsapp).append("\r\n");
+            });
         list.append("```");
-        event.reply(list.toString()).subscribe();
+        event.editReply(list.toString()).subscribe();
     }
 
     private void onChats(@NotNull ChatInputInteractionEvent event) {

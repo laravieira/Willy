@@ -1,6 +1,8 @@
 # Willy
 Willy is your best, beautiful, little and cute friend. He will help you to do everything possible.
 
+![Showcase](assets/showcase.png)
+
 ## What you need
 
  * Watson Assistant, you can create one [here](https://assistant-us-south.watsonplatform.net/).

@@ -9,11 +9,11 @@ StartLimitIntervalSec=0
 [Service]
 Type=simple
 Restart=always
-RestartSec=1
+RestartSec=10
 User=root
-ExecStart=java --add-opens java.base/java.lang=ALL-UNNAMED -jar /bin/willy/willy.jar
-RuntimeDirectory=willy
+ExecStart=java --enable-preview -jar /bin/willy/willy.jar
 
 [Install]
 WantedBy=multi-user.target
 EOF
+systemctl daemon-reload

@@ -2,6 +2,9 @@ package me.laravieira.willy;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import me.laravieira.willy.chat.bloom.Bloom;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
@@ -78,11 +81,14 @@ public class Willy {
 		logger.info("Startup completed.");
 		logger.info("Welcome to Willy bot!");
 
-		while(!stop) {
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(() -> {
+			if(stop)
+				executor.shutdown();
 			refreshWillyChatInstances();
 			ContextStorage.refresh();
 			MessageStorage.refresh();
-		}
+		}, 0, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void connectWillyChatInstances() {

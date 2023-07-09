@@ -18,7 +18,7 @@ phases:
       - echo Packaging started on `date`
 artifacts:
   files:
-    - target/willy-0.16.1-jar-with-dependencies.jar
+    - target/willy-0.16.2-jar-with-dependencies.jar
     - codedeploy/before-install.sh
     - codedeploy/after-install.sh
     - codedeploy/application-start.sh

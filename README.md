@@ -5,7 +5,7 @@ Willy is your best, beautiful, little and cute friend.
 
 ## Is Willy on...
 * [x] [Discord](https://discordapp.com/users/604134489484165121)
-* [x] [Whatsapp](https://wa.me/qr/6RTZSIBLC6RMD1) `+19292381810`
+* [x] [Whatsapp](https://wa.me/19292381810?text=Heey!%20What'%20up) `+19292381810`
 * [x] [Telegram](https://t.me/WillyDiscordBot)
 
 ###### You can share Willy through [https://willybot.carrd.co/](https://willybot.carrd.co/).

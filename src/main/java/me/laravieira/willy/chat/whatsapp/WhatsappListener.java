@@ -17,25 +17,26 @@ import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.*;
 
 public class WhatsappListener implements Listener {
 
     @Override
-    public void onChats() {
-        Listener.super.onChats();
+    public void onChats(Collection<Chat> chats) {
+        Listener.super.onChats(chats);
 
-        Whatsapp.getApi().store().chats().forEach(chat -> {
+        chats.forEach(chat -> {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {}
 
-            if(chat.lastMessage().isEmpty() || chat.lastMessageFromMe().isEmpty())
+            if(chat.newestMessage().isEmpty() || chat.newestMessageFromMe().isEmpty())
                 return;
 
-            MessageInfo last = chat.lastMessage().get();
-            MessageInfo myLast = chat.lastMessageFromMe().get();
+            MessageInfo last = chat.newestMessage().get();
+            MessageInfo myLast = chat.newestMessageFromMe().get();
 
             // chat.hasUnreadMessages() is not reliable
             if(last == myLast || last.status() == MessageStatus.READ)
@@ -48,13 +49,13 @@ public class WhatsappListener implements Listener {
     }
 
     @Override
-    public void onChatMessages(Chat chat, boolean last) {
-        Listener.super.onChats();
+    public void onChatMessagesSync(Chat chat, boolean last) {
+        Listener.super.onChatMessagesSync(chat, last);
         if(!last)
             return;
 
-        if(chat.hasUnreadMessages() && chat.lastMessage().isPresent())
-            onNewMessage(chat.lastMessage().get());
+        if(chat.hasUnreadMessages() && chat.newestMessage().isPresent())
+            onNewMessage(chat.newestMessage().get());
     }
 
     @Override
@@ -63,6 +64,9 @@ public class WhatsappListener implements Listener {
 
         if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
             return;
+        if(info.fromMe())
+            return;
+
         Chat chat = info.chat();
 
         Thread messageHandler = new Thread(() -> {

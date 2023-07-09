@@ -2,13 +2,10 @@ package me.laravieira.willy.chat.openai;
 
 import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.CompletionResult;
-import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.WillyUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -27,11 +24,11 @@ public class OpenAiSender implements SenderInterface {
 
     private CompletionResult sendCompletion(CompletionRequest request) {
         try {
-            return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
+            return OpenAi.getService().createCompletion(request);
         }catch(RuntimeException e) {
             if(!e.getMessage().contains("timed out"))
                 e.printStackTrace();
-            return OpenAi.getService().createCompletion(OpenAi.ENGINE, request);
+            return OpenAi.getService().createCompletion(request);
         }
     }
 
@@ -55,6 +52,7 @@ public class OpenAiSender implements SenderInterface {
                 .topP(OpenAi.TOP_P)
                 .echo(OpenAi.ECHO)
                 .stop(stopList)
+                .model("text-davinci-003")
                 .build());
         new OpenAiListener().onCompletionResponse(result, context);
     }

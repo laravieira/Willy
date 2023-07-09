@@ -1,6 +1,6 @@
 package me.laravieira.willy.chat.openai;
 
-import com.theokanning.openai.OpenAiService;
+import com.theokanning.openai.service.OpenAiService;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 

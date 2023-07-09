@@ -5,7 +5,7 @@
 
   <groupId>me.laravieira</groupId>
   <artifactId>willy</artifactId>
-  <version>0.16.1</version>
+  <version>0.16.2</version>
   <packaging>jar</packaging>
 
   <name>Willy</name>
@@ -18,22 +18,22 @@
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.manifest.mainClass>me.laravieira.willy.Willy</project.manifest.mainClass>
-    <slf4j.version>1.7.36</slf4j.version>
-    <gson.version>2.8.9</gson.version>
-    <jackson.version>2.13.3</jackson.version>
-    <youtube.version>3.1.0</youtube.version>
+    <slf4j.version>2.0.7</slf4j.version>
+    <gson.version>2.10.1</gson.version>
+    <jackson.version>2.15.2</jackson.version>
+    <youtube.version>3.2.3</youtube.version>
     <bitly.version>0.8.0</bitly.version>
-    <junit.version>4.13.2</junit.version>
-    <snakeyaml.version>2.4</snakeyaml.version>
-    <telegram.version>6.2.0</telegram.version>
-    <whatsapp.version>3.0-RC26</whatsapp.version>
-    <discord.bot.version>3.2.3</discord.bot.version>
+    <junit.version>5.10.0-RC1</junit.version>
+    <snakeyaml.version>2.6</snakeyaml.version>
+    <telegram.version>6.7.0</telegram.version>
+    <whatsapp.version>3.4.8</whatsapp.version>
+    <discord.bot.version>3.2.5</discord.bot.version>
     <discord.client.version>5.0.0-alpha.13</discord.client.version>
     <lavaplayer.version>1.3.78</lavaplayer.version>
     <watson.version>10.1.0</watson.version>
-    <openai.version>0.8.0</openai.version>
-    <maven.compile.version>3.10.1</maven.compile.version>
-    <maven.assembly.version>3.3.0</maven.assembly.version>
+    <openai.version>0.14.0</openai.version>
+    <maven.compile.version>3.11.0</maven.compile.version>
+    <maven.assembly.version>3.6.0</maven.assembly.version>
   </properties>
   <build>
     <plugins>
@@ -98,18 +98,20 @@
   </repositories>
 
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>
-      <!-- https://search.maven.org/artifact/com.google.code.gson/gson/2.8.8/jar -->
+      <!-- https://search.maven.org/artifact/com.google.code.gson/gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
@@ -132,11 +134,14 @@
       	</exclusion>
       </exclusions>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
       <version>${junit.version}</version>
+      <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.snakeyaml</groupId>
       <artifactId>snakeyaml-engine</artifactId>
@@ -181,13 +186,13 @@
     <!-- https://mvnrepository.com/artifact/com.theokanning.openai-gpt3-java/api -->
     <dependency>
       <groupId>com.theokanning.openai-gpt3-java</groupId>
-      <artifactId>client</artifactId>
+      <artifactId>service</artifactId>
       <version>${openai.version}</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>
-      <!-- https://mvnrepository.com/artifact/co  m.fasterxml.jackson.core/jackson-databind -->
+      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>

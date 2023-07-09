@@ -13,6 +13,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
+import it.auties.whatsapp.api.ClientType;
 import it.auties.whatsapp.api.ErrorHandler;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
@@ -22,7 +23,6 @@ import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,10 +32,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WhatsappHandler {
-    @NotNull
-    public static Boolean onError(ErrorHandler.Location location, Throwable throwable) {
+    public static ErrorHandler.Result onError(ClientType ignore, ErrorHandler.Location location, Throwable throwable) {
         if(Willy.getWilly().getStop())
-            return true;
+            return ErrorHandler.Result.DISCONNECT;
         if(location.name().equals("LOGGED_OUT")) {
             new Whatsapp().disconnect();
             Snowflake consoleSnowflake = Snowflake.of(Config.getLong("discord.admin.command"));
@@ -43,14 +42,14 @@ public class WhatsappHandler {
             MessageChannel console = (MessageChannel) Discord.getBotGateway().getChannelById(consoleSnowflake).block();
             User master = Discord.getBotGateway().getUserById(masterSnowflake).block();
             if(console == null || master == null)
-                return false;
+                return ErrorHandler.Result.DISCARD;
             console.createMessage(MessageCreateSpec.builder()
                 .content(master.getMention()+" Whatsapp is disconnected.").build())
                 .subscribe();
-            return true;
+            return ErrorHandler.Result.RECONNECT;
         }
         Willy.getLogger().severe(location.name()+": "+throwable.getMessage());
-        return false;
+        return ErrorHandler.Result.DISCARD;
     }
 
     public static void onQRCode(String qr) {

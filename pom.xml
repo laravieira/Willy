@@ -5,7 +5,7 @@
 
   <groupId>me.laravieira</groupId>
   <artifactId>willy</artifactId>
-  <version>0.16.2</version>
+  <version>0.17.0</version>
   <packaging>jar</packaging>
 
   <name>Willy</name>

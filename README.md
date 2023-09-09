@@ -16,7 +16,7 @@ Willy is currently hosted on an AWS EC2 instance.
 ## How does Willy think?
 ### Willy is a interface that passes the messages to:
 1. [Watson Assistent](https://assistant-us-south.watsonplatform.net/), who analyze the message and return an action.
-2. [Open AI - GPT-3](https://openai.com/), who builds the Willy's responses when no action is requested.
+2. [Open AI - GPT-4](https://openai.com/), who builds the Willy's responses when no action is requested.
 
 ### Willy has support to some action like:
 * Short a link using Bitly API.
@@ -35,7 +35,7 @@ maven package
 ```
 To run use:
 ```shell
-java --enable-preview -jar /target/willy-0.16.1-jar-with-dependencies.jar
+java --enable-preview -jar /target/willy-0.17.0-jar-with-dependencies.jar
 ```
 
 ### Configuring

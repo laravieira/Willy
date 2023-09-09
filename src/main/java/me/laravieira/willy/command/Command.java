@@ -12,9 +12,7 @@ public class Command {
 		commands.add(new CommandBitly());
 		commands.add(new CommandContext());
 		commands.add(new CommandDiscord());
-		commands.add(new CommandOpenAi());
 		commands.add(new CommandStatus());
-		commands.add(new CommandWatson());
 		commands.add(new CommandWhatsapp());
 		commands.add(new CommandYoutube());
 

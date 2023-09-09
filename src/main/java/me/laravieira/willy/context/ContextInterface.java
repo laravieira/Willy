@@ -1,7 +1,6 @@
 package me.laravieira.willy.context;
 
 import me.laravieira.willy.utils.PassedInterval;
-import me.laravieira.willy.chat.watson.WatsonContext;
 
 import java.util.*;
 
@@ -27,8 +26,7 @@ public interface ContextInterface {
     void setApp(String app);
 
     // Sender
+    SenderInterface getUserSender();
     SenderInterface getSender();
-    void setSender(SenderInterface sender);
-
-    WatsonContext getWatson();
+    void setUserSender(SenderInterface sender);
 }

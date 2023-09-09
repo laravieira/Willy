@@ -64,23 +64,23 @@ public class WatsonAction {
 
 	private void getYoutubeLink() {
 		Youtube youtube = new Youtube(action.getParameters().get("id").toString());
-		if(youtube.getVideo()) {
-			context.getWatson().getSender().sendAction("youtube", youtube.getDownloadLink());
-		}else {
-			context.getWatson().getSender().sendAction("youtube", "null");
-		}
+//		if(youtube.getVideo()) {
+//			context.getWatson().getSender().sendAction("youtube", youtube.getDownloadLink());
+//		}else
+//			context.getWatson().getSender().sendAction("youtube", "null");
+//		}
 	}
 	
 	private void shortLink() {
 		if(Bitly.canUse) {
 			String fullLink  = action.getParameters().get("link").toString();
 			String shortLink = new Bitly(fullLink).getShort();
-			if(shortLink != null && !shortLink.equals(fullLink) && !shortLink.isEmpty())
-				context.getWatson().getSender().sendAction("short_link", shortLink);
-			else
-				context.getWatson().getSender().sendAction("short_link", "null");
-		}else
-			context.getWatson().getSender().sendAction("short_link", "false");
+//			if(shortLink != null && !shortLink.equals(fullLink) && !shortLink.isEmpty())
+//				context.getWatson().getSender().sendAction("short_link", shortLink);
+
+//				context.getWatson().getSender().sendAction("short_link", "null");
+		}
+//			context.getWatson().getSender().sendAction("short_link", "false");
 	}
 	
 	private void musicAdd() {
@@ -90,64 +90,64 @@ public class WatsonAction {
 				player.add(action.getParameters().get("link").toString());
 			else
 				player.play();
-		}else
-			context.getWatson().getSender().sendAction("music_add", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_add", "null");
 	}
 	
 	private void musicPlay() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.play();
-		}else
-			context.getWatson().getSender().sendAction("music_play", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_play", "null");
 	}
 
 	private void musicResume() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.resume();
-		}else
-			context.getWatson().getSender().sendAction("music_resume", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_resume", "null");
 	}
 
 	private void musicPause() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.pause();
-		}else
-			context.getWatson().getSender().sendAction("music_pause", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_pause", "null");
 	}
 
 	private void musicStop() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.stop();
-		}else
-			context.getWatson().getSender().sendAction("music_stop", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_stop", "null");
 	}
 
 	private void musicNext() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.next();
-		}else
-			context.getWatson().getSender().sendAction("music_next", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_next", "null");
 	}
 
 	private void musicClear() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.clear();
-		}else
-			context.getWatson().getSender().sendAction("music_clear", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_clear", "null");
 	}
 
 	private void musicDestroy() {
 		DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(context.getId());
 		if(player != null) {
 			player.destroy();
-		}else
-			context.getWatson().getSender().sendAction("music_destroy", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_destroy", "null");
 	}
 
 	private void musicInfo() {
@@ -210,7 +210,7 @@ public class WatsonAction {
 			((DiscordSender)context.getSender()).sendEmbed(MessageCreateSpec.builder()
 					.addEmbed(embed.build())
 					.build());
-		}else
-			context.getWatson().getSender().sendAction("music_info", "null");
+		}
+//			context.getWatson().getSender().sendAction("music_info", "null");
 	}
 }

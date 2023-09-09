@@ -29,13 +29,13 @@ public class TelegramListener implements UpdatesListener {
 
         Thread messageHandler = new Thread(() -> {
             TelegramSender sender = new TelegramSender(chat);
-            ContextStorage.of(id).setSender(sender);
+            ContextStorage.of(id).setUserSender(sender);
             ContextStorage.of(id).setApp("telegram");
 
             TelegramMessage message = new TelegramMessage(id, msg, chat, PassedInterval.DISABLE);
             MessageStorage.add(message);
 
-            ContextStorage.of(message.getContext()).getWatson().getSender().sendText(message.getText());
+            ContextStorage.of(message.getContext()).getSender().sendText(message.getText());
         });
         messageHandler.setDaemon(true);
         messageHandler.start();

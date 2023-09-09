@@ -6,16 +6,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import me.laravieira.willy.chat.chatgpt.ChatGPT;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.telegram.Telegram;
 import me.laravieira.willy.internal.logger.WillyLogger;
-import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
-import me.laravieira.willy.chat.watson.Watson;
 
 public class Willy {
 	
@@ -46,8 +45,7 @@ public class Willy {
 	public boolean getStop() {return stop;}
 
 	private void registryChats() {
-		willy.addWillyChatInstance(new OpenAi());
-		willy.addWillyChatInstance(new Watson());
+		willy.addWillyChatInstance(new ChatGPT());
 		willy.addWillyChatInstance(new Discord());
 		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());

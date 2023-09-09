@@ -50,14 +50,6 @@ public class Config {
 		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("5m"));
 		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,    ignore);
 
-		// Watson Assistant settings
-		set("wa.session_live", "WILLY_WA_SESSION_LIVE", "watson.session-live",         TYPE_TIME,    parseTime("5m"));
-		set("wa.keep_alive",   "WILLY_WA_KEEP_ALIVE",   "watson.keep-alive",           TYPE_BOOLEAN, false);
-		set("wa.api_date",     "WILLY_WA_API_DATE",     "watson.api-date",             TYPE_STRING,  "2021-11-27");
-		set("wa.server_url",   "WILLY_WA_SERVER_URL",   "watson.server-url",           TYPE_STRING,  "https://api.us-south.assistant.watson.cloud.ibm.com");
-		set("wa.assistant_id", "WILLY_WA_ASSISTANT_ID", "watson.assistant-id",         TYPE_STRING,  null);
-		set("wa.password",     "WILLY_WA_PASSWORD",     "watson.credentials-password", TYPE_STRING,  null);
-
 		// Discord settings
 		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, true);
 		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
@@ -71,9 +63,9 @@ public class Config {
 		set("discord.admin.command",      "WILLY_DISCORD_ADMIN_COMMAND",            "discord.admin.command",           TYPE_LONG, null);
 		set("discord.admin.log",          "WILLY_DISCORD_ADMIN_LOG",                "discord.admin.log",               TYPE_LONG, null);
 
-		// OpenAI settings
-		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, true);
-		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
+		// ChatGPT settings
+		set("chatgpt.enable", "WILLY_CHATGPT_ENABLE", "chatgpt.enable", TYPE_BOOLEAN, true);
+		set("chatgpt.token", "WILLY_CHATGPT_TOKEN", "chatgpt.token", TYPE_STRING, null);
 
 		// Whatsapp Settings
 		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, true);

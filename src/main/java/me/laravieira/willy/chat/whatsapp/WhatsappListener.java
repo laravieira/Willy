@@ -81,12 +81,12 @@ public class WhatsappListener implements Listener {
             content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
             WhatsappSender sender = new WhatsappSender(chat);
-            ContextStorage.of(id).setSender(sender);
+            ContextStorage.of(id).setUserSender(sender);
             ContextStorage.of(id).setApp("whatsapp");
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
             MessageStorage.add(whatsappMessage);
-            ContextStorage.of(whatsappMessage.getContext()).getWatson().getSender().sendText(whatsappMessage.getText());
+            ContextStorage.of(whatsappMessage.getContext()).getSender().sendText(whatsappMessage.getText());
         });
 
         Thread messageStatusUpdate = new Thread(() -> {

@@ -31,7 +31,7 @@ public class WatsonListener {
     }
 
     private void onTextResponse(@NotNull MessageResponse response, @NotNull RuntimeResponseGeneric generic, UUID context) {
-        ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
+//        ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
 
         Message message = new Message(context);
         message.setExpire(PassedInterval.DISABLE);
@@ -45,7 +45,7 @@ public class WatsonListener {
     }
 
     private void onActionResponse(@NotNull MessageResponse response, DialogNodeAction action, UUID context) {
-        ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
+//        ContextStorage.of(context).getWatson().setWatsonContext(response.getContext());
         new WatsonAction(action, context);
     }
 }

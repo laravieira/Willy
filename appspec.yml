@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: ./willy-0.16.2-jar-with-dependencies.jar
+  - source: ./willy-0.17.0-jar-with-dependencies.jar
     destination: /
   - source: ./after-install.sh
     destination: /

@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import me.laravieira.willy.chat.bloom.Bloom;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.internal.Config;
@@ -47,7 +46,6 @@ public class Willy {
 	public boolean getStop() {return stop;}
 
 	private void registryChats() {
-		willy.addWillyChatInstance(new Bloom());
 		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Watson());
 		willy.addWillyChatInstance(new Discord());

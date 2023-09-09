@@ -68,7 +68,7 @@ public class WhatsappHandler {
             UUID id = UUID.nameUUIDFromBytes(("discord-"+masterChannel.getId().asString()).getBytes());
 
             DiscordSender sender = new DiscordSender(id, masterChannel, PassedInterval.DISABLE);
-            ContextStorage.of(id).setSender(sender);
+            ContextStorage.of(id).setUserSender(sender);
 
             Message message = new Message(id);
             message.setExpire(PassedInterval.DISABLE);

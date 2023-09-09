@@ -52,7 +52,7 @@ public class Watson implements WillyChat {
 	public void refresh() {
 		if(Config.getBoolean("wa.keep_alive") && expire.hasPassedInterval()) {
 			UUID context = UUID.nameUUIDFromBytes("willy-refresh".getBytes());
-			ContextStorage.of(context).getWatson().getSender().sendText(null);
+			ContextStorage.of(context).getSender().sendText(null);
 		}else if(expire.hasPassedInterval()) {
 			registered = false;
 			session = null;

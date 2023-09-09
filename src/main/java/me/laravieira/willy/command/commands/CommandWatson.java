@@ -39,7 +39,7 @@ public class CommandWatson implements CommandListener {
     public void execute(@NotNull ChatInputInteractionEvent event) {
         event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).ifPresent(value -> {
             UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-            ContextStorage.of(context).setSender(new CommandSender(event));
+            ContextStorage.of(context).setUserSender(new CommandSender(event));
 
             Message message = new Message(context);
             message.setExpire(PassedInterval.DISABLE);
@@ -49,7 +49,7 @@ public class CommandWatson implements CommandListener {
             message.setTo(Willy.getWilly().getName());
             MessageStorage.add(message);
 
-            ContextStorage.of(message.getContext()).getWatson().getSender().sendText(message.getText());
+            ContextStorage.of(message.getContext()).getSender().sendText(message.getText());
         });
     }
 

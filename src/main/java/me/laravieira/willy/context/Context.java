@@ -1,10 +1,9 @@
 package me.laravieira.willy.context;
 
+import me.laravieira.willy.chat.chatgpt.ChatGPTSender;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
-import me.laravieira.willy.chat.watson.WatsonContext;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -12,15 +11,15 @@ public class Context implements ContextInterface {
     private final PassedInterval expire = new PassedInterval(Config.getLong("context_lifetime"));
     private final UUID id;
     private final LinkedList<UUID> history = new LinkedList<>();
-    private final WatsonContext watson;
-    private SenderInterface sender;
+    private final SenderInterface sender;
+    private SenderInterface userSender;
     private String language = "default";
     private String app = "discord";
 
     public Context(UUID id) {
         this.id = id;
         this.expire.start();
-        this.watson = new WatsonContext(id);
+        this.sender = new ChatGPTSender(id);
     }
 
     @Override
@@ -86,18 +85,17 @@ public class Context implements ContextInterface {
     }
 
     @Override
-    public WatsonContext getWatson() {
-        return watson;
-    }
-
-    @Override
     public SenderInterface getSender() {
         return sender;
     }
 
     @Override
-    public void setSender(SenderInterface sender) {
-        this.sender = sender;
+    public SenderInterface getUserSender() {
+        return userSender;
     }
 
+    @Override
+    public void setUserSender(SenderInterface sender) {
+        this.userSender = sender;
+    }
 }

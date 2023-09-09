@@ -69,7 +69,7 @@ public class DiscordListener {
 
 		DiscordMessage discordMessage = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
 
-		ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
+		ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
 	}
 
 	@NotNull
@@ -79,7 +79,7 @@ public class DiscordListener {
 
 		DiscordSender sender = new DiscordSender(id, channel, expire);
 
-		ContextStorage.of(id).setSender(sender);
+		ContextStorage.of(id).setUserSender(sender);
 		ContextStorage.of(id).setApp("discord");
 		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
 		MessageStorage.add(discordMessage);
@@ -122,7 +122,7 @@ public class DiscordListener {
 		DiscordMessage discordMessage= clearContent(channel, user, message, content, id, expire);
 
 		if(!checkForPlayQuestion(id, content))
-			ContextStorage.of(discordMessage.getContext()).getWatson().getSender().sendText(content);
+			ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
 	
@@ -194,7 +194,7 @@ public class DiscordListener {
 		try {
 			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.clear_after_wait"));
-			ContextStorage.of(id).setSender(sender);
+			ContextStorage.of(id).setUserSender(sender);
 
 			me.laravieira.willy.context.Message message = new me.laravieira.willy.context.Message(id);
 			message.setExpire(Config.getLong("discord.clear_after_wait"));

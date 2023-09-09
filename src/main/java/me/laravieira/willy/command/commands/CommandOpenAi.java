@@ -40,7 +40,7 @@ public class CommandOpenAi implements CommandListener {
     public void execute(@NotNull ChatInputInteractionEvent event) {
         event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).ifPresent(value -> {
             UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-            ContextStorage.of(context).setSender(new CommandSender(event));
+            ContextStorage.of(context).setUserSender(new CommandSender(event));
 
             Message message = new Message(context);
             message.setExpire(PassedInterval.DISABLE);

@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackState;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
-import me.laravieira.willy.chat.bloom.BloomSender;
 import me.laravieira.willy.chat.discord.DiscordSender;
 import me.laravieira.willy.context.Context;
 import me.laravieira.willy.feature.bitly.Bitly;
@@ -31,10 +30,6 @@ public class WatsonAction {
 		Thread actionTask = new Thread(() -> {
 			if(action.getName().equals("openai"))
 				openAi();
-			if(action.getName().equals("ping"))
-				ping();
-			if(action.getName().equals("bloom"))
-				bloom();
 			else if(action.getName().equals("get_youtube_link"))
 				getYoutubeLink();
 			else if(action.getName().equals("short"))
@@ -64,17 +59,6 @@ public class WatsonAction {
 
 	private void openAi() {
 		OpenAiSender sender = new OpenAiSender(context.getId());
-		sender.sendText(context.getLastMessage().getText());
-	}
-
-	private void bloom() {
-		BloomSender sender = new BloomSender(context.getId());
-		sender.sendText(context.getLastMessage().getText());
-	}
-
-	private void ping() {
-		BloomSender sender = new BloomSender(context.getId());
-		context.getLastMessage().setText("Say an welcome phrase.");
 		sender.sendText(context.getLastMessage().getText());
 	}
 

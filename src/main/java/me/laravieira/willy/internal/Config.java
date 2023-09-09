@@ -75,10 +75,6 @@ public class Config {
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, true);
 		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
 
-		// Bloom settings
-		set("bloom.enable", "WILLY_BLOOM_ENABLE", "bloom.enable", TYPE_BOOLEAN, true);
-		set("bloom.token", "WILLY_BLOOM_TOKEN", "bloom.token", TYPE_STRING, null);
-
 		// Whatsapp Settings
 		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, true);
 		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, false);

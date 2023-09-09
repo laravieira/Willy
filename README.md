@@ -76,11 +76,6 @@ openai:
   enable: # type: TYPE_BOOLEAN, default: true
   token:  # type: TYPE_STRING,  default: null
 
-// Bloom settings
-bloom:
-  enable: # type: TYPE_BOOLEAN, default: true
-  token:  # type: TYPE_STRING,  default: null
-
 // Whatsapp Settings
 whatsapp:
   enable:      # type: TYPE_BOOLEAN, default: true
@@ -146,10 +141,6 @@ WILLY_DISCORD_ADMIN_LOG
 // OpenAI settings
 WILLY_OPENAI_ENABLE
 WILLY_OPENAI_TOKEN
-
-// Bloom settings
-WILLY_BLOOM_ENABLE
-WILLY_BLOOM_TOKEN
 
 // Whatsapp Settings
 WILLY_WHATSAPP_ENABLE

@@ -10,7 +10,6 @@ public class Command {
 		List<CommandListener> commands = new ArrayList<>();
 
 		commands.add(new CommandBitly());
-		commands.add(new CommandBloom());
 		commands.add(new CommandContext());
 		commands.add(new CommandDiscord());
 		commands.add(new CommandOpenAi());

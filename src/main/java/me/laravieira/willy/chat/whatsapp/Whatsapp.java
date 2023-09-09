@@ -24,9 +24,8 @@ public class Whatsapp implements WillyChat {
             .newConnection(Willy.getWilly().getName())
             .autodetectListeners(false)
             .name(Willy.getWilly().getName() + " by L4R4")
-            .qrHandler(WhatsappHandler::onQRCode)
             .errorHandler(WhatsappHandler::onError)
-            .build()
+            .unregistered(WhatsappHandler::onQRCode)
             .addListener(new WhatsappListener());
         whatsapp
             .connect()

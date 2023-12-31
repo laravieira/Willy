@@ -4,7 +4,7 @@ import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.request.SendMessage;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import java.io.File;
 

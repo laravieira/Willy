@@ -5,7 +5,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.chat.telegram.Telegram;
-import me.laravieira.willy.chat.watson.Watson;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.discord.Discord;
@@ -35,7 +34,6 @@ public class CommandStatus implements CommandListener {
         list.append("```yaml").append("\r\n");
 
         list.append("discord: ").append(new Discord().isConnected() ? "Connected" : "Disconnected").append("\r\n");
-        list.append("watson: ").append(new Watson().isConnected() ? "Connected" : "Disconnected").append("\r\n");
         list.append("openai: ").append(new OpenAi().isConnected() ? "Connected" : "Disconnected").append("\r\n");
         list.append("whatsapp: ").append(new Whatsapp().isConnected() ? "Connected" : "Disconnected").append("\r\n");
         list.append("telegram: ").append(new Telegram().isConnected() ? "Connected" : "Disconnected").append("\r\n");

@@ -6,7 +6,7 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

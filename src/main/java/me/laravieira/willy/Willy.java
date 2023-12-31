@@ -6,7 +6,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import me.laravieira.willy.chat.chatgpt.ChatGPT;
+import me.laravieira.willy.chat.http.HTTP;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.internal.Config;
@@ -22,7 +24,9 @@ public class Willy {
 	private static final int[]  my_version = {0,17,0};
 	private static final long   start_time = new Date().getTime();
 
+	@Getter
 	private static final Willy willy = new Willy();
+	@Getter
 	private static final WillyLogger logger = new WillyLogger();
 
 	private final ArrayList<WillyChat> chats = new ArrayList<>();
@@ -31,9 +35,6 @@ public class Willy {
 	public static void main(String[] args) {
 		willy.run();
     }
-
-    public static Willy       getWilly()  {return willy;}
-	public static WillyLogger getLogger() {return logger;}
 
 	public void stop() {
     	stop = true;
@@ -49,6 +50,7 @@ public class Willy {
 		willy.addWillyChatInstance(new Discord());
 		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());
+		willy.addWillyChatInstance(new HTTP());
 	}
 
 	private void onShutdown() {

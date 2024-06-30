@@ -13,7 +13,7 @@ public class Handler implements org.eclipse.jetty.server.Handler {
     public static final JSONObject DEFAULT_RESPONSE = new JSONObject() {{
         put("name", Willy.getWilly().getName());
         put("version", Willy.getWilly().getFullVersion());
-        put("paths", new String[] {"/ping"});
+        put("paths", new String[] {"/ping", "/status"});
     }};
 
     private boolean toMethod(Controller controller) {
@@ -38,6 +38,8 @@ public class Handler implements org.eclipse.jetty.server.Handler {
     public boolean handle(Request request, Response response, Callback callback) {
         if (request.getHttpURI().getPath().equals("/ping"))
             return onNoMethod(new Ping(request, response, callback));
+        if (request.getHttpURI().getPath().equals("/status"))
+            return onNoMethod(new Status(request, response, callback));
         return new Controller(request, response, callback).toJSON(DEFAULT_RESPONSE, 404);
     }
 

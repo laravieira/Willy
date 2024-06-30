@@ -3,11 +3,10 @@ package me.laravieira.willy.chat.discord;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.VoiceStateUpdateEvent;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.guild.MemberUpdateEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.lifecycle.ConnectEvent;
-import discord4j.core.event.domain.lifecycle.DisconnectEvent;
+import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.gateway.intent.IntentSet;
@@ -15,32 +14,43 @@ import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.Command;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
-import me.laravieira.willy.feature.player.DiscordPlayer;
 
 import java.util.logging.LogRecord;
 
 public class Discord implements WillyChat {
 
-	private static final DiscordClient client = DiscordClient.create(Config.getString("discord.token"));
+	private static DiscordClient client;
 	private static GatewayDiscordClient gateway;
 	private static boolean ready = false;
 
 	@Override
 	public void connect() {
-		if(!Config.getBoolean("discord.enable"))
+		if(!Config.has("discord.enable") || !Config.getBoolean("discord.enable")) {
+			Willy.getLogger().warning("Discord instance disabled.");
 			return;
+		}
+		if(!Config.has("discord.token")) {
+			Willy.getLogger().severe("Discord token not found.");
+			return;
+		}
+
+		EventDispatcher eventDispatcher = EventDispatcher.builder().build();
+		eventDispatcher.on(ChatInputInteractionEvent.class).subscribe(DiscordListener::onCommand, Discord::errorDisplay);
+		eventDispatcher.on(ConnectEvent.class)             .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
+		eventDispatcher.on(ReconnectEvent.class)           .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
+		eventDispatcher.on(ReadyEvent.class)               .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
+		eventDispatcher.on(DisconnectEvent.class)          .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
+		eventDispatcher.on(SessionInvalidatedEvent.class)  .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
+		eventDispatcher.on(MemberUpdateEvent.class)        .subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
+		eventDispatcher.on(MessageCreateEvent.class)       .subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);
+
+		client = DiscordClient.create(Config.getString("discord.token"));
 		gateway = client
-				.gateway()
-				.setEnabledIntents(IntentSet.all())
-				.login()
-				.block();
-		DiscordPlayer.load();
-		gateway.on(ChatInputInteractionEvent.class).subscribe(DiscordListener::onCommand, Discord::errorDisplay);
-		gateway.on(ConnectEvent.class).subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
-		gateway.on(DisconnectEvent.class).subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
-		gateway.on(MemberUpdateEvent.class).subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
-		gateway.on(VoiceStateUpdateEvent.class).subscribe(DiscordPlayer::onVoiceChannelUpdate, Discord::errorDisplay);
-		gateway.on(MessageCreateEvent.class).subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);
+			.gateway()
+			.setEventDispatcher(eventDispatcher)
+			.setEnabledIntents(IntentSet.all())
+			.login()
+			.block();
 		Willy.getLogger().registerDiscordHandler();
 		registerCommands();
     	Willy.getLogger().info("Discord instance connected.");

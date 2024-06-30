@@ -19,7 +19,6 @@ import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.Command;
-import me.laravieira.willy.feature.player.DiscordPlayer;
 import me.laravieira.willy.internal.Config;
 import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.storage.ContextStorage;
@@ -27,6 +26,7 @@ import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
+import org.reactivestreams.Subscription;
 
 public class DiscordListener {
 
@@ -119,10 +119,6 @@ public class DiscordListener {
 		
 		if(!WillyUtils.hasWillyCall(content) && !ContextStorage.has(id)) return;
 
-		DiscordMessage discordMessage= clearContent(channel, user, message, content, id, expire);
-
-		if(!checkForPlayQuestion(id, content))
-			ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
 		Willy.getLogger().info("Message transaction in a public chat.");
 	}
 	
@@ -137,22 +133,6 @@ public class DiscordListener {
 		for(String prefix : Config.getStringList("ignore_if_start_with"))
 			if(message.startsWith(prefix))
 				return true;
-		return false;
-	}
-
-	public static boolean checkForPlayQuestion(UUID context, String content) {
-		//TODO Fix context on music player
-		for(String key : Config.getStringList("ap.blends_for_play"))
-			if(content.toLowerCase().startsWith(key.toLowerCase())) {
-				DiscordPlayer player = DiscordPlayer.getDiscordPlayerFromContext(null);
-				String data = content.substring(key.length()).trim();
-				System.out.println(data);
-				if(player != null && !data.isEmpty())
-					player.search(data);
-				else
-					ContextStorage.of(context).getSender().sendText("Desculpa, acho que eu não peguei seu pedido. 🐕");
-				return true;
-			}
 		return false;
 	}
 

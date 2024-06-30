@@ -1,6 +1,6 @@
 package me.laravieira.willy.chat.http;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
@@ -12,14 +12,14 @@ public class Controller implements HandlerHTTP {
     protected Response response;
     protected Callback callback;
 
-    protected boolean toJSON(JSONObject body) {
+    protected boolean toJSON(Object body) {
         return toJSON(body, 200);
     }
 
-    protected boolean toJSON(JSONObject body, int status) {
+    protected boolean toJSON(Object body, int status) {
         response.setStatus(status);
         response.getHeaders().add("Content-Type", "application/json");
-        response.write(true, ByteBuffer.wrap(body.toJSONString().getBytes()), callback);
+        response.write(true, ByteBuffer.wrap(JSON.toJSONString(body).getBytes()), callback);
         callback.succeeded();
         return true;
     }

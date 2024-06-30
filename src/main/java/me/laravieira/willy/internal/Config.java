@@ -76,24 +76,13 @@ public class Config {
 		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, false);
 		set("telegram.token",  "WILLY_TELEGRAM_TOKEN",  "telegram.token",  TYPE_STRING,  null);
 
-		// Audio Player Settings
-		set("ap.enable",                     "WILLY_AP_ENABLE",          "audio-player.enable",                     TYPE_BOOLEAN, false);
-		set("ap.change_activity",            "WILLY_AP_CHANGE_ACTIVITY", "audio-player.change-activity",            TYPE_BOOLEAN, true);
-		set("ap.command_default_channel_id", "WILLY_AP_DEFAULT_CHANNEL", "audio-player.command-default-channel-id", TYPE_STRING,  null);
-		set("ap.blends_for_play",            "WILLY_AP_BLENDS",          "audio-player.blends-for-play",            TYPE_LIST,    apBlends);
-
 		// Bitly Settings
 		set("bitly.enable", "WILLY_BITLY_ENABLE", "bitly.enable", TYPE_BOOLEAN, false);
 		set("bitly.token",  "WILLY_BITLY_TOKEN",  "bitly.token",  TYPE_STRING,  null);
 
-		// YouTube Downloader Settings
-		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, false);
-		set("ytd.willy_vpn", "WILLY_YTD_LOCAL",     "youtube-downloader.willy-vpn", TYPE_BOOLEAN, false);
-		set("ytd.use_bitly", "WILLY_YTD_USE_BITLY", "youtube-downloader.use-bitly", TYPE_BOOLEAN, true);
-
-		// Willy Shadow Settings
-		set("shadow.enable", "WILLY_SHADOW_ENABLE", "shadow.enable", TYPE_BOOLEAN, false);
-		set("shadow.token",  "WILLY_SHADOW_TOKEN",  "shadow.token",  TYPE_STRING,  null);
+		// HTTP API Settings
+		set("http-api.enable", "WILLY_HTTP_API_ENABLE", "http-api.enable", TYPE_BOOLEAN, false);
+		set("http-api.port",   "WILLY_HTTP_API_PORT",   "http-api.port",   TYPE_INT,     8080);
 	}
 
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {

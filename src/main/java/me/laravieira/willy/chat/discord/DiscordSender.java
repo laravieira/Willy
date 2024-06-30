@@ -6,7 +6,6 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -57,7 +56,7 @@ public class DiscordSender implements SenderInterface {
     }
 
     @Override
-    public void sendStick(Message message) {
+    public void sendStick(Message message) throws Exception {
         //TODO Implement how to send stick images to Discord
 //        try {
 //            sendMessage(MessageCreateSpec.builder()
@@ -69,7 +68,7 @@ public class DiscordSender implements SenderInterface {
 //        } catch(FileNotFoundException e) {
 //            e.printStackTrace();
 //        }
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     public void sendEmbed(MessageCreateSpec messageCreateSpec) {
@@ -77,39 +76,39 @@ public class DiscordSender implements SenderInterface {
     }
 
     @Override
-    public void sendGif(Message message) {
+    public void sendGif(Message message) throws Exception {
         //TODO Implement how to send gif images to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override
-    public void sendImage(Message message) {
+    public void sendImage(Message message) throws Exception {
         //TODO Implement how to send images to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override
-    public void sendVideo(Message message) {
+    public void sendVideo(Message message) throws Exception {
         //TODO Implement how to send videos to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override
-    public void sendAudio(Message message) {
+    public void sendAudio(Message message) throws Exception {
         //TODO Implement how to send audio to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override
-    public void sendLocation(Message message) {
+    public void sendLocation(Message message) throws Exception {
         //TODO Implement how to send locations to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override
-    public void sendContact(Message message) {
+    public void sendContact(Message message) throws Exception {
         //TODO Implement how to send contacts to Discord
-        throw new NotImplementedException("This function is not implemented.");
+        throw new Exception("This function is not implemented.");
     }
 
     @Override

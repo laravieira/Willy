@@ -1,6 +1,6 @@
 package me.laravieira.willy.chat.openai;
 
-import com.theokanning.openai.completion.CompletionResult;
+import io.github.sashirestela.openai.domain.chat.Chat;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.storage.ContextStorage;
@@ -11,18 +11,31 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class OpenAiListener {
-    public void onCompletionResponse(@NotNull CompletionResult result, UUID context) {
-        String response = result.getChoices().get(0).getText().trim();
+    private final UUID context;
+
+    public static void whenCompletionComplete(@NotNull Chat chat, Throwable throwable, UUID context) {
+        if(throwable != null) {
+            Willy.getLogger().warning(STR."Error on OpenAI chat completion: \{throwable.getMessage()}");
+            return;
+        }
+        new OpenAiListener(context).onCompletionResponse(chat);
+    }
+
+    OpenAiListener(UUID context) {
+        this.context = context;
+    }
+
+    public void onCompletionResponse(@NotNull Chat chat) {
         String from = ContextStorage.of(context).getLastMessage().getFrom();
 
         Message message = new Message(context);
         message.setExpire(PassedInterval.DISABLE);
         message.setTo(from);
         message.setFrom(Willy.getWilly().getName());
-        message.setContent(result.getChoices().get(0));
-        message.setText(response);
+        message.setContent(chat.firstMessage());
+        message.setText(chat.firstContent());
         MessageStorage.add(message);
 
-        ContextStorage.of(context).getSender().sendText(response);
+        ContextStorage.of(context).getSender().sendText(chat.firstContent());
     }
 }

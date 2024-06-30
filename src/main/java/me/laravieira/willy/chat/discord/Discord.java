@@ -36,8 +36,8 @@ public class Discord implements WillyChat {
 				.block();
 		DiscordPlayer.load();
 		gateway.on(ChatInputInteractionEvent.class).subscribe(DiscordListener::onCommand, Discord::errorDisplay);
-		gateway.on(ConnectEvent.class).subscribe(event -> Discord.setReady(true), Discord::errorDisplay);
-		gateway.on(DisconnectEvent.class).subscribe(event -> Discord.setReady(false), Discord::errorDisplay);
+		gateway.on(ConnectEvent.class).subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
+		gateway.on(DisconnectEvent.class).subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
 		gateway.on(MemberUpdateEvent.class).subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
 		gateway.on(VoiceStateUpdateEvent.class).subscribe(DiscordPlayer::onVoiceChannelUpdate, Discord::errorDisplay);
 		gateway.on(MessageCreateEvent.class).subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);

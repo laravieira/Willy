@@ -5,6 +5,7 @@ import it.auties.whatsapp.api.SocketEvent;
 import it.auties.whatsapp.listener.Listener;
 import it.auties.whatsapp.model.chat.Chat;
 import it.auties.whatsapp.model.contact.ContactStatus;
+import it.auties.whatsapp.model.info.ChatMessageInfo;
 import it.auties.whatsapp.model.info.MessageInfo;
 import it.auties.whatsapp.model.message.model.MessageStatus;
 import it.auties.whatsapp.model.message.standard.TextMessage;
@@ -35,14 +36,14 @@ public class WhatsappListener implements Listener {
             if(chat.newestMessage().isEmpty() || chat.newestMessageFromMe().isEmpty())
                 return;
 
-            MessageInfo last = chat.newestMessage().get();
-            MessageInfo myLast = chat.newestMessageFromMe().get();
+            ChatMessageInfo last = chat.newestMessage().get();
+            ChatMessageInfo myLast = chat.newestMessageFromMe().get();
 
             // chat.hasUnreadMessages() is not reliable
             if(last == myLast || last.status() == MessageStatus.READ)
                 return;
 
-            last.key(last.key().chat(chat));
+//            last.key(last.key().chat(chat));
             Willy.getLogger().info("Unread messages on chat "+chat.jid().user());
             onNewMessage(last);
         });
@@ -64,10 +65,8 @@ public class WhatsappListener implements Listener {
 
         if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
             return;
-        if(info.fromMe())
-            return;
-
-        Chat chat = info.chat();
+//        if(info.fromMe())
+//            return;
 
         Thread messageHandler = new Thread(() -> {
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
@@ -80,8 +79,8 @@ public class WhatsappListener implements Listener {
 
             content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-            WhatsappSender sender = new WhatsappSender(chat);
-            ContextStorage.of(id).setUserSender(sender);
+//            WhatsappSender sender = new WhatsappSender();
+//            ContextStorage.of(id).setUserSender(sender);
             ContextStorage.of(id).setApp("whatsapp");
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
@@ -89,16 +88,16 @@ public class WhatsappListener implements Listener {
             ContextStorage.of(whatsappMessage.getContext()).getSender().sendText(whatsappMessage.getText());
         });
 
-        Thread messageStatusUpdate = new Thread(() -> {
-            try {
-                Whatsapp.getApi().markRead(chat).get(5, TimeUnit.SECONDS);
-                Whatsapp.getApi().clear(chat, false).get(5, TimeUnit.SECONDS);
-                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
-            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
-        });
+//        Thread messageStatusUpdate = new Thread(() -> {
+//            try {
+//                Whatsapp.getApi().markRead(chat).get(5, TimeUnit.SECONDS);
+//                Whatsapp.getApi().clear(chat, false).get(5, TimeUnit.SECONDS);
+//                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
+//            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
+//        });
 
-        messageStatusUpdate.setDaemon(true);
-        messageStatusUpdate.start();
+//        messageStatusUpdate.setDaemon(true);
+//        messageStatusUpdate.start();
         messageHandler.setDaemon(true);
         messageHandler.start();
     }

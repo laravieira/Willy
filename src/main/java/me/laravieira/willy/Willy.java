@@ -7,8 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
-import me.laravieira.willy.chat.chatgpt.ChatGPT;
 import me.laravieira.willy.chat.http.HTTP;
+import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.internal.Config;
@@ -46,7 +46,7 @@ public class Willy {
 	public boolean getStop() {return stop;}
 
 	private void registryChats() {
-		willy.addWillyChatInstance(new ChatGPT());
+		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Discord());
 		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());

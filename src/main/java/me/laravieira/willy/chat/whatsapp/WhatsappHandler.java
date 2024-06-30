@@ -13,7 +13,6 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
-import it.auties.whatsapp.api.ClientType;
 import it.auties.whatsapp.api.ErrorHandler;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
@@ -32,7 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WhatsappHandler {
-    public static ErrorHandler.Result onError(ClientType ignore, ErrorHandler.Location location, Throwable throwable) {
+    public static ErrorHandler.Result onError(it.auties.whatsapp.api.Whatsapp ignore, ErrorHandler.Location location, Throwable throwable) {
         if(Willy.getWilly().getStop())
             return ErrorHandler.Result.DISCONNECT;
         if(location.name().equals("LOGGED_OUT")) {

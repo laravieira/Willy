@@ -12,9 +12,12 @@ public class WhatsappMessage extends Message {
 
     public WhatsappMessage(UUID context, @NotNull MessageInfo message, String text, long expire) {
         super(context);
+
+        String name = message.senderJid().user();
+
         this.content = message;
         this.text = text;
-        this.from = message.senderName().substring(0, message.senderName().contains(" ") ? message.senderName().indexOf(" ") : message.senderName().length()-1);
+        this.from = name.substring(0, name.contains(" ") ? name.indexOf(" ") : name.length()-1);
         this.to = Willy.getWilly().getName();
         this.expire = new PassedInterval(expire);
         this.expire.start();

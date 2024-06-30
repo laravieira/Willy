@@ -1,53 +1,33 @@
 package me.laravieira.willy.chat.openai;
 
-import com.theokanning.openai.service.OpenAiService;
+import io.github.sashirestela.openai.SimpleOpenAI;
+import io.github.sashirestela.openai.common.function.FunctionExecutor;
+import io.github.sashirestela.openai.domain.chat.ChatMessage.SystemMessage;
+import io.github.sashirestela.openai.domain.chat.ChatRequest;
+import lombok.Getter;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
-import java.util.*;
-
 public class OpenAi implements WillyChat {
-    public static final String ENGINE = "text-davinci-002";
-    public static final int BEST_OF = 1;
+    public static final String MODEL = "gpt-3.5-turbo-0125"; // newest 3.5 model (3.5 is the cheapest model available with functions)
     public static final int MAX_TOKENS = 100;
-    public static final double FREQUENCY_PENALTY = .51;
-    public static final double PRESENCE_PENALTY = 1;
-    public static final double TEMPERATURE = 1;
-    public static final double TOP_P = .19;
-    public static final boolean ECHO = false;
-    public static final int HISTORY_SIZE = 7;
+    public static final int HISTORY_SIZE = 10;
 
-    private static OpenAiService service = null;
-
-    public OpenAi() {
-        List<String> portugueseHeader = new ArrayList<>();
-        portugueseHeader.add("Você é Willy, um cãozinho virtual falante da Lara Vieira. Você é muito fofo.");
-        portugueseHeader.add("Vocé é branco e mora nas núvens");
-        portugueseHeader.add("PHP é melhor que Python");
-
-        List<String> englishHeader = new ArrayList<>();
-        englishHeader.add("You are Willy, a little virtual talking dog of Lara Vieira. You are very cute");
-        englishHeader.add("You are white and live in the clouds");
-        englishHeader.add("PHP is better than Python");
-
-        Map<String, List<String>> headerBaseList = new HashMap<>();
-        headerBaseList.put("default", portugueseHeader);
-        headerBaseList.put("pt-br", portugueseHeader);
-        headerBaseList.put("en-us", englishHeader);
-        OpenAiHeader.setHeaderBaseList(headerBaseList);
-
-        Map<String, String> connectorList = new HashMap<>();
-        connectorList.put("default", "\r\nWilly: Oi!!! :)\r\n");
-        connectorList.put("pt-br", "\r\nWilly: Oi!!! :)\r\n");
-        connectorList.put("en-us", "\r\nWilly: Hi!!! :)\r\n");
-        OpenAiHeader.setConnectorList(connectorList);
-    }
+    @Getter
+    private static SimpleOpenAI service = null;
 
     @Override
     public void connect() {
-        if(!Config.getBoolean("openai.enable"))
+        if(!Config.getBoolean("openai.enable")) {
+            Willy.getLogger().info("OpenAI is disabled.");
             return;
-        service = new OpenAiService(Config.getString("openai.token"));
+        }
+        if(!Config.has("openai.token")) {
+            Willy.getLogger().severe("OpenAI token is not defined in the configuration file.");
+            return;
+        }
+        service = SimpleOpenAI.builder().apiKey(Config.getString("openai.token")).build();
     }
 
     @Override
@@ -65,7 +45,28 @@ public class OpenAi implements WillyChat {
 
     }
 
-    public static OpenAiService getService() {
-        return service;
+    public static ChatRequest.ChatRequestBuilder chat() {
+        FunctionExecutor executor = new FunctionExecutor();
+
+//        How to add a function
+//        executor.enrollFunction(
+//            FunctionDef.builder()
+//                .name("getWeather")
+//                .description("Get the weather of a city")
+//                .functionalClass(Weather.class)
+//                .build()
+//        );
+
+        return ChatRequest.builder()
+            .model(MODEL)
+            .maxTokens(MAX_TOKENS)
+            //TODO Implement the language selection
+            // .message(SystemMessage.of("You are Willy, a little virtual talking dog of Lara Vieira. You are very cute"))
+            // .message(SystemMessage.of("You are white and live in the clouds"))
+            // .message(SystemMessage.of("PHP is better than Python"))
+            .message(SystemMessage.of("Eu sou Willy, um cãozinho virtual falante da Lara Vieira. EU sou muito fofo."))
+            .message(SystemMessage.of("Eu sou branco e moro nas núvens."))
+            .message(SystemMessage.of("Pra mim, PHP é melhor que Python."))
+            .tools(executor.getToolFunctions());
     }
 }

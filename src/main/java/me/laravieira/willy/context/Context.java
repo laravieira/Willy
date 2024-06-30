@@ -1,6 +1,6 @@
 package me.laravieira.willy.context;
 
-import me.laravieira.willy.chat.chatgpt.ChatGPTSender;
+import me.laravieira.willy.chat.openai.OpenAiSender;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
@@ -19,7 +19,7 @@ public class Context implements ContextInterface {
     public Context(UUID id) {
         this.id = id;
         this.expire.start();
-        this.sender = new ChatGPTSender(id);
+        this.sender = new OpenAiSender(id);
     }
 
     @Override

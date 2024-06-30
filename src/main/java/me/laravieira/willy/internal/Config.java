@@ -46,12 +46,13 @@ public class Config {
 
 		// Overall Settings
 		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, Willy.getWilly().getName());
-		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,    aliases);
-		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,    parseTime("5m"));
-		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,    ignore);
+		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,   aliases);
+		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,   parseTime("5m"));
+		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,   ignore);
+		set("environment",           "ENVIRONMENT",                    "environment",             TYPE_STRING, "development");
 
 		// Discord settings
-		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, true);
+		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, false);
 		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
 		set("discord.token",              "WILLY_DISCORD_TOKEN",                    "discord.token",                   TYPE_STRING,  null);
 		set("discord.verbose",            "WILLY_DISCORD_VERBOSE",                  "discord.verbose-channel",         TYPE_STRING,  null);
@@ -64,29 +65,29 @@ public class Config {
 		set("discord.admin.log",          "WILLY_DISCORD_ADMIN_LOG",                "discord.admin.log",               TYPE_LONG, null);
 
 		// ChatGPT settings
-		set("chatgpt.enable", "WILLY_CHATGPT_ENABLE", "chatgpt.enable", TYPE_BOOLEAN, true);
-		set("chatgpt.token", "WILLY_CHATGPT_TOKEN", "chatgpt.token", TYPE_STRING, null);
+		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, false);
+		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
 
 		// Whatsapp Settings
-		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, true);
+		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, false);
 		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, false);
 
 		// Telegram Settings
-		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, true);
+		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, false);
 		set("telegram.token",  "WILLY_TELEGRAM_TOKEN",  "telegram.token",  TYPE_STRING,  null);
 
 		// Audio Player Settings
-		set("ap.enable",                     "WILLY_AP_ENABLE",          "audio-player.enable",                     TYPE_BOOLEAN, true);
+		set("ap.enable",                     "WILLY_AP_ENABLE",          "audio-player.enable",                     TYPE_BOOLEAN, false);
 		set("ap.change_activity",            "WILLY_AP_CHANGE_ACTIVITY", "audio-player.change-activity",            TYPE_BOOLEAN, true);
 		set("ap.command_default_channel_id", "WILLY_AP_DEFAULT_CHANNEL", "audio-player.command-default-channel-id", TYPE_STRING,  null);
 		set("ap.blends_for_play",            "WILLY_AP_BLENDS",          "audio-player.blends-for-play",            TYPE_LIST,    apBlends);
 
 		// Bitly Settings
-		set("bitly.enable", "WILLY_BITLY_ENABLE", "bitly.enable", TYPE_BOOLEAN, true);
+		set("bitly.enable", "WILLY_BITLY_ENABLE", "bitly.enable", TYPE_BOOLEAN, false);
 		set("bitly.token",  "WILLY_BITLY_TOKEN",  "bitly.token",  TYPE_STRING,  null);
 
 		// YouTube Downloader Settings
-		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, true);
+		set("ytd.enable",    "WILLY_YTD_ENABLE",    "youtube-downloader.enable",    TYPE_BOOLEAN, false);
 		set("ytd.willy_vpn", "WILLY_YTD_LOCAL",     "youtube-downloader.willy-vpn", TYPE_BOOLEAN, false);
 		set("ytd.use_bitly", "WILLY_YTD_USE_BITLY", "youtube-downloader.use-bitly", TYPE_BOOLEAN, true);
 

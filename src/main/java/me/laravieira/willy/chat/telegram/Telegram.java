@@ -1,11 +1,13 @@
 package me.laravieira.willy.chat.telegram;
 
 import com.pengrad.telegrambot.TelegramBot;
+import lombok.Getter;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Telegram implements WillyChat {
+    @Getter
     private static TelegramBot bot;
 
     @Override
@@ -15,10 +17,6 @@ public class Telegram implements WillyChat {
         bot = new TelegramBot(Config.getString("telegram.token"));
         bot.setUpdatesListener(new TelegramListener());
         Willy.getLogger().info("Telegram instance connected.");
-    }
-
-    public static TelegramBot getBot() {
-        return bot;
     }
 
 

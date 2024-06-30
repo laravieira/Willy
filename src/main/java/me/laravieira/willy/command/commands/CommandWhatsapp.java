@@ -6,7 +6,6 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import it.auties.whatsapp.model.contact.ContactJid;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import org.jetbrains.annotations.NotNull;
@@ -165,20 +164,20 @@ public class CommandWhatsapp implements CommandListener {
     }
 
     private void onTalk(@NotNull ChatInputInteractionEvent event, @NotNull ApplicationCommandInteractionOption option) {
-        option.getOption(OPTION_TALK_NUMBER).ifPresentOrElse(
-            number -> option.getOption(OPTION_TALK_MESSAGE).ifPresentOrElse(
-                message -> {
-                    String numberValue = number.getValue().isPresent() ? number.getValue().get().asString() : "";
-                    String messageValue = message.getValue().isPresent() ? message.getValue().get().asString() : "";
-                    Whatsapp.getApi().store().findChatByJid(ContactJid.of(numberValue)).ifPresent(chat -> {
-                        try {
-                            Whatsapp.getApi().sendMessage(chat, messageValue).get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            event.reply(e.getMessage()).subscribe();
-                        }
-                    });
-                }, () -> event.reply("missing the message.").subscribe().dispose()
-            ), () -> event.reply("Missing the number.").subscribe().dispose()
-        );
+//        option.getOption(OPTION_TALK_NUMBER).ifPresentOrElse(
+//            number -> option.getOption(OPTION_TALK_MESSAGE).ifPresentOrElse(
+//                message -> {
+//                    String numberValue = number.getValue().isPresent() ? number.getValue().get().asString() : "";
+//                    String messageValue = message.getValue().isPresent() ? message.getValue().get().asString() : "";
+//                    Whatsapp.getApi().store().findChatByJid(ContactJid.of(numberValue)).ifPresent(chat -> {
+//                        try {
+//                            Whatsapp.getApi().sendMessage(chat, messageValue).get();
+//                        } catch (InterruptedException | ExecutionException e) {
+//                            event.reply(e.getMessage()).subscribe();
+//                        }
+//                    });
+//                }, () -> event.reply("missing the message.").subscribe().dispose()
+//            ), () -> event.reply("Missing the number.").subscribe().dispose()
+//        );
     }
 }

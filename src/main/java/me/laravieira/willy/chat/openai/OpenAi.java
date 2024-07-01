@@ -6,6 +6,7 @@ import io.github.sashirestela.openai.domain.chat.ChatMessage.SystemMessage;
 import io.github.sashirestela.openai.domain.chat.ChatRequest;
 import lombok.Getter;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.chat.openai.function.BitlyFunction;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
@@ -16,6 +17,9 @@ public class OpenAi implements WillyChat {
 
     @Getter
     private static SimpleOpenAI service = null;
+
+    @Getter
+    private static FunctionExecutor executor = new FunctionExecutor();
 
     @Override
     public void connect() {
@@ -46,16 +50,7 @@ public class OpenAi implements WillyChat {
     }
 
     public static ChatRequest.ChatRequestBuilder chat() {
-        FunctionExecutor executor = new FunctionExecutor();
-
-//        How to add a function
-//        executor.enrollFunction(
-//            FunctionDef.builder()
-//                .name("getWeather")
-//                .description("Get the weather of a city")
-//                .functionalClass(Weather.class)
-//                .build()
-//        );
+        executor.enrollFunction(BitlyFunction.builder());
 
         return ChatRequest.builder()
             .model(MODEL)

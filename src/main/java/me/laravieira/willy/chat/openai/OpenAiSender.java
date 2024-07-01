@@ -1,6 +1,7 @@
 package me.laravieira.willy.chat.openai;
 
 import io.github.sashirestela.openai.domain.chat.ChatRequest;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
@@ -8,6 +9,7 @@ import me.laravieira.willy.utils.WillyUtils;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class OpenAiSender implements SenderInterface {
     private final UUID context;
@@ -28,8 +30,12 @@ public class OpenAiSender implements SenderInterface {
         ChatRequest request = OpenAi.chat()
             .messages(WillyUtils.parseContextToOpenAIChat(messages, OpenAi.HISTORY_SIZE))
             .build();
-        OpenAi.getService().chatCompletions().create(request)
-            .whenComplete((chat, throwable) -> OpenAiListener.whenCompletionComplete(chat, throwable, context));
+        try {
+            OpenAi.getService().chatCompletions().create(request)
+                .whenComplete((chat, throwable) -> OpenAiListener.whenCompletionComplete(chat, throwable, context)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Willy.getLogger().warning(e.getMessage());
+        }
     }
 
     @Override

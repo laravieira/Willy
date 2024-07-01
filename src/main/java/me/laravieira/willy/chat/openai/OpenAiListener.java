@@ -36,6 +36,6 @@ public class OpenAiListener {
         message.setText(chat.firstContent());
         MessageStorage.add(message);
 
-        ContextStorage.of(context).getSender().sendText(chat.firstContent());
+        ContextStorage.of(context).getUserSender().sendText(chat.firstContent());
     }
 }

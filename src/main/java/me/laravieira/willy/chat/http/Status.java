@@ -16,7 +16,7 @@ public class Status extends Controller {
         super(request, response, callback);
     }
 
-    private boolean generalStatus() {
+    public static boolean generalStatus() {
         if(!Config.getBoolean("openai.enable") || !new OpenAi().isConnected())
             return false;
         if(!Config.getBoolean("discord.enable") || !new Discord().isConnected())
@@ -25,7 +25,7 @@ public class Status extends Controller {
             return false;
         if(!Config.getBoolean("telegram.enable") || !new Telegram().isConnected())
             return false;
-        if(!Config.getBoolean("http-api.enable") || !new HTTP().isConnected())
+        if(!Config.getBoolean("http_api.enable") || !new HTTP().isConnected())
             return false;
         return true;
     }
@@ -54,8 +54,8 @@ public class Status extends Controller {
                 put("connected", new Telegram().isConnected());
             }});
             put("http-api", new JSONObject() {{
-                put("enabled", Config.getBoolean("http-api.enable"));
-                put("port", Config.getInt("http-api.port"));
+                put("enabled", Config.getBoolean("http_api.enable"));
+                put("port", Config.getInt("http_api.port"));
                 put("connected", new HTTP().isConnected());
             }});
         }};

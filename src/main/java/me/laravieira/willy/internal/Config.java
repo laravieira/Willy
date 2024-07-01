@@ -23,8 +23,9 @@ public class Config {
 	public static void load() {
 		loadConfigFile();
 
-		List<String> aliases = new ArrayList<>();
-		aliases.add(Willy.getWilly().getName().toLowerCase());
+		List<String> names = new ArrayList<>();
+		names.add(Willy.getWilly().getName());
+		names.add(Willy.getWilly().getName().toLowerCase());
 
 		List<String> ignore = new ArrayList<>();
 		ignore.add("!");
@@ -35,54 +36,54 @@ public class Config {
 		ignore.add("//");
 		ignore.add("#");
 
-		List<String> apBlends = new ArrayList<>();
-		apBlends.add(Willy.getWilly().getName() + " play");
-		apBlends.add(Willy.getWilly().getName() + " toca");
-		apBlends.add(Willy.getWilly().getName() + " adiciona");
-		apBlends.add(Willy.getWilly().getName() + " reproduz");
-		apBlends.add(Willy.getWilly().getName() + " reproduza");
-		apBlends.add(Willy.getWilly().getName() + " toque");
-		apBlends.add(Willy.getWilly().getName() + " coloca");
-
 		// Overall Settings
-		set("name",                  "WILLY_NAME",                     "willy-name",              TYPE_STRING, Willy.getWilly().getName());
-		set("aliases",               "WILLY_ALIASES",                  "willy-aliases",           TYPE_LIST,   aliases);
-		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,   parseTime("5m"));
-		set("ignore_if_start_with",  "WILLY_IGNORE_IF_START_WITH",     "ignore-start-with",       TYPE_LIST,   ignore);
 		set("environment",           "ENVIRONMENT",                    "environment",             TYPE_STRING, "development");
+		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,   parseTime("5m"));
 
 		// Discord settings
-		set("discord.enable",             "WILLY_DISCORD_ENABLE",                   "discord.enable",                  TYPE_BOOLEAN, false);
-		set("discord.client_id",          "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",               TYPE_STRING,  null);
-		set("discord.token",              "WILLY_DISCORD_TOKEN",                    "discord.token",                   TYPE_STRING,  null);
-		set("discord.verbose",            "WILLY_DISCORD_VERBOSE",                  "discord.verbose-channel",         TYPE_STRING,  null);
-		set("discord.keep_willy_nick",    "WILLY_DISCORD_KEEP_NICK_WILLY",          "discord.keep-willy-nick",         TYPE_BOOLEAN, true);
-		set("discord.keep_master_nick",   "WILLY_DISCORD_KEEP_NICK_MASTER",         "discord.keep-master-nick",        TYPE_STRING,  null);
-		set("discord.clear_public_chats", "WILLY_DISCORD_CLEAR_PUBLIC_CHATS",       "discord.clear-public-chats",      TYPE_BOOLEAN, true);
-		set("discord.clear_after_wait",   "WILLY_DISCORD_CLEAR_PUBLIC_CHATS_AFTER", "discord.clear-after-wait",        TYPE_TIME,    parseTime("10m"));
-		set("discord.admin.guild",        "WILLY_DISCORD_ADMIN_GUILD",              "discord.admin.guild",             TYPE_LONG, null);
-		set("discord.admin.command",      "WILLY_DISCORD_ADMIN_COMMAND",            "discord.admin.command",           TYPE_LONG, null);
-		set("discord.admin.log",          "WILLY_DISCORD_ADMIN_LOG",                "discord.admin.log",               TYPE_LONG, null);
+		set("discord.enable",           "WILLY_DISCORD_ENABLE",           "discord.enable",           TYPE_BOOLEAN, false);
+		set("discord.client_id",        "WILLY_DISCORD_CLIENT_ID",        "discord.client-id",        TYPE_LONG,    null);
+		set("discord.token",            "WILLY_DISCORD_TOKEN",            "discord.token",            TYPE_STRING,  null);
+		set("discord.keep_willy_nick",  "WILLY_DISCORD_KEEP_NICK_WILLY",  "discord.keep-willy-nick",  TYPE_BOOLEAN, true);
+		set("discord.keep_master_nick", "WILLY_DISCORD_KEEP_NICK_MASTER", "discord.keep-master-nick", TYPE_LONG,    null);
+		set("discord.admin.guild",      "WILLY_DISCORD_ADMIN_GUILD",      "discord.admin.guild",      TYPE_LONG,    null);
+		set("discord.admin.command",    "WILLY_DISCORD_ADMIN_COMMAND",    "discord.admin.command",    TYPE_LONG,    null);
+		set("discord.admin.log",        "WILLY_DISCORD_ADMIN_LOG",        "discord.admin.log",        TYPE_LONG,    null);
+		set("discord.public_chat.enable",                        "WILLY_DISCORD_PUBLIC_CHAT_ENABLE",                        "discord.public-chat.enable",                        TYPE_BOOLEAN, true);
+		set("discord.public_chat.willy_names",                   "WILLY_DISCORD_PUBLIC_CHAT_WILLY_NAMES",                   "discord.public-chat.willy-names",                   TYPE_LIST, names);
+		set("discord.public_chat.ignore_start_with",             "WILLY_DISCORD_PUBLIC_CHAT_IGNORE_START_WITH",             "discord.public-chat.ignore-start-with",             TYPE_LIST, ignore);
+		set("discord.public_chat.auto_delete.willy_messages",    "WILLY_DISCORD_PUBLIC_CHAT_AUTO_DELETE_WILLY_MESSAGES",    "discord.public-chat.auto-delete.willy-messages",    TYPE_BOOLEAN, false);
+		set("discord.public_chat.auto_delete.delete_after_wait", "WILLY_DISCORD_PUBLIC_CHAT_AUTO_DELETE_DELETE_AFTER_WAIT", "discord.public-chat.auto-delete.delete-after-wait", TYPE_TIME, parseTime("10m"));
 
-		// ChatGPT settings
+		// OpenAI settings
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, false);
 		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
 
 		// Whatsapp Settings
-		set("whatsapp.enable",      "WILLY_WHATSAPP_ENABLE", "whatsapp.enable",      TYPE_BOOLEAN, false);
-		set("whatsapp.shared_chat", "WILLY_WHATSAPP_SHARED", "whatsapp.shared-chat", TYPE_BOOLEAN, false);
+		set("whatsapp.enable",                              "WILLY_WHATSAPP_ENABLE",                              "whatsapp.enable",                              TYPE_BOOLEAN, false);
+		set("whatsapp.phone_number",                        "WILLY_WHATSAPP_PHONE_NUMBER",                        "whatsapp.phone-number",                        TYPE_LONG, null);
+		set("whatsapp.group.enable",                        "WILLY_WHATSAPP_GROUP_ENABLE",                        "whatsapp.group.enable",                        TYPE_BOOLEAN, true);
+		set("whatsapp.group.willy_names",                   "WILLY_WHATSAPP_GROUP_WILLY_NAMES",                   "whatsapp.group.willy-names",                   TYPE_LIST, names);
+		set("whatsapp.group.ignore_start_with",             "WILLY_WHATSAPP_GROUP_IGNORE_START_WITH",             "whatsapp.group.ignore-start-with",             TYPE_LIST, ignore);
+		set("whatsapp.group.auto_delete.willy_messages",    "WILLY_WHATSAPP_GROUP_AUTO_DELETE_WILLY_MESSAGES",    "whatsapp.group.auto-delete.willy-messages",    TYPE_BOOLEAN, false);
+		set("whatsapp.group.auto_delete.delete_after_wait", "WILLY_WHATSAPP_GROUP_AUTO_DELETE_DELETE_AFTER_WAIT", "whatsapp.group.auto-delete.delete-after-wait", TYPE_TIME, parseTime("10m"));
 
 		// Telegram Settings
-		set("telegram.enable", "WILLY_TELEGRAM_ENABLE", "telegram.enable", TYPE_BOOLEAN, false);
-		set("telegram.token",  "WILLY_TELEGRAM_TOKEN",  "telegram.token",  TYPE_STRING,  null);
+		set("telegram.enable",                              "WILLY_TELEGRAM_ENABLE",                              "telegram.enable",                              TYPE_BOOLEAN, false);
+		set("telegram.token",                               "WILLY_TELEGRAM_TOKEN",                               "telegram.token",                               TYPE_STRING,  null);
+		set("telegram.group.enable",                        "WILLY_TELEGRAM_GROUP_ENABLE",                        "telegram.group.enable",                        TYPE_BOOLEAN, true);
+		set("telegram.group.willy_names",                   "WILLY_TELEGRAM_GROUP_WILLY_NAMES",                   "telegram.group.willy-names",                   TYPE_LIST, names);
+		set("telegram.group.ignore_start_with",             "WILLY_TELEGRAM_GROUP_IGNORE_START_WITH",             "telegram.group.ignore-start-with",             TYPE_LIST, ignore);
+		set("telegram.group.auto_delete.willy_messages",    "WILLY_TELEGRAM_GROUP_AUTO_DELETE_WILLY_MESSAGES",    "telegram.group.auto-delete.willy-messages",    TYPE_BOOLEAN, false);
+		set("telegram.group.auto_delete.delete_after_wait", "WILLY_TELEGRAM_GROUP_AUTO_DELETE_DELETE_AFTER_WAIT", "telegram.group.auto-delete.delete-after-wait", TYPE_TIME, parseTime("10m"));
 
 		// Bitly Settings
 		set("bitly.enable", "WILLY_BITLY_ENABLE", "bitly.enable", TYPE_BOOLEAN, false);
 		set("bitly.token",  "WILLY_BITLY_TOKEN",  "bitly.token",  TYPE_STRING,  null);
 
 		// HTTP API Settings
-		set("http-api.enable", "WILLY_HTTP_API_ENABLE", "http-api.enable", TYPE_BOOLEAN, false);
-		set("http-api.port",   "WILLY_HTTP_API_PORT",   "http-api.port",   TYPE_INT,     8080);
+		set("http_api.enable", "WILLY_HTTP_API_ENABLE", "http-api.enable", TYPE_BOOLEAN, false);
+		set("http_api.port",   "WILLY_HTTP_API_PORT",   "http-api.port",   TYPE_INT,     8080);
 	}
 
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {
@@ -103,7 +104,7 @@ public class Config {
 				case TYPE_LONG    -> settings.put(key, Long.parseLong(System.getenv(envKey)));
 				case TYPE_BOOLEAN -> settings.put(key, Boolean.parseBoolean(System.getenv(envKey)));
 				case TYPE_TIME    -> settings.put(key, parseTime(System.getenv(envKey)));
-				case TYPE_LIST    -> settings.put(key, Arrays.stream(System.getenv(envKey).split(";")).toList());
+				case TYPE_LIST    -> settings.put(key, Arrays.stream(System.getenv(envKey).split("\\|")).toList());
 				default -> settings.put(key, System.getenv(envKey));
 			}
 		}
@@ -116,7 +117,6 @@ public class Config {
 		if(confFile.exists() && confFile.isFile())
 			configFile = new Yaml("config.yml", false);
 		else {
-			// TODO Implement a better cofig file generator
 			String sconf = "";
 			sconf += "# ---------------------------------------------------------- #\r\n";
 			sconf += "#                                                            #\r\n";
@@ -126,7 +126,81 @@ public class Config {
 			sconf += "#                                                            #\r\n";
 			sconf += "# ---------------------------------------------------------- #\r\n";
 			sconf += "\r\n";
-			sconf += "willy-name: Willy\r\n";
+			sconf += "environment: development\r\n";
+			sconf += "context-life-time: 5m\r\n";
+			sconf += "\r\n";
+			sconf += "discord:\r\n";
+			sconf += "    enable: false\r\n";
+			sconf += "    client-id: \r\n";
+			sconf += "    token: \r\n";
+			sconf += "    keep-willy-nick: true\r\n";
+			sconf += "    keep-master-nick: \r\n";
+			sconf += "    public-chat:\r\n";
+			sconf += "        enable: true\r\n";
+			sconf += "        willy-names:\r\n";
+			sconf += "            - Willy\r\n";
+			sconf += "            - willy\r\n";
+			sconf += "        ignore-start-with:\r\n";
+			sconf += "            - \"!\"\r\n";
+			sconf += "            - \"?\"\r\n";
+			sconf += "            - \"@\"\r\n";
+			sconf += "            - \"/\"\r\n";
+			sconf += "            - \"#\"\r\n";
+			sconf += "        auto-delete:\r\n";
+			sconf += "            willy-messages: false\r\n";
+			sconf += "            delete-after-wait: 10m\r\n";
+			sconf += "    admin:\r\n";
+			sconf += "        guild: \r\n";
+			sconf += "        command: \r\n";
+			sconf += "        log: \r\n";
+			sconf += "\r\n";
+			sconf += "openai:\r\n";
+			sconf += "    enable: false\r\n";
+			sconf += "    token: \r\n";
+			sconf += "\r\n";
+			sconf += "whatsapp:\r\n";
+			sconf += "    enable: false\r\n";
+			sconf += "    phone-number: \r\n";
+			sconf += "    group: # Not implemented yet\r\n";
+			sconf += "        enable: false\r\n";
+			sconf += "        willy-names:\r\n";
+			sconf += "            - Willy\r\n";
+			sconf += "            - willy\r\n";
+			sconf += "        ignore-start-with:\r\n";
+			sconf += "            - \"!\"\r\n";
+			sconf += "            - \"?\"\r\n";
+			sconf += "            - \"@\"\r\n";
+			sconf += "            - \"/\"\r\n";
+			sconf += "            - \"#\"\r\n";
+			sconf += "        auto-delete:\r\n";
+			sconf += "            willy-messages: false\r\n";
+			sconf += "            delete-after-wait: 10m\r\n";
+			sconf += "\r\n";
+			sconf += "telegram:\r\n";
+			sconf += "    enable: false\r\n";
+			sconf += "    token: \r\n";
+			sconf += "    group: # Not implemented yet\r\n";
+			sconf += "        enable: false\r\n";
+			sconf += "        willy-names:\r\n";
+			sconf += "            - Willy\r\n";
+			sconf += "            - willy\r\n";
+			sconf += "        ignore-start-with:\r\n";
+			sconf += "            - \"!\"\r\n";
+			sconf += "            - \"?\"\r\n";
+			sconf += "            - \"@\"\r\n";
+			sconf += "            - \"/\"\r\n";
+			sconf += "            - \"#\"\r\n";
+			sconf += "        auto-delete:\r\n";
+			sconf += "            willy-messages: false\r\n";
+			sconf += "            delete-after-wait: 10m\r\n";
+			sconf += "\r\n";
+			sconf += "bitly:\r\n";
+			sconf += "    enable: false\r\n";
+			sconf += "    token: \r\n";
+			sconf += "\r\n";
+			sconf += "http-api:\r\n";
+			sconf += "    enable: true\r\n";
+			sconf += "    port: 7001\r\n";
 
 			try {
 				FileWriter confWriter = new FileWriter(confFile);

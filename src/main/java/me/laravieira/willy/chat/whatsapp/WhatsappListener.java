@@ -77,8 +77,8 @@ public class WhatsappListener implements Listener {
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
             String content = message.text();
 
-            if(Config.getBoolean("whatsapp.shared_chat")
-            && !WillyUtils.hasWillyCall(content)
+            if(Config.getBoolean("whatsapp.group.enable")
+            && !WillyUtils.hasWillyName(content, Config.getStringList("whatsapp.group.willy_names"))
             && !ContextStorage.has(id))
                 return;
 

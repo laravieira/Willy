@@ -1,6 +1,5 @@
 package me.laravieira.willy.chat.discord;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
@@ -8,14 +7,11 @@ import discord4j.core.event.domain.guild.MemberUpdateEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.gateway.intent.IntentSet;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.Command;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
-
-import java.util.logging.LogRecord;
 
 public class Discord implements WillyChat {
 
@@ -25,7 +21,7 @@ public class Discord implements WillyChat {
 
 	@Override
 	public void connect() {
-		if(!Config.has("discord.enable") || !Config.getBoolean("discord.enable")) {
+		if(!Config.getBoolean("discord.enable")) {
 			Willy.getLogger().warning("Discord instance disabled.");
 			return;
 		}
@@ -33,12 +29,15 @@ public class Discord implements WillyChat {
 			Willy.getLogger().severe("Discord token not found.");
 			return;
 		}
+		if(!Config.has("discord.client_id")) {
+			Willy.getLogger().severe("Discord client id not found.");
+			return;
+		}
 
 		EventDispatcher eventDispatcher = EventDispatcher.builder().build();
 		eventDispatcher.on(ChatInputInteractionEvent.class).subscribe(DiscordListener::onCommand, Discord::errorDisplay);
-		eventDispatcher.on(ConnectEvent.class)             .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
-		eventDispatcher.on(ReconnectEvent.class)           .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
-		eventDispatcher.on(ReadyEvent.class)               .subscribe(_ -> Discord.setReady(true), Discord::errorDisplay);
+		eventDispatcher.on(ConnectEvent.class)             .subscribe(_ -> Discord.onReady(), Discord::errorDisplay);
+		eventDispatcher.on(ReconnectEvent.class)           .subscribe(_ -> Discord.onReady(), Discord::errorDisplay);
 		eventDispatcher.on(DisconnectEvent.class)          .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
 		eventDispatcher.on(SessionInvalidatedEvent.class)  .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
 		eventDispatcher.on(MemberUpdateEvent.class)        .subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
@@ -51,9 +50,22 @@ public class Discord implements WillyChat {
 			.setEnabledIntents(IntentSet.all())
 			.login()
 			.block();
-		Willy.getLogger().registerDiscordHandler();
+
+    	Willy.getLogger().info("Discord instance loaded.");
+	}
+
+	public static void onReady() {
+		Willy.getLogger().info("Discord instance ready.");
+		Discord.setReady(true);
+
+		if(Config.has("discord.admin.log")) {
+			Willy.getLogger().registerDiscordHandler();
+			Willy.getLogger().info("Discord admin log channel initiated.");
+		}else {
+			Willy.getLogger().warning("Discord admin log channel not found.");
+		}
+
 		registerCommands();
-    	Willy.getLogger().info("Discord instance connected.");
 	}
 
 	@Override
@@ -74,8 +86,8 @@ public class Discord implements WillyChat {
 
 	}
 
-	private static void errorDisplay(Object error) {
-		Willy.getLogger().severe(""+error);
+	private static void errorDisplay(Throwable error) {
+		Willy.getLogger().severe(STR."Discord: \{error.getMessage()}");
 	}
 
 
@@ -91,24 +103,21 @@ public class Discord implements WillyChat {
     	Discord.ready = ready;
     }
 
-	public static void sendLog(LogRecord record) {
-		if(gateway == null || !Config.has("discord.admin.log"))
-			return;
-		String message = "```yaml\r\n" + "[" + record.getLevel() + "] " + record.getMessage() + "```";
-		gateway.getChannelById(Snowflake.of(Config.getLong("discord.admin.log")))
-			.doOnSuccess(channel -> ((MessageChannel)channel).createMessage(message).subscribe())
-			.block();
-	}
-
 	private static void registerCommands() {
+		if(gateway == null)
+			return;
+		if(!Config.has("discord.admin.guild")) {
+			Willy.getLogger().warning("Discord admin guild (server) not found.");
+			return;
+		}
 		gateway.getRestClient()
 			.getApplicationId()
 			.doOnSuccess(id -> Command.commandsList()
 				.forEach(command -> gateway.getRestClient()
 					.getApplicationService()
 					.createGuildApplicationCommand(id, Config.getLong("discord.admin.guild"), command.register())
-					.doOnSuccess(ignore -> Willy.getLogger().info("Command "+command.getName()+" registered."))
-					.doOnError(error -> Willy.getLogger().warning("Command "+command.getName()+" failed with: "+error.getMessage()))
+					.doOnSuccess(ignore -> Willy.getLogger().fine(STR."Command \{command.getName()} registered."))
+					.doOnError(error -> Willy.getLogger().warning(STR."Command \{command.getName()} failed with: \{error.getMessage()}"))
 					.subscribe()
 				))
 			.block();

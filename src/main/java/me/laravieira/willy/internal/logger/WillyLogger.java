@@ -40,16 +40,17 @@ public class WillyLogger extends Logger {
 			Handler consoleHandler = new ConsoleHandler();
 
 			fileHandler.setLevel(Level.ALL);
-			consoleHandler.setLevel(Level.INFO);
+			consoleHandler.setLevel(Level.FINE);
 
 			fileHandler.setFormatter(LOG_FORMATTER);
 			consoleHandler.setFormatter(LOG_FORMATTER);
 
-			consoleLogger = Logger.getLogger(Willy.class.getCanonicalName()+"-console");
+			consoleLogger = Logger.getLogger(STR."\{Willy.class.getCanonicalName()}-console");
 
 			this.addHandler(fileHandler);
 			this.addHandler(consoleHandler);
 			consoleLogger.addHandler(consoleHandler);
+			this.setLevel(Level.ALL);
 
 		} catch (SecurityException | IOException e) {
 			e.printStackTrace();

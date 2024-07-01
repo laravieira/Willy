@@ -3,7 +3,6 @@ package me.laravieira.willy.utils;
 import io.github.sashirestela.openai.domain.chat.ChatMessage;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
-import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.MessageStorage;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,14 +10,20 @@ import java.util.*;
 
 public class WillyUtils {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean hasWillyCall(@NotNull String message) {
-        if(message.contains(Config.getString("name")))
-            return true;
-        for(String alias : Config.getStringList("aliases"))
+    public static boolean hasWillyName(@NotNull String message, @NotNull List<String> calls) {
+        for(String alias : calls)
             if(message.contains(alias))
                 return true;
         return false;
     }
+
+    public static boolean startsWith(@NotNull String message, @NotNull List<String> starts) {
+        for(String prefix : starts)
+            if(message.startsWith(prefix))
+                return true;
+        return false;
+    }
+
 
     public static List<ChatMessage> parseContextToOpenAIChat(@NotNull LinkedList<UUID> messages, @NotNull int historySize) {
         List<ChatMessage> chat = new ArrayList<>();

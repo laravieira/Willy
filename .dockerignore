@@ -1,0 +1,13 @@
+/target/
+/.settings/
+/.git/
+/logs/
+/config.yml
+/config.blank.yml
+/start.bat
+/.idea/
+/whatsapp.json
+/whatsapp-qrcode.png
+/videos/
+/willy.iml
+/README.md

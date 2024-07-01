@@ -60,13 +60,16 @@ public class WhatsappListener implements Listener {
     }
 
     @Override
-    public void onNewMessage(@NotNull MessageInfo info) {
+    public void onNewMessage(@NotNull MessageInfo _info) {
+        ChatMessageInfo info = (ChatMessageInfo) _info;
         Listener.super.onNewMessage(info);
 
         if(!(info.message().content() instanceof TextMessage message) || message.text().isEmpty())
             return;
-//        if(info.fromMe())
-//            return;
+        if(info.fromMe())
+            return;
+
+        Chat chat = info.chat().get();
 
         Thread messageHandler = new Thread(() -> {
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
@@ -79,8 +82,8 @@ public class WhatsappListener implements Listener {
 
             content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
 
-//            WhatsappSender sender = new WhatsappSender();
-//            ContextStorage.of(id).setUserSender(sender);
+            WhatsappSender sender = new WhatsappSender(chat);
+            ContextStorage.of(id).setUserSender(sender);
             ContextStorage.of(id).setApp("whatsapp");
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
@@ -88,16 +91,16 @@ public class WhatsappListener implements Listener {
             ContextStorage.of(whatsappMessage.getContext()).getSender().sendText(whatsappMessage.getText());
         });
 
-//        Thread messageStatusUpdate = new Thread(() -> {
-//            try {
-//                Whatsapp.getApi().markRead(chat).get(5, TimeUnit.SECONDS);
-//                Whatsapp.getApi().clear(chat, false).get(5, TimeUnit.SECONDS);
-//                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
-//            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
-//        });
+        Thread messageStatusUpdate = new Thread(() -> {
+            try {
+                Whatsapp.getApi().markChatRead(chat).get(5, TimeUnit.SECONDS);
+                Whatsapp.getApi().clearChat(chat, false).get(5, TimeUnit.SECONDS);
+                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
+            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
+        });
 
-//        messageStatusUpdate.setDaemon(true);
-//        messageStatusUpdate.start();
+        messageStatusUpdate.setDaemon(true);
+        messageStatusUpdate.start();
         messageHandler.setDaemon(true);
         messageHandler.start();
     }

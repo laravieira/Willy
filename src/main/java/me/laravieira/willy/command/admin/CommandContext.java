@@ -1,4 +1,4 @@
-package me.laravieira.willy.command.commands;
+package me.laravieira.willy.command.admin;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;

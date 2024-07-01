@@ -1,4 +1,4 @@
-package me.laravieira.willy.command.commands;
+package me.laravieira.willy.command.admin;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class CommandWhatsapp implements CommandListener {
     public static final String COMMAND = "whats";

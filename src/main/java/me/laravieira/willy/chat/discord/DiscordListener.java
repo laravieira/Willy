@@ -31,7 +31,11 @@ public class DiscordListener {
 
 	public static void onCommand(ChatInputInteractionEvent event) {
 		try {
-			Command.commandsList().forEach(command -> {
+			Command.adminCommandsList().forEach(command -> {
+				if (command.getName().equals(event.getCommandName()))
+					command.execute(event);
+			});
+			Command.globalCommandsList().forEach(command -> {
 				if (command.getName().equals(event.getCommandName()))
 					command.execute(event);
 			});

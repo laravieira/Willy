@@ -10,21 +10,21 @@ public class HTTP implements WillyChat {
 
     @Override
     public void connect() {
-        if(!Config.has("http-api.enable") || !Config.getBoolean("http-api.enable")) {
+        if(!Config.getBoolean("http_api.enable")) {
             Willy.getLogger().info("HTTP API is disabled.");
             return;
         }
-        if(!Config.has("http-api.port")) {
+        if(!Config.has("http_api.port")) {
             Willy.getLogger().severe("HTTP API port is not defined.");
             return;
         }
 
-        server = new Server(Config.getInt("http-api.port"));
+        server = new Server(Config.getInt("http_api.port"));
         server.setHandler(new Handler());
 
         try {
             server.start();
-            Willy.getLogger().info(STR."HTTP API listening on port \{Config.getInt("http-api.port")}.");
+            Willy.getLogger().info(STR."HTTP API listening on port \{Config.getInt("http_api.port")}.");
         }catch (Exception exception) {
             Willy.getLogger().severe(STR."HTTP API failed to start: \{exception.getMessage()}");
         }

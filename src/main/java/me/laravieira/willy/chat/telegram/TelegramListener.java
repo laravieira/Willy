@@ -25,7 +25,7 @@ public class TelegramListener implements UpdatesListener {
     public void onTextMessageReceived(@NotNull Update update) {
         Message msg = update.message();
         Chat chat = msg.chat();
-        UUID id = UUID.nameUUIDFromBytes(("telegram-"+chat.id()).getBytes());
+        UUID id = UUID.nameUUIDFromBytes((STR."telegram-\{chat.id()}").getBytes());
 
         Thread messageHandler = new Thread(() -> {
             TelegramSender sender = new TelegramSender(chat);

@@ -12,8 +12,14 @@ public class Telegram implements WillyChat {
 
     @Override
     public void connect() {
-        if(!Config.getBoolean("telegram.enable"))
+        if(!Config.getBoolean("telegram.enable")) {
+            Willy.getLogger().info("Telegram instance was disabled.");
             return;
+        }
+        if(!Config.has("telegram.token")) {
+            Willy.getLogger().severe("Telegram token was not found.");
+            return;
+        }
         bot = new TelegramBot(Config.getString("telegram.token"));
         bot.setUpdatesListener(new TelegramListener());
         Willy.getLogger().info("Telegram instance connected.");

@@ -26,7 +26,6 @@ import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
-import org.reactivestreams.Subscription;
 
 public class DiscordListener {
 
@@ -37,7 +36,7 @@ public class DiscordListener {
 					command.execute(event);
 			});
 		}catch(Exception e) {
-			event.reply("Something went wrong: "+e.getMessage()).subscribe();
+			event.reply(STR."Something went wrong: \{e.getMessage()}").subscribe();
 		}
 	}
 
@@ -58,29 +57,29 @@ public class DiscordListener {
 		}catch(Exception e) {
 			Willy.getLogger().severe(e.getMessage());
 			for(StackTraceElement elem : e.getStackTrace())
-				Willy.getLogger().severe(elem.getMethodName()+" ("+elem.getLineNumber()+")");
+				Willy.getLogger().severe(STR."\{elem.getMethodName()} (\{elem.getLineNumber()})");
 		}
 	}
 	
 	public static void onPrivateTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
 		String content = parseWillyDiscordId(message.getContent());
-		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
-		if(startWith(content)) return;
+		UUID id = UUID.nameUUIDFromBytes((STR."discord-\{user.getId().asString()}").getBytes());
 
-		DiscordMessage discordMessage = clearContent(channel, user, message, content, id, PassedInterval.DISABLE);
+		if(content.isEmpty())
+			return;
+		if(WillyUtils.startsWith(content, Config.getStringList("discord.public_chat.ignore_start_with")))
+			return;
 
-		ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
+		Willy.getLogger().fine(STR."Msg on Discord dm \{channel.getId().asLong()} by \{user.getId().asLong()}");
+		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, PassedInterval.DISABLE);
+		ContextStorage.of(discordMessage.getContext()).getSender().sendText(discordMessage.getText());
 	}
 
 	@NotNull
-	private static DiscordMessage clearContent(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
-		content = content.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ');
-
-
-		DiscordSender sender = new DiscordSender(id, channel, expire);
-
-		ContextStorage.of(id).setUserSender(sender);
+	private static DiscordMessage buildMessage(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
+		ContextStorage.of(id).setUserSender(new DiscordSender(id, channel, expire));
 		ContextStorage.of(id).setApp("discord");
+
 		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
 		MessageStorage.add(discordMessage);
 		if(!message.getAttachments().isEmpty())
@@ -107,38 +106,37 @@ public class DiscordListener {
 	}
 
 	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
-		long expire = Config.getBoolean("discord.clear_public_chats") ? Config.getLong("discord.clear_after_wait") : PassedInterval.DISABLE;
+		if(!Config.getBoolean("discord.public_chat.enable"))
+			return;
 		String content = parseWillyDiscordId(message.getContent());
-		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
-		
-		if(content.startsWith("!help")) {
-			content = content.substring(5);
-			floodChat(channel, user);
-		}else if(startWith(content)) return;
-		if(content.isEmpty()) return;
-		
-		if(!WillyUtils.hasWillyCall(content) && !ContextStorage.has(id)) return;
+		UUID id = UUID.nameUUIDFromBytes((STR."discord-\{channel.getId()}").getBytes());
 
-		Willy.getLogger().info("Message transaction in a public chat.");
+		if(content.isEmpty())
+			return;
+		if(WillyUtils.startsWith(content, Config.getStringList("discord.public_chat.ignore_start_with")))
+			return;
+		if(!WillyUtils.hasWillyName(content, Config.getStringList("discord.public_chat.willy_names")) && !ContextStorage.has(id))
+			return;
+
+		long expire = Config.getBoolean("discord.public_chat.auto_delete.willy_messages")
+				? Config.getLong("discord.public_chat.auto_delete.delete_after_wait")
+				: PassedInterval.DISABLE;
+
+		Willy.getLogger().fine(STR."Msg on Discord public \{channel.getId().asLong()} by \{user.getId().asLong()}");
+		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, expire);
+		ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
 	}
 	
 	@NotNull
 	private static String parseWillyDiscordId(@NotNull String message) {
 		long id = Config.getLong("discord.client_id");
-		String name = Config.getString("name");
-		return message.replaceAll("<@"+ id +">", name);
-	}
-	
-	private static boolean startWith(String message) {
-		for(String prefix : Config.getStringList("ignore_if_start_with"))
-			if(message.startsWith(prefix))
-				return true;
-		return false;
+		String name = Config.getStringList("discord.public_chat.willy_names").getFirst();
+		return message.replaceAll(STR."<@\{id}>", name);
 	}
 
 	public static void onMemberUpdate(MemberUpdateEvent event) {
-		String master = Config.getString("discord.keep_master_nick");
 		boolean willy = Config.getBoolean("discord.keep_willy_nick");
+		String master = Config.getString("discord.keep_master_nick");
 
 		try {
 			if(master != null && event.getMemberId().asString().equals(master) && event.getCurrentNickname().isPresent()) {
@@ -147,7 +145,7 @@ public class DiscordListener {
 					member.edit(GuildMemberEditSpec.builder()
 							.nicknameOrNull(null)
 							.build())
-						.doOnError(data -> Willy.getLogger().warning("Master nickname reset failed caused by: "+data.getMessage()))
+						.doOnError(data -> Willy.getLogger().warning(STR."Master nickname reset failed caused by: \{data.getMessage()}"))
 						.block();
 				}
 			}
@@ -158,7 +156,7 @@ public class DiscordListener {
 					member.edit(GuildMemberEditSpec.builder()
 									.nicknameOrNull(null)
 									.build())
-							.doOnError(data -> Willy.getLogger().warning("Willy nickname reset failed caused by: "+data.getMessage()))
+							.doOnError(data -> Willy.getLogger().warning(STR."Willy nickname reset failed caused by: \{data.getMessage()}"))
 							.block();
 				}
 			}
@@ -166,21 +164,23 @@ public class DiscordListener {
 			if(e.getMessage().contains("Missing Permissions"))
 				Willy.getLogger().warning("Nickname reset failed caused by missing permission.");
 			else
-				Willy.getLogger().warning("Nickname reset exception: "+e.getMessage());
+				Willy.getLogger().warning(STR."Nickname reset exception: \{e.getMessage()}");
 		}
 	}
 
 	private static void floodChat(MessageChannel channel, User user) {
+		//TODO Make this a command
 		try {
-			UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
-			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.clear_after_wait"));
+			UUID id = UUID.nameUUIDFromBytes((STR."discord-\{channel.getId()}").getBytes());
+			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			ContextStorage.of(id).setUserSender(sender);
+			ContextStorage.of(id).setApp("discord");
 
 			me.laravieira.willy.context.Message message = new me.laravieira.willy.context.Message(id);
-			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://github.com/laravieira/Willy/raw/master/assets/help/helps.png")
+							.image("https://raw.laravieira.me/willy/help/helps.png")
 							.build())
 					.build());
 			message.setFrom(Willy.getWilly().getName());
@@ -189,10 +189,10 @@ public class DiscordListener {
 			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
 			message = new me.laravieira.willy.context.Message(id);
-			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://github.com/laravieira/Willy/raw/master/assets/help/help.png")
+							.image("https://raw.laravieira.me/willy/help/help.png")
 							.build())
 					.build());
 			message.setFrom(Willy.getWilly().getName());
@@ -201,10 +201,10 @@ public class DiscordListener {
 			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
 			message = new me.laravieira.willy.context.Message(id);
-			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://github.com/laravieira/Willy/raw/master/assets/help/be-help.png")
+							.image("https://raw.laravieira.me/willy/help/be-help.png")
 							.build())
 					.build());
 			message.setFrom(Willy.getWilly().getName());
@@ -213,10 +213,10 @@ public class DiscordListener {
 			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
 			message = new me.laravieira.willy.context.Message(id);
-			message.setExpire(Config.getLong("discord.clear_after_wait"));
+			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			message.setContent(MessageCreateSpec.builder()
 					.addEmbed(EmbedCreateSpec.builder()
-							.thumbnail("https://github.com/laravieira/Willy/raw/master/assets/help/piscadela.jpg")
+							.thumbnail("https://raw.laravieira.me/willy/help/piscadela.jpg")
 							.build())
 					.build());
 			message.setFrom(Willy.getWilly().getName());
@@ -224,7 +224,7 @@ public class DiscordListener {
 			MessageStorage.add(message);
 			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
-			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
+			Willy.getLogger().info(STR."Chat flood sent to \{channel.getId().asString()}.");
 		}catch(RuntimeException e) {
 			e.printStackTrace();
 		}

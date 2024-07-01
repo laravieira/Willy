@@ -47,7 +47,7 @@ public class WhatsappHandler {
                 .subscribe();
             return ErrorHandler.Result.RECONNECT;
         }
-        Willy.getLogger().severe(location.name()+": "+throwable.getMessage());
+        Willy.getLogger().finer(location.name()+": "+throwable.getMessage());
         return ErrorHandler.Result.DISCARD;
     }
 
@@ -77,7 +77,7 @@ public class WhatsappHandler {
                     .addEmbed(EmbedCreateSpec.builder()
                             .title("Willy likes Whatsapp")
                             .description("Read this QR Code on your WhatsApp app to let Willy use it")
-                            .thumbnail("https://github.com/laravieira/Willy/raw/master/assets/whatsapp.png")
+                            .thumbnail("https://raw.laravieira.me/willy/whatsapp.png")
                             .image("attachment://whatsapp-qrcode.png")
                             .color(Color.GREEN)
                             .build())

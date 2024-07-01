@@ -11,8 +11,14 @@ public class Whatsapp implements WillyChat {
 
     @Override
     public void connect() {
-        if(!Config.getBoolean("whatsapp.enable"))
+        if(!Config.getBoolean("whatsapp.enable")) {
+            Willy.getLogger().info("Whatsapp instance was disabled.");
             return;
+        }
+        if(!Config.has("whatsapp.phone_number")) {
+            Willy.getLogger().severe("Whatsapp phone number was not found.");
+            return;
+        }
 
         Thread whatsappThread = new Thread(Whatsapp::onConnectionRequest);
         whatsappThread.setDaemon(true);
@@ -23,7 +29,7 @@ public class Whatsapp implements WillyChat {
         whatsapp = webBuilder()
             .newConnection(Willy.getWilly().getName())
             .autodetectListeners(false)
-            .name(Willy.getWilly().getName() + " by L4R4")
+            .name(STR."\{Willy.getWilly().getName()} \{Config.getString("environment")}")
             .errorHandler(WhatsappHandler::onError)
             .unregistered(WhatsappHandler::onQRCode)
             .addListener(new WhatsappListener());
@@ -32,7 +38,7 @@ public class Whatsapp implements WillyChat {
             .whenComplete((whatsapp, error) -> {
                 if(error == null)
                     return;
-                Willy.getLogger().warning("Error on Whatsapp connection: " + error.getMessage());
+                Willy.getLogger().warning(STR."Error on Whatsapp connection: \{error.getMessage()}");
                 Whatsapp.whatsapp = null;
             });
     }
@@ -62,7 +68,7 @@ public class Whatsapp implements WillyChat {
                 if(error == null)
                     Willy.getLogger().info("Whatsapp instance was reconnected.");
                 else
-                    Willy.getLogger().warning("Whatsapp instance couldn't reconnect: "+error.getMessage());
+                    Willy.getLogger().warning(STR."Whatsapp instance couldn't reconnect: \{error.getMessage()}");
             });
         });
         disconnect.setDaemon(false);
@@ -76,7 +82,7 @@ public class Whatsapp implements WillyChat {
             if(error == null)
                 Willy.getLogger().info("Whatsapp instance successfully logout.");
             else
-                Willy.getLogger().warning("Whatsapp instance couldn't logout: "+error.getMessage());
+                Willy.getLogger().warning(STR."Whatsapp instance couldn't logout: \{error.getMessage()}");
             new Whatsapp().disconnect();
         });
     }

@@ -36,6 +36,7 @@ public class DiscordMessage extends Message {
     public void delete() {
         try {
             message.delete("Willy auto deleted this message.").block();
+            Willy.getLogger().fine(STR."Discord auto deleted message \{message.getId().asLong()} at \{message.getChannelId().asLong()}.");
         }catch (RuntimeException ignore) {}
     }
 }

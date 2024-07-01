@@ -14,8 +14,6 @@ import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
 
 public class Discord implements WillyChat {
-
-	private static DiscordClient client;
 	private static GatewayDiscordClient gateway;
 	private static boolean ready = false;
 
@@ -43,20 +41,12 @@ public class Discord implements WillyChat {
 		eventDispatcher.on(MemberUpdateEvent.class)        .subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
 		eventDispatcher.on(MessageCreateEvent.class)       .subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);
 
-		client = DiscordClient.create(Config.getString("discord.token"));
-		gateway = client
+		gateway = DiscordClient.create(Config.getString("discord.token"))
 			.gateway()
 			.setEventDispatcher(eventDispatcher)
 			.setEnabledIntents(IntentSet.all())
 			.login()
 			.block();
-
-    	Willy.getLogger().info("Discord instance loaded.");
-	}
-
-	public static void onReady() {
-		Willy.getLogger().info("Discord instance ready.");
-		Discord.setReady(true);
 
 		if(Config.has("discord.admin.log")) {
 			Willy.getLogger().registerDiscordHandler();
@@ -66,6 +56,12 @@ public class Discord implements WillyChat {
 		}
 
 		registerCommands();
+    	Willy.getLogger().info("Discord instance loaded.");
+	}
+
+	public static void onReady() {
+		Willy.getLogger().info("Discord instance ready.");
+		Discord.setReady(true);
 	}
 
 	@Override
@@ -90,11 +86,6 @@ public class Discord implements WillyChat {
 		Willy.getLogger().severe(STR."Discord: \{error.getMessage()}");
 	}
 
-
-	public static DiscordClient getBot() {
-    	return client;
-    }
-    
     public static GatewayDiscordClient getBotGateway() {
     	return gateway;
     }
@@ -112,14 +103,22 @@ public class Discord implements WillyChat {
 		}
 		gateway.getRestClient()
 			.getApplicationId()
-			.doOnSuccess(id -> Command.commandsList()
-				.forEach(command -> gateway.getRestClient()
+			.doOnSuccess(id -> {
+				Command.globalCommandsList().forEach(command -> gateway.getRestClient()
+					.getApplicationService()
+					.createGlobalApplicationCommand(id, command.register())
+					.doOnSuccess(ignore -> Willy.getLogger().fine(STR."Discord global command \{command.getName()} registered."))
+					.doOnError(error -> Willy.getLogger().warning(STR."Discord global command \{command.getName()} failed with: \{error.getMessage()}"))
+					.subscribe()
+				);
+				Command.adminCommandsList().forEach(command -> gateway.getRestClient()
 					.getApplicationService()
 					.createGuildApplicationCommand(id, Config.getLong("discord.admin.guild"), command.register())
-					.doOnSuccess(ignore -> Willy.getLogger().fine(STR."Command \{command.getName()} registered."))
-					.doOnError(error -> Willy.getLogger().warning(STR."Command \{command.getName()} failed with: \{error.getMessage()}"))
+					.doOnSuccess(ignore -> Willy.getLogger().fine(STR."Discord admin command \{command.getName()} registered."))
+					.doOnError(error -> Willy.getLogger().warning(STR."Discord admin command \{command.getName()} failed with: \{error.getMessage()}"))
 					.subscribe()
-				))
+				);
+			})
 			.block();
 	}
 }

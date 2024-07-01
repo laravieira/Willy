@@ -10,7 +10,6 @@ import me.laravieira.willy.chat.telegram.Telegram;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.discord.Discord;
-import me.laravieira.willy.feature.bitly.Bitly;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.storage.ContextStorage;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +65,7 @@ public class CommandStatus implements CommandListener {
         list.append("    connected: ").append(new HTTP().isConnected()).append("\r\n");
         list.append("    port: ").append(Config.getInt("http_api.port")).append("\r\n");
         list.append("bitly:").append("\r\n");
-        list.append("    enabled: ").append(Bitly.canUse).append("\r\n");
+        list.append("    enabled: ").append(Config.getBoolean("bitly.enable")).append("\r\n");
         list.append("contexts: ").append(ContextStorage.size()).append(" in use").append("\r\n");
 
         list.append("```");

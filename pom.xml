@@ -109,16 +109,10 @@
       <version>3.2.3</version>
     </dependency>
     <dependency>
-      <!-- https://github.com/stackmagic/bitly-api-client -->
-      <groupId>net.swisstech</groupId>
-      <artifactId>bitly-api-client</artifactId>
-      <version>0.8.0</version>
-      <exclusions>
-      	<exclusion>
-      		<groupId>com.google.code.gson</groupId>
-      		<artifactId>gson</artifactId>
-      	</exclusion>
-      </exclusions>
+      <!-- https://github.com/opsmatters/bitly-java-api -->
+      <groupId>com.opsmatters</groupId>
+      <artifactId>bitly-java-api</artifactId>
+      <version>1.0.4</version>
     </dependency>
     <dependency>
       <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
@@ -164,16 +158,16 @@
       <version>3.2.6</version>
     </dependency>
     <dependency>
-      <!-- https://github.com/sedmelluq/lavaplayer -->
-      <groupId>com.sedmelluq</groupId>
-      <artifactId>lavaplayer</artifactId>
-      <version>1.3.78</version>
-    </dependency>
-    <dependency>
       <!-- https://github.com/sashirestela/simple-openai -->
       <groupId>io.github.sashirestela</groupId>
       <artifactId>simple-openai</artifactId>
       <version>3.5.1</version>
+    </dependency>
+    <dependency>
+      <!-- https://github.com/commonmark/commonmark-java -->
+      <groupId>org.commonmark</groupId>
+      <artifactId>commonmark</artifactId>
+      <version>0.22.0</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

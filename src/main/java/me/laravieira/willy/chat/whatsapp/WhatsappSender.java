@@ -7,7 +7,10 @@ import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 
 import java.io.File;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class WhatsappSender implements SenderInterface {
     private final Chat chat;
@@ -25,7 +28,14 @@ public class WhatsappSender implements SenderInterface {
     public void sendText(String message) {
         try {
             Whatsapp.getApi().sendMessage(chat, message).get();
-            Whatsapp.getApi().changePresence(chat, ContactStatus.AVAILABLE).get();
+
+            Thread messageStatusUpdate = new Thread(() -> {
+                try {
+                    Whatsapp.getApi().changePresence(chat, ContactStatus.AVAILABLE).get(5, TimeUnit.SECONDS);
+                }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
+            });
+            messageStatusUpdate.setDaemon(true);
+            messageStatusUpdate.start();
         } catch (InterruptedException | ExecutionException e) {
             Willy.getLogger().warning("Fail when sending Whatsapp message.");
         }

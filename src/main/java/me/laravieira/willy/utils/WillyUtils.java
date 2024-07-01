@@ -25,7 +25,7 @@ public class WillyUtils {
     }
 
 
-    public static List<ChatMessage> parseContextToOpenAIChat(@NotNull LinkedList<UUID> messages, @NotNull int historySize) {
+    public static List<ChatMessage> parseContextToOpenAIChat(@NotNull LinkedList<UUID> messages, int historySize) {
         List<ChatMessage> chat = new ArrayList<>();
         LinkedList<UUID> lastMessages = new LinkedList<>(messages);
         LinkedList<Message> descendingHistory = new LinkedList<>();
@@ -36,7 +36,9 @@ public class WillyUtils {
         while(history.hasNext()) {
             Message message = history.next();
             if(message.getFrom().equals(Willy.getWilly().getName()))
-                chat.add(ChatMessage.SystemMessage.of(message.getText()));
+                chat.add((ChatMessage.ResponseMessage) message.getContent());
+            else if(message.getFrom().equals("SYSTEM"))
+                chat.add((ChatMessage.ToolMessage) message.getContent());
             else
                 chat.add(ChatMessage.UserMessage.of(message.getText()));
         }

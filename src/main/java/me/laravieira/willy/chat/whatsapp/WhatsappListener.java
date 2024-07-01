@@ -69,9 +69,11 @@ public class WhatsappListener implements Listener {
         if(info.fromMe())
             return;
 
-        Chat chat = info.chat().get();
+        if(info.chat().isEmpty())
+            return;
 
         Thread messageHandler = new Thread(() -> {
+            Chat chat = info.chat().get();
             UUID id = UUID.nameUUIDFromBytes(("whatsapp-"+info.senderJid().user()).getBytes());
             String content = message.text();
 
@@ -89,18 +91,18 @@ public class WhatsappListener implements Listener {
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
             MessageStorage.add(whatsappMessage);
             ContextStorage.of(whatsappMessage.getContext()).getSender().sendText(whatsappMessage.getText());
-        });
 
-        Thread messageStatusUpdate = new Thread(() -> {
-            try {
-                Whatsapp.getApi().markChatRead(chat).get(5, TimeUnit.SECONDS);
-                Whatsapp.getApi().clearChat(chat, false).get(5, TimeUnit.SECONDS);
-                Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
-            }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
-        });
+            Thread messageStatusUpdate = new Thread(() -> {
+                try {
+                    Whatsapp.getApi().markChatRead(chat).get(5, TimeUnit.SECONDS);
+                    Whatsapp.getApi().clearChat(chat, false).get(5, TimeUnit.SECONDS);
+                    Whatsapp.getApi().changePresence(chat, ContactStatus.COMPOSING).get(5, TimeUnit.SECONDS);
+                }catch(CompletionException | InterruptedException | TimeoutException | ExecutionException ignored) {}
+            });
 
-        messageStatusUpdate.setDaemon(true);
-        messageStatusUpdate.start();
+            messageStatusUpdate.setDaemon(true);
+            messageStatusUpdate.start();
+        });
         messageHandler.setDaemon(true);
         messageHandler.start();
     }

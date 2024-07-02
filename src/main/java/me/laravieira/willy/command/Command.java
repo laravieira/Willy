@@ -5,6 +5,7 @@ import java.util.List;
 
 import me.laravieira.willy.command.admin.*;
 import me.laravieira.willy.command.commands.CommandBitly;
+import me.laravieira.willy.command.commands.CommandDallE;
 
 public class Command {
 	public static List<CommandListener> adminCommandsList() {
@@ -22,6 +23,7 @@ public class Command {
 		List<CommandListener> commands = new ArrayList<>();
 
 		commands.add(new CommandBitly());
+		commands.add(new CommandDallE());
 
 		return commands;
 	}

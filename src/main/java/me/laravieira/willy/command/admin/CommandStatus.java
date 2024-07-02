@@ -45,6 +45,7 @@ public class CommandStatus implements CommandListener {
         list.append("openai:").append("\r\n");
         list.append("    enabled: ").append(Config.getBoolean("openai.enable")).append("\r\n");
         list.append("    connected: ").append(new OpenAi().isConnected()).append("\r\n");
+        list.append("    dall-e: ").append(Config.getBoolean("openai.dall_e")).append("\r\n");
         list.append("discord:").append("\r\n");
         list.append("    enabled: ").append(Config.getBoolean("discord.enable")).append("\r\n");
         list.append("    connected: ").append(new Discord().isConnected()).append("\r\n");

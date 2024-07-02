@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.sashirestela.openai.common.function.FunctionCall;
 import io.github.sashirestela.openai.common.tool.ToolCall;
 import io.github.sashirestela.openai.domain.chat.Chat;
-import io.github.sashirestela.openai.domain.chat.ChatMessage.ToolMessage;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.storage.ContextStorage;
@@ -24,7 +23,6 @@ public class OpenAiListener {
 
     public static void whenCompletionComplete(@NotNull Chat chat, UUID context) {
         if(chat.firstMessage().getToolCalls() == null || chat.firstMessage().getToolCalls().isEmpty()) {
-            Willy.getLogger().fine(STR."OpenAI chat completion \{chat.getId()}");
             new OpenAiListener(context).onCompletionResponse(chat);
             return;
         }
@@ -42,21 +40,10 @@ public class OpenAiListener {
             FunctionCall function = call.getFunction();
             JSONObject temp = JSON.parseObject(function.getArguments());
             temp.put("context", context);
+            temp.put("call", call.getId());
             function.setArguments(temp.toJSONString());
 
-            Object object = OpenAi.getExecutor().execute(function);
-            ToolMessage toolMessage = ToolMessage.of(object.toString(), call.getId());
-
-            Message result = new Message(context);
-            result.setExpire(PassedInterval.DISABLE);
-            result.setTo(Willy.getWilly().getName());
-            result.setFrom("SYSTEM");
-            result.setContent(toolMessage);
-            result.setText(toolMessage.getContent());
-            MessageStorage.add(result);
-
-            Willy.getLogger().fine(STR."OpenAI tool call \{call.getId()}");
-            ContextStorage.of(context).getSender().sendText(result.toString());
+            OpenAi.getExecutor().execute(function);
         }
     }
 
@@ -82,5 +69,6 @@ public class OpenAiListener {
         MessageStorage.add(message);
 
         ContextStorage.of(context).getUserSender().send(message);
+        Willy.getLogger().fine(STR."OpenAI chat completion \{chat.getId()}");
     }
 }

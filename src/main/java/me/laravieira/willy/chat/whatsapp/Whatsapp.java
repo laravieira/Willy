@@ -1,5 +1,6 @@
 package me.laravieira.willy.chat.whatsapp;
 
+import lombok.Getter;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.internal.WillyChat;
@@ -7,6 +8,7 @@ import me.laravieira.willy.internal.WillyChat;
 import static it.auties.whatsapp.api.Whatsapp.webBuilder;
 
 public class Whatsapp implements WillyChat {
+    @Getter
     private static it.auties.whatsapp.api.Whatsapp whatsapp = null;
 
     @Override
@@ -62,8 +64,10 @@ public class Whatsapp implements WillyChat {
 
     public static void reconnect() {
         Thread disconnect = new Thread(() -> {
-            if(whatsapp == null)
+            if(whatsapp == null) {
+                Willy.getLogger().info("Whatsapp instance was already null.");
                 return;
+            }
             whatsapp.reconnect().whenComplete((success, error) -> {
                 if(error == null)
                     Willy.getLogger().info("Whatsapp instance was reconnected.");
@@ -76,8 +80,10 @@ public class Whatsapp implements WillyChat {
     }
 
     public static void logout() {
-        if(whatsapp == null)
+        if(whatsapp == null) {
+            Willy.getLogger().info("Whatsapp instance was already null.");
             return;
+        }
         whatsapp.logout().whenComplete((success, error) -> {
             if(error == null)
                 Willy.getLogger().info("Whatsapp instance successfully logout.");

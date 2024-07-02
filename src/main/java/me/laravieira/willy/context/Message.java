@@ -21,7 +21,7 @@ public class Message {
     @Setter
     protected Object content;
     @Setter
-    protected String text;
+    protected String text = "";
     protected PassedInterval expire = null;
     @Setter
     protected List<File> attachments = new ArrayList<>();

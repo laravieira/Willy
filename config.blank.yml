@@ -37,6 +37,7 @@ discord:
 openai:
     enable: false
     token:
+    dall-e: false
 
 whatsapp:
     enable: false

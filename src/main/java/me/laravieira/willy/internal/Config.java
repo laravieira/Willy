@@ -58,6 +58,7 @@ public class Config {
 		// OpenAI settings
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, false);
 		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
+		set("openai.dall_e", "WILLY_OPENAI_DALL_E", "openai.dall-e", TYPE_BOOLEAN, false);
 
 		// Whatsapp Settings
 		set("whatsapp.enable",                              "WILLY_WHATSAPP_ENABLE",                              "whatsapp.enable",                              TYPE_BOOLEAN, false);

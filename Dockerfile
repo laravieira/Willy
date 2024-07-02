@@ -55,4 +55,4 @@ ENV WILLY_HTTP_API_PORT 7001
 COPY --from=build /app/target/$BUILD_NAME /app
 EXPOSE $WILLY_HTTP_API_PORT
 
-CMD java -Xmx$MEMORY -jar $BUILD_NAME
+CMD java -Xmx$MEMORY --enable-preview -jar $BUILD_NAME

@@ -90,12 +90,12 @@ public class Config {
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {
 		if(configFile.has(fileKey)) {
 			switch (type) {
-				case TYPE_STRING  -> settings.put(key, configFile.asString(fileKey));
-				case TYPE_INT     -> settings.put(key, configFile.asInt(fileKey));
-				case TYPE_LONG    -> settings.put(key, configFile.asLong(fileKey));
-				case TYPE_BOOLEAN -> settings.put(key, configFile.asBoolean(fileKey));
-				case TYPE_TIME    -> settings.put(key, parseTime(configFile.asString(fileKey)));
-				case TYPE_LIST    -> settings.put(key, configFile.asList(fileKey));
+				case TYPE_STRING  -> { if(configFile.isString(fileKey))  settings.put(key, configFile.asString(fileKey)); }
+				case TYPE_INT     -> { if(configFile.isInt(fileKey))     settings.put(key, configFile.asInt(fileKey)); }
+				case TYPE_LONG    -> { if(configFile.isLong(fileKey))    settings.put(key, configFile.asLong(fileKey)); }
+				case TYPE_BOOLEAN -> { if(configFile.isBoolean(fileKey)) settings.put(key, configFile.asBoolean(fileKey)); }
+				case TYPE_TIME    -> { if(configFile.isString(fileKey))  settings.put(key, parseTime(configFile.asString(fileKey))); }
+				case TYPE_LIST    -> { if(configFile.isList(fileKey))    settings.put(key, configFile.asList(fileKey)); }
 				default -> settings.put(key, configFile.asObject(fileKey));
 			}
 		}

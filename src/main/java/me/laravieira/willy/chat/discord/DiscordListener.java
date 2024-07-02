@@ -76,7 +76,7 @@ public class DiscordListener {
 
 		Willy.getLogger().fine(STR."Msg on Discord dm \{channel.getId().asLong()} by \{user.getId().asLong()}");
 		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, PassedInterval.DISABLE);
-		ContextStorage.of(discordMessage.getContext()).getSender().sendText(discordMessage.getText());
+		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
 	}
 
 	@NotNull
@@ -128,7 +128,7 @@ public class DiscordListener {
 
 		Willy.getLogger().fine(STR."Msg on Discord public \{channel.getId().asLong()} by \{user.getId().asLong()}");
 		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, expire);
-		ContextStorage.of(discordMessage.getContext()).getSender().sendText(content);
+		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
 	}
 	
 	@NotNull

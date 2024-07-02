@@ -2,6 +2,7 @@ package me.laravieira.willy.chat.discord;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateSpec;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
 import me.laravieira.willy.storage.ContextStorage;
@@ -22,13 +23,6 @@ public class DiscordSender implements SenderInterface {
         this.expire = expire;
     }
 
-    private void saveMessage(discord4j.core.object.entity.Message result) {
-        Message lastMessage = ContextStorage.of(context).getLastMessage();
-        DiscordMessage message = new DiscordMessage(context, lastMessage, result, expire);
-        MessageStorage.remove(lastMessage.getId());
-        MessageStorage.add(message);
-    }
-
     private void sendMessage(MessageCreateSpec messageCreateSpec) {
         discord4j.core.object.entity.Message result;
         try {
@@ -37,22 +31,45 @@ public class DiscordSender implements SenderInterface {
             new Discord().connect();
             result = channel.createMessage(messageCreateSpec).block();
         }
-        saveMessage(result);
+        // Save the message to the storage for auto delete
+        Message lastMessage = ContextStorage.of(context).getLastMessage();
+        DiscordMessage message = new DiscordMessage(context, lastMessage, result, expire);
+        MessageStorage.remove(lastMessage.getId());
+        MessageStorage.add(message);
     }
 
     @Override
-    public void send(Object message) {
+    public void send(Message message) {
+        switch (message.getType()) {
+            case IMAGE:
+                sendImage(message);
+                break;
+            case TEXT:
+            default:
+                sendText(message.getText());
+                break;
+        }
     }
 
     @Override
     public void sendText(String message) {
-        sendMessage(MessageCreateSpec.builder().content(message).build());
+        try {
+            sendMessage(MessageCreateSpec.builder().content(message).build());
+            Willy.getLogger().fine("Discord send text success.");
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Discord send text fail: \{e.getMessage()}");
+        }
     }
 
     @Override
     public void sendLink(@NotNull Message message) {
-        String content = (String)message.getContent();
-        sendMessage(MessageCreateSpec.builder().content(content).build());
+        try {
+            String content = (String)message.getContent();
+            sendMessage(MessageCreateSpec.builder().content(content).build());
+            Willy.getLogger().fine("Discord send link success.");
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Discord send link fail: \{e.getMessage()}");
+        }
     }
 
     @Override
@@ -72,7 +89,12 @@ public class DiscordSender implements SenderInterface {
     }
 
     public void sendEmbed(MessageCreateSpec messageCreateSpec) {
-        sendMessage(messageCreateSpec);
+        try {
+            sendMessage(messageCreateSpec);
+            Willy.getLogger().fine("Discord send embed success.");
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Discord send embed fail: \{e.getMessage()}");
+        }
     }
 
     @Override
@@ -82,9 +104,25 @@ public class DiscordSender implements SenderInterface {
     }
 
     @Override
-    public void sendImage(Message message) throws Exception {
-        //TODO Implement how to send images to Discord
-        throw new Exception("This function is not implemented.");
+    public void sendImage(Message message) {
+        try {
+            StringBuilder links = new StringBuilder(message.getText());
+            for(String url : message.getUrls()) {
+                links.append("\r\n").append(url);
+            }
+
+            MessageCreateSpec.Builder builder = MessageCreateSpec.builder();
+            builder.content(links.toString());
+
+            for(File file : message.getAttachments()) {
+                builder.addFile(file.getName(), new FileInputStream(file));
+            }
+
+            sendMessage(builder.build());
+            Willy.getLogger().fine("Discord send image success.");
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Discord send image fail: \{e.getMessage()}");
+        }
     }
 
     @Override
@@ -118,8 +156,9 @@ public class DiscordSender implements SenderInterface {
             sendMessage(MessageCreateSpec.builder()
                 .addFile(message.getName(), new FileInputStream(message))
                 .build());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Willy.getLogger().fine("Discord send file success.");
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Discord send file fail: \{e.getMessage()}");
         }
     }
 }

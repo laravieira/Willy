@@ -1,5 +1,6 @@
 package me.laravieira.willy.chat.openai;
 
+import io.github.sashirestela.openai.domain.chat.Chat;
 import io.github.sashirestela.openai.domain.chat.ChatRequest;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
@@ -20,21 +21,31 @@ public class OpenAiSender implements SenderInterface {
     }
 
     @Override
-    public void send(Object message) {
-
+    public void send(Message message) {
+        switch (message.getType()) {
+            case IMAGE:
+                sendImage(message);
+                break;
+            case TEXT:
+            default:
+                sendText(message.getText());
+                break;
+        }
     }
 
     @Override
     public void sendText(String message) {
-        LinkedList<UUID> messages = ContextStorage.of(context).getMessages();
-        ChatRequest request = OpenAi.chat()
-            .messages(WillyUtils.parseContextToOpenAIChat(messages, OpenAi.HISTORY_SIZE))
-            .build();
         try {
-            OpenAi.getService().chatCompletions().create(request)
-                .whenComplete((chat, throwable) -> OpenAiListener.whenCompletionComplete(chat, throwable, context)).get();
+            LinkedList<UUID> messages = ContextStorage.of(context).getMessages();
+            ChatRequest request = OpenAi.chat()
+                .messages(WillyUtils.parseContextToOpenAIChat(messages, OpenAi.HISTORY_SIZE))
+                .build();
+
+            Chat chat = OpenAi.getService().chatCompletions().create(request).get();
+            OpenAiListener.whenCompletionComplete(chat, context);
+            Willy.getLogger().fine("OpenAI send text success.");
         } catch (InterruptedException | ExecutionException e) {
-            Willy.getLogger().warning(e.getMessage());
+            Willy.getLogger().warning(STR."OpenAI send text fail: \{e.getMessage()}");
         }
     }
 

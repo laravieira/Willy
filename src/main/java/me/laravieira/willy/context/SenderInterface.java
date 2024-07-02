@@ -3,7 +3,7 @@ package me.laravieira.willy.context;
 import java.io.File;
 
 public interface SenderInterface {
-    void send(Object message);
+    void send(Message message);
     void sendText(String message);
     void sendLink(Message message) throws Exception;
     void sendStick(Message message) throws Exception;

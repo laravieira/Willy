@@ -90,7 +90,7 @@ public class WhatsappListener implements Listener {
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
             MessageStorage.add(whatsappMessage);
-            ContextStorage.of(whatsappMessage.getContext()).getSender().sendText(whatsappMessage.getText());
+            ContextStorage.of(whatsappMessage.getContext()).getSender().send(whatsappMessage);
 
             Thread messageStatusUpdate = new Thread(() -> {
                 try {

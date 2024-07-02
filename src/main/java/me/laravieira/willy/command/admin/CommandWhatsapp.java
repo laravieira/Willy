@@ -6,15 +6,20 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import it.auties.whatsapp.controller.StoreBuilder;
+import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.prefs.Preferences;
 
 public class CommandWhatsapp implements CommandListener {
@@ -22,10 +27,8 @@ public class CommandWhatsapp implements CommandListener {
     public static final String DESCRIPTION = "Manage whatsapp connection.";
     public static final String OPTION_CONNECT = "connect";
     public static final String OPTION_DISCONNECT = "disconnect";
-    public static final String OPTION_RECONNECT = "reconnect";
+    public static final String OPTION_RESET = "reset";
     public static final String OPTION_LOGOUT = "logout";
-    public static final String OPTION_CONNECTIONS = "connections";
-    public static final String OPTION_LOGOUT_ALL = "logoutall";
     public static final String OPTION_CHATS = "chats";
     public static final String OPTION_TALK = "talk";
     public static final String OPTION_TALK_NUMBER = "number";
@@ -36,10 +39,8 @@ public class CommandWhatsapp implements CommandListener {
         List<ApplicationCommandOptionChoiceData> options = new ArrayList<>();
         options.add(registerChoice(OPTION_CONNECT, OPTION_CONNECT));
         options.add(registerChoice(OPTION_DISCONNECT, OPTION_DISCONNECT));
-        options.add(registerChoice(OPTION_RECONNECT, OPTION_RECONNECT));
+        options.add(registerChoice(OPTION_RESET, OPTION_RESET));
         options.add(registerChoice(OPTION_LOGOUT, OPTION_LOGOUT));
-        options.add(registerChoice(OPTION_LOGOUT_ALL, OPTION_LOGOUT_ALL));
-        options.add(registerChoice(OPTION_CONNECTIONS, OPTION_CONNECTIONS));
         options.add(registerChoice(OPTION_CHATS, OPTION_CHATS));
         options.add(registerChoice(OPTION_TALK, OPTION_TALK));
 
@@ -75,10 +76,8 @@ public class CommandWhatsapp implements CommandListener {
                 switch (value.asString()) {
                     case OPTION_CONNECT -> onConnect(event);
                     case OPTION_DISCONNECT -> onDisconnect(event);
-                    case OPTION_RECONNECT -> onReconnect(event);
+                    case OPTION_RESET -> onReset(event);
                     case OPTION_LOGOUT -> onLogout(event);
-                    case OPTION_LOGOUT_ALL -> onLogoutAll(event);
-                    case OPTION_CONNECTIONS -> onConnections(event);
                     case OPTION_CHATS -> onChats(event);
                     case OPTION_TALK -> onTalk(event, command);
                 }
@@ -113,52 +112,22 @@ public class CommandWhatsapp implements CommandListener {
         event.reply("Whatsapp disconnect sent.").subscribe();
     }
 
-    private void onReconnect(@NotNull ChatInputInteractionEvent event) {
-        Whatsapp.reconnect();
-        event.reply("Whatsapp reconnect sent.").subscribe();
+    private void onReset(@NotNull ChatInputInteractionEvent event) {
+        event.reply("Hard reset WhatsApp").subscribe();
+        try {
+            Whatsapp.logout();
+            Files.delete(Paths.get(System.getProperty("user.home"), ".cobalt", "web", "Willy"));
+            event.editReply("Whatsapp reset.").subscribe();
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Error on hard reset WhatsApp: \{e.getMessage()}");
+            event.editReply(STR."Whatsapp reset: \{e.getMessage()}").subscribe();
+        }
     }
 
-    private void onLogout(@NotNull ChatInputInteractionEvent event) {
+        private void onLogout(@NotNull ChatInputInteractionEvent event) {
         Whatsapp.logout();
         new Whatsapp().disconnect();
         event.reply("Whatsapp logout sent.").subscribe();
-    }
-
-    private void onLogoutAll(@NotNull ChatInputInteractionEvent event) {
-        event.reply("Loading...").subscribe();
-        StringBuilder list = new StringBuilder();
-        list.append("```yaml\r\n");
-        Whatsapp.logout();
-        new Whatsapp().disconnect();
-        Whatsapp.getApi().awaitDisconnection();
-//        try {
-//            try()
-//            Files.walk(Paths.get(System.getProperty("user.home"))).forEach(folder -> {
-//                try {
-//                    if(Files.isDirectory(folder))
-//                        for(Path file : Files.walk(folder).toList())
-//                            Files.deleteIfExists(file);
-//                    Files.deleteIfExists(folder);
-//                    StringBuilder message = new StringBuilder(list.append(folder.getFileName()).append(": deleted\r\n"));
-//                    event.editReply(message.append("```").toString()).subscribe();
-//                }catch(IOException ignore) {
-//                    StringBuilder message = new StringBuilder(list.append(folder.getFileName()).append(": failed\r\n"));
-//                    event.editReply(message.append("```").toString()).subscribe();
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        event.editReply(list.append("```:white_check_mark:").toString()).subscribe();
-    }
-
-    private void onConnections(@NotNull ChatInputInteractionEvent event) {
-        StringBuilder list = new StringBuilder();
-        event.reply("Loading...").subscribe();
-        list.append("**Whatsapp connections** `").append(new Date()).append("`").append("\r\n");
-        list.append("```yaml\r\n").append("\r\n");
-        list.append("```");
-        event.editReply(list.toString()).subscribe();
     }
 
     private void onChats(@NotNull ChatInputInteractionEvent event) {

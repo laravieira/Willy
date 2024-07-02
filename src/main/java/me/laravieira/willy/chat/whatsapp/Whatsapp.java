@@ -80,17 +80,16 @@ public class Whatsapp implements WillyChat {
     }
 
     public static void logout() {
-        if(whatsapp == null) {
-            Willy.getLogger().info("Whatsapp instance was already null.");
-            return;
+        try {
+            if(whatsapp == null) {
+                Willy.getLogger().info("Whatsapp instance was already null.");
+                return;
+            }
+            whatsapp.logout().join();
+            whatsapp.disconnect().join();
+        } catch (Exception e) {
+            Willy.getLogger().warning(STR."Error on Whatsapp logout: \{e.getMessage()}");
         }
-        whatsapp.logout().whenComplete((success, error) -> {
-            if(error == null)
-                Willy.getLogger().info("Whatsapp instance successfully logout.");
-            else
-                Willy.getLogger().warning(STR."Whatsapp instance couldn't logout: \{error.getMessage()}");
-            new Whatsapp().disconnect();
-        });
     }
 
     public static void chats() {

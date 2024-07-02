@@ -1,5 +1,8 @@
 package me.laravieira.willy.chat.openai;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import io.github.sashirestela.openai.common.function.FunctionCall;
 import io.github.sashirestela.openai.common.tool.ToolCall;
 import io.github.sashirestela.openai.domain.chat.Chat;
 import io.github.sashirestela.openai.domain.chat.ChatMessage.ToolMessage;
@@ -19,36 +22,38 @@ import java.util.UUID;
 public class OpenAiListener {
     private final UUID context;
 
-    public static void whenCompletionComplete(@NotNull Chat chat, Throwable throwable, UUID context) {
-        if(throwable != null) {
-            Willy.getLogger().warning(STR."Error on OpenAI chat completion: \{throwable.getMessage()}");
-            return;
-        }
+    public static void whenCompletionComplete(@NotNull Chat chat, UUID context) {
         if(chat.firstMessage().getToolCalls() == null || chat.firstMessage().getToolCalls().isEmpty()) {
             Willy.getLogger().fine(STR."OpenAI chat completion \{chat.getId()}");
             new OpenAiListener(context).onCompletionResponse(chat);
             return;
         }
 
+        Message response = new Message(context);
+        response.setExpire(PassedInterval.DISABLE);
+        response.setTo("SYSTEM");
+        response.setFrom(Willy.getWilly().getName());
+        response.setContent(chat.firstMessage());
+        response.setText(chat.firstContent());
+        MessageStorage.add(response);
+
         for(ToolCall call : chat.firstMessage().getToolCalls()) {
-            Message response = new Message(context);
-            response.setExpire(PassedInterval.DISABLE);
-            response.setTo("SYSTEM");
-            response.setFrom(Willy.getWilly().getName());
-            response.setContent(chat.firstMessage());
-            response.setText(chat.firstContent());
-            MessageStorage.add(response);
+            // Inject the context id into the functions
+            FunctionCall function = call.getFunction();
+            JSONObject temp = JSON.parseObject(function.getArguments());
+            temp.put("context", context);
+            function.setArguments(temp.toJSONString());
 
-            Object result = OpenAi.getExecutor().execute(call.getFunction());
-            ToolMessage toolMessage = ToolMessage.of(result.toString(), call.getId());
+            Object object = OpenAi.getExecutor().execute(function);
+            ToolMessage toolMessage = ToolMessage.of(object.toString(), call.getId());
 
-            Message function = new Message(context);
-            function.setExpire(PassedInterval.DISABLE);
-            function.setTo(Willy.getWilly().getName());
-            function.setFrom("SYSTEM");
-            function.setContent(toolMessage);
-            function.setText(toolMessage.getContent());
-            MessageStorage.add(function);
+            Message result = new Message(context);
+            result.setExpire(PassedInterval.DISABLE);
+            result.setTo(Willy.getWilly().getName());
+            result.setFrom("SYSTEM");
+            result.setContent(toolMessage);
+            result.setText(toolMessage.getContent());
+            MessageStorage.add(result);
 
             Willy.getLogger().fine(STR."OpenAI tool call \{call.getId()}");
             ContextStorage.of(context).getSender().sendText(result.toString());
@@ -76,6 +81,6 @@ public class OpenAiListener {
         message.setText(text);
         MessageStorage.add(message);
 
-        ContextStorage.of(context).getUserSender().sendText(text);
+        ContextStorage.of(context).getUserSender().send(message);
     }
 }

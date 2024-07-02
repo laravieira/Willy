@@ -14,7 +14,7 @@ public class CommandSender implements SenderInterface {
     }
 
     @Override
-    public void send(Object message) {
+    public void send(Message message) {
 
     }
 

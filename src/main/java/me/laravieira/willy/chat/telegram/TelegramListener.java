@@ -35,7 +35,7 @@ public class TelegramListener implements UpdatesListener {
             TelegramMessage message = new TelegramMessage(id, msg, chat, PassedInterval.DISABLE);
             MessageStorage.add(message);
 
-            ContextStorage.of(message.getContext()).getSender().sendText(message.getText());
+            ContextStorage.of(message.getContext()).getSender().send(message);
         });
         messageHandler.setDaemon(true);
         messageHandler.start();

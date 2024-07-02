@@ -1,19 +1,32 @@
 package me.laravieira.willy.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.laravieira.willy.utils.PassedInterval;
 
 import java.io.File;
 import java.util.*;
 
+@Getter
 public class Message {
     protected final UUID context;
     protected final UUID id;
+
+    @Setter
     protected String from;
+    @Setter
     protected String to;
+    @Setter
+    protected MessageType type = MessageType.TEXT;
+    @Setter
     protected Object content;
+    @Setter
     protected String text;
     protected PassedInterval expire = null;
+    @Setter
     protected List<File> attachments = new ArrayList<>();
+    @Setter
+    protected List<String> urls = new ArrayList<>();
 
     public Message(UUID context) {
         this.context = context;
@@ -25,57 +38,13 @@ public class Message {
         this.expire.start();
     }
 
-    public void delete() {}
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public void setContent(Object content) {
-        this.content = content;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public void addAttachment(File file) {
         attachments.add(file);
     }
 
-    public UUID getId() {
-        return id;
+    public void addUrl(String url) {
+        urls.add(url);
     }
 
-    public UUID getContext() {
-        return context;
-    }
-
-    public PassedInterval getExpire() {
-        return expire;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public Object getContent() {
-        return content;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public List<File> getAttachments() {
-        return attachments;
-    }
+    public void delete() {}
 }

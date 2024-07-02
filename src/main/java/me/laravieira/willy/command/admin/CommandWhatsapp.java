@@ -10,9 +10,12 @@ import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 public class CommandWhatsapp implements CommandListener {
     public static final String COMMAND = "whats";
@@ -129,7 +132,8 @@ public class CommandWhatsapp implements CommandListener {
         new Whatsapp().disconnect();
         Whatsapp.getApi().awaitDisconnection();
 //        try {
-//            Files.walk(Preferences.home()).forEach(folder -> {
+//            try()
+//            Files.walk(Paths.get(System.getProperty("user.home"))).forEach(folder -> {
 //                try {
 //                    if(Files.isDirectory(folder))
 //                        for(Path file : Files.walk(folder).toList())

@@ -4,8 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.opsmatters.bitly.Bitly;
 import io.github.sashirestela.openai.common.function.FunctionDef;
+import io.github.sashirestela.openai.domain.chat.ChatMessage;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.context.Message;
 import me.laravieira.willy.internal.Config;
+import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.utils.PassedInterval;
 
 public class BitlyFunction extends Functional {
     @JsonPropertyDescription("The url to be shortened.")
@@ -37,18 +42,18 @@ public class BitlyFunction extends Functional {
             String shortLink = bitly.bitlinks().shorten(link).get().getLink();
             if (shortLink == null || shortLink.isEmpty()) {
                 Willy.getLogger().fine(STR."function call shortenLink \{link} failed.");
-                return "Something didn't work right.";
+                return askResponse("Something didn't work right.");
             }
             if (shortLink.equals(link)) {
                 Willy.getLogger().fine(STR."function call shortenLink \{link} returned the same link.");
-                return "Maybe it's already short enough.";
+                return askResponse("Maybe it's already short enough.");
             }
 
             Willy.getLogger().fine(STR."function call shortenLink \{link} returned \{shortLink}.");
-            return shortLink;
+            return askResponse(shortLink);
         } catch (Exception e) {
             Willy.getLogger().warning(e.getMessage());
-            return "Something didn't work right.";
+            return askResponse("Something didn't work right.");
         }
     }
 }

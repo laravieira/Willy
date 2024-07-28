@@ -52,7 +52,7 @@ public class OpenAi implements WillyChat {
 
     public static ChatRequest.ChatRequestBuilder chat() {
         executor.enrollFunction(BitlyFunction.builder());
-//        executor.enrollFunction(DallEFunction.builder());
+        executor.enrollFunction(DallEFunction.builder());
 
         return ChatRequest.builder()
             .model(MODEL)

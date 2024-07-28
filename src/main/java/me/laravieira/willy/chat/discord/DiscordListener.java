@@ -1,10 +1,5 @@
 package me.laravieira.willy.chat.discord;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import discord4j.core.event.domain.guild.MemberUpdateEvent;

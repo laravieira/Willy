@@ -9,6 +9,8 @@ import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.utils.WillyUtils;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -44,7 +46,7 @@ public class OpenAiSender implements SenderInterface {
             Chat chat = OpenAi.getService().chatCompletions().create(request).get();
             OpenAiListener.whenCompletionComplete(chat, context);
             Willy.getLogger().fine("OpenAI send text success.");
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | MalformedURLException | URISyntaxException e) {
             Willy.getLogger().warning(STR."OpenAI send text fail: \{e.getMessage()}");
         }
     }

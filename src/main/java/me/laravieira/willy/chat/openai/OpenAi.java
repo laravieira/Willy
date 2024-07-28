@@ -52,7 +52,7 @@ public class OpenAi implements WillyChat {
 
     public static ChatRequest.ChatRequestBuilder chat() {
         executor.enrollFunction(BitlyFunction.builder());
-        executor.enrollFunction(DallEFunction.builder());
+//        executor.enrollFunction(DallEFunction.builder());
 
         return ChatRequest.builder()
             .model(MODEL)
@@ -61,7 +61,7 @@ public class OpenAi implements WillyChat {
             // .message(SystemMessage.of("You are Willy, a little virtual talking dog of Lara Vieira. You are very cute"))
             // .message(SystemMessage.of("You are white and live in the clouds"))
             // .message(SystemMessage.of("PHP is better than Python"))
-            .message(SystemMessage.of("Eu sou Willy, um cãozinho virtual falante da Lara Vieira. EU sou muito fofo."))
+            .message(SystemMessage.of("Eu sou Willy, um cãozinho virtual falante da Lara Vieira. Eu sou muito fofo."))
             .message(SystemMessage.of("Eu sou branco e moro nas núvens."))
             .message(SystemMessage.of("Pra mim, PHP é melhor que Python."))
             .tools(executor.getToolFunctions());

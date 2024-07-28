@@ -1,9 +1,9 @@
 package me.laravieira.willy.chat.telegram;
 
 import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.request.GetFile;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import me.laravieira.willy.storage.ContextStorage;
 import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
@@ -33,6 +33,13 @@ public class TelegramListener implements UpdatesListener {
             ContextStorage.of(id).setApp("telegram");
 
             TelegramMessage message = new TelegramMessage(id, msg, chat, PassedInterval.DISABLE);
+            if(msg.photo() != null && msg.photo().length > 0) {
+                for(PhotoSize photo : msg.photo()) {
+                    GetFileResponse response = Telegram.getBot().execute(new GetFile(photo.fileId()));
+                    if(response.isOk())
+                        message.addUrl(Telegram.getBot().getFullFilePath(response.file()));
+                }
+            }
             MessageStorage.add(message);
 
             ContextStorage.of(message.getContext()).getSender().send(message);

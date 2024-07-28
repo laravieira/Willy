@@ -18,6 +18,7 @@ import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -89,6 +90,9 @@ public class WhatsappListener implements Listener {
             ContextStorage.of(id).setApp("whatsapp");
 
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
+            if(info.mediaData().isPresent())
+                whatsappMessage.addAttachment(Path.of(info.mediaData().get().localPath()).toFile());
+
             MessageStorage.add(whatsappMessage);
             ContextStorage.of(whatsappMessage.getContext()).getSender().send(whatsappMessage);
 

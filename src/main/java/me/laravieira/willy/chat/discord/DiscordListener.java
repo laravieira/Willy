@@ -85,28 +85,16 @@ public class DiscordListener {
 		ContextStorage.of(id).setApp("discord");
 
 		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
-		MessageStorage.add(discordMessage);
-		if(!message.getAttachments().isEmpty())
-			onAttachments(discordMessage.getId(), message);
-		return discordMessage;
-	}
-
-	public static void onAttachments(UUID messageID, @NotNull Message message) {
-		Thread download = new Thread(() -> {
+		for(Attachment attachment : message.getAttachments()) {
 			try {
-				me.laravieira.willy.context.Message msg = MessageStorage.of(messageID);
-				for (Attachment attachment : message.getAttachments()) {
-					File raw = Files.createTempFile("willy", attachment.getFilename()).toFile();
-					Files.copy(new URL(attachment.getUrl()).openStream(), raw.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					msg.addAttachment(raw);
-					Willy.getLogger().info(raw.toString());
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+				if(attachment.getContentType().isPresent() && attachment.getContentType().get().toLowerCase().startsWith("image"))
+					discordMessage.addUrl(attachment.getUrl());
+			}catch(Exception e) {
+				Willy.getLogger().warning(STR."Error on attachment proccessing: \{e.getMessage()}");
 			}
-		});
-		download.setDaemon(true);
-		download.start();
+		}
+		MessageStorage.add(discordMessage);
+		return discordMessage;
 	}
 
 	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {

@@ -48,11 +48,11 @@ public class DallEFunction extends Functional {
             }
 
             ImageRequest.Style style = ImageRequest.Style.NATURAL;
-            Size size = Size.X256;
+            Size size = Size.X1024;
             int amount = 1;
 
             ImageRequest request = ImageRequest.builder()
-                    .model("dall-e-2")
+                    .model("dall-e-3")
                     .prompt(prompt)
                     .style(style)
                     .size(size)
@@ -82,7 +82,7 @@ public class DallEFunction extends Functional {
             context.getSender().sendText(result.toString());
             return toolMessage.getContent();
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Dal-E function error: \{e.getMessage()}");
+            Willy.getLogger().warning(STR."Dall-E function error: \{e.getMessage()}");
             return askResponse(STR."Something didn't work right: \{e.getMessage()}");
         }
     }

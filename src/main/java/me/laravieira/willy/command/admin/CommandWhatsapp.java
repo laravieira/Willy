@@ -3,24 +3,20 @@ package me.laravieira.willy.command.admin;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import it.auties.whatsapp.controller.StoreBuilder;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.prefs.Preferences;
 
 public class CommandWhatsapp implements CommandListener {
     public static final String COMMAND = "whats";
@@ -70,19 +66,20 @@ public class CommandWhatsapp implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
-        event.getOption("command").ifPresent(
-            command -> command.getValue().ifPresent(value -> {
-                switch (value.asString()) {
-                    case OPTION_CONNECT -> onConnect(event);
-                    case OPTION_DISCONNECT -> onDisconnect(event);
-                    case OPTION_RESET -> onReset(event);
-                    case OPTION_LOGOUT -> onLogout(event);
-                    case OPTION_CHATS -> onChats(event);
-                    case OPTION_TALK -> onTalk(event, command);
-                }
-            })
-        );
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
+        if(event.getOption("command").isPresent() && event.getOption("command").get().getValue().isPresent()) {
+            String value = event.getOption("command").get().getValue().get().asString();
+            return switch (value) {
+                case OPTION_CONNECT -> onConnect(event);
+                case OPTION_DISCONNECT -> onDisconnect(event);
+                case OPTION_RESET -> onReset(event);
+                case OPTION_LOGOUT -> onLogout(event);
+                // case OPTION_CHATS -> onChats(event);
+                // case OPTION_TALK -> onTalk(event, command);
+                default -> null;
+            };
+        }
+        return null;
     }
 
     @Override
@@ -102,32 +99,60 @@ public class CommandWhatsapp implements CommandListener {
             .build();
     }
 
-    private void onConnect(@NotNull ChatInputInteractionEvent event) {
-        Whatsapp.create();
-        event.reply("Whatsapp connect sent.").subscribe();
+    private InteractionApplicationCommandCallbackReplyMono onConnect(@NotNull ChatInputInteractionEvent event) {
+        Thread thread = new Thread(Whatsapp::create);
+        thread.setName("Whatsapp connect thread");
+        thread.start();
+        thread.setDaemon(true);
+
+        return event.reply("Whatsapp connect sent.");
     }
 
-    private void onDisconnect(@NotNull ChatInputInteractionEvent event) {
+    private InteractionApplicationCommandCallbackReplyMono onDisconnect(@NotNull ChatInputInteractionEvent event) {
         new Whatsapp().disconnect();
-        event.reply("Whatsapp disconnect sent.").subscribe();
+        return event.reply("Whatsapp disconnect sent.");
     }
 
-    private void onReset(@NotNull ChatInputInteractionEvent event) {
-        event.reply("Hard reset WhatsApp").subscribe();
-        try {
-            Whatsapp.logout();
-            Files.delete(Paths.get(System.getProperty("user.home"), ".cobalt", "web", "Willy"));
-            event.editReply("Whatsapp reset.").subscribe();
-        } catch (Exception e) {
-            Willy.getLogger().warning(STR."Error on hard reset WhatsApp: \{e.getMessage()}");
-            event.editReply(STR."Whatsapp reset: \{e.getMessage()}").subscribe();
-        }
+    private InteractionApplicationCommandCallbackReplyMono onReset(@NotNull ChatInputInteractionEvent event) {
+        Thread thread = new Thread(() -> {
+            try {
+                Whatsapp.logout();
+                Files.walkFileTree(
+                    Paths.get(System.getProperty("user.home"), ".cobalt", "web"),
+                    new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                            if (exc == null) {
+                                Files.delete(dir);
+                                return FileVisitResult.CONTINUE;
+                            }
+                            throw exc;
+                        }
+                    }
+                );
+                event.createFollowup("Whatsapp reset.").subscribe();
+            } catch (Exception e) {
+                Willy.getLogger().warning(STR."Error on hard reset WhatsApp: \{e.getMessage()}");
+                event.createFollowup(STR."Whatsapp reset: \{e.getMessage()}").subscribe();
+            }
+        });
+        thread.setName("Whatsapp reset thread");
+        thread.start();
+        thread.setDaemon(true);
+
+        return event.reply("Hard reset WhatsApp");
     }
 
-        private void onLogout(@NotNull ChatInputInteractionEvent event) {
+    private InteractionApplicationCommandCallbackReplyMono onLogout(@NotNull ChatInputInteractionEvent event) {
         Whatsapp.logout();
         new Whatsapp().disconnect();
-        event.reply("Whatsapp logout sent.").subscribe();
+        return event.reply("Whatsapp logout sent.");
     }
 
     private void onChats(@NotNull ChatInputInteractionEvent event) {

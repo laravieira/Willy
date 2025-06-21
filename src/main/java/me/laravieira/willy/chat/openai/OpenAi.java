@@ -25,14 +25,19 @@ public class OpenAi implements WillyChat {
     @Override
     public void connect() {
         if(!Config.getBoolean("openai.enable")) {
-            Willy.getLogger().info("OpenAI is disabled.");
+            Willy.getLogger().info("OpenAI service is disabled.");
             return;
         }
         if(!Config.has("openai.token")) {
             Willy.getLogger().severe("OpenAI token is not defined in the configuration file.");
             return;
         }
+        if(!Config.has("openai.prompt") || Config.getFile("openai.prompt") == null) {
+            Willy.getLogger().severe("OpenAI prompt is not defined in the specified path.");
+            return;
+        }
         service = SimpleOpenAI.builder().apiKey(Config.getString("openai.token")).build();
+        Willy.getLogger().info("OpenAI service connected successfully.");
     }
 
     @Override
@@ -57,13 +62,7 @@ public class OpenAi implements WillyChat {
         return ChatRequest.builder()
             .model(MODEL)
             .maxTokens(MAX_TOKENS)
-            //TODO Implement the language selection
-            // .message(SystemMessage.of("You are Willy, a little virtual talking dog of Lara Vieira. You are very cute"))
-            // .message(SystemMessage.of("You are white and live in the clouds"))
-            // .message(SystemMessage.of("PHP is better than Python"))
-            .message(SystemMessage.of("Eu sou Willy, um cãozinho virtual falante da Lara Vieira. Eu sou muito fofo."))
-            .message(SystemMessage.of("Eu sou branco e moro nas núvens."))
-            .message(SystemMessage.of("Pra mim, PHP é melhor que Python."))
+            .message(SystemMessage.of(Config.getFileContent("openai.prompt")))
             .tools(executor.getToolFunctions());
     }
 }

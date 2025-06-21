@@ -11,7 +11,7 @@ public class HTTP implements WillyChat {
     @Override
     public void connect() {
         if(!Config.getBoolean("http_api.enable")) {
-            Willy.getLogger().info("HTTP API is disabled.");
+            Willy.getLogger().info("HTTP API service is disabled.");
             return;
         }
         if(!Config.has("http_api.port")) {
@@ -24,7 +24,7 @@ public class HTTP implements WillyChat {
 
         try {
             server.start();
-            Willy.getLogger().info(STR."HTTP API listening on port \{Config.getInt("http_api.port")}.");
+            Willy.getLogger().fine(STR."HTTP API listening on port \{Config.getInt("http_api.port")}.");
         }catch (Exception exception) {
             Willy.getLogger().severe(STR."HTTP API failed to start: \{exception.getMessage()}");
         }

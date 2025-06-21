@@ -36,16 +36,14 @@ public class WillyUtils {
         List<ChatMessage> chat = new ArrayList<>();
         LinkedList<UUID> lastMessages = new LinkedList<>(messages);
         LinkedList<Message> descendingHistory = new LinkedList<>();
-        for(int i = 0; i < lastMessages.size() && i < historySize; i++)
+        for(int i = 0; i < messages.size() && i < historySize; i++)
             descendingHistory.add(MessageStorage.of(lastMessages.pollLast()));
         Iterator<Message> history = descendingHistory.descendingIterator();
 
         while(history.hasNext()) {
             Message message = history.next();
-            if(message.getFrom().equals(Willy.getWilly().getName()))
-                chat.add((ChatMessage.ResponseMessage) message.getContent());
-            else if(message.getFrom().equals("SYSTEM"))
-                chat.add((ChatMessage.ToolMessage) message.getContent());
+            if(message.getContent() instanceof ChatMessage)
+                chat.add((ChatMessage) message.getContent());
             else {
                 for(File image : message.getAttachments()) {
                     ContentPart.ContentPartImageUrl.ImageUrl imageUrl = loadImageAsBase64(image.toPath());
@@ -67,6 +65,9 @@ public class WillyUtils {
                         chat.add(usermessage);
                     }
                 }
+                chat.add(ChatMessage.UserMessage.of(List.of(
+                    ContentPart.ContentPartText.of(message.getText())
+                )));
             }
         }
         return chat;

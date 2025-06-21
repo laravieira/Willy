@@ -4,6 +4,7 @@ import com.opsmatters.bitly.Bitly;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import me.laravieira.willy.Willy;
@@ -30,9 +31,9 @@ public class CommandBitly implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
-        event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).ifPresent(value -> {
-            String link = value.asString();
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
+        if(event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).isPresent()) {
+            String link = event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).get().asString();
             try {
                 if(!Config.getBoolean("bitly.enable")) {
                     throw new Exception("Bitly is not enabled.");
@@ -40,30 +41,43 @@ public class CommandBitly implements CommandListener {
                 if(!Config.has("bitly.token")) {
                     throw new Exception("Bitly token was not found.");
                 }
-                Bitly bitly = new Bitly(Config.getString("bitly.token"));
-                if(!bitly.bitlinks().shorten(link).isPresent()) {
-                    throw new Exception("Bitly failed to shorten the link.");
-                }
 
-                String shortLink = bitly.bitlinks().shorten(link).get().getLink();
-                if (shortLink == null || shortLink.isEmpty()) {
-                    Willy.getLogger().fine(STR."command bitly \{link} failed.");
-                    event.reply("Something didn't work right.").subscribe();
-                    return;
-                }
-                if (shortLink.equals(link)) {
-                    Willy.getLogger().fine(STR."command bitly \{link} returned the same link.");
-                    event.reply("Maybe it's already short enough.").subscribe();
-                    return;
-                }
+                Thread thread = new Thread(() -> {
+                    try {
+                        Bitly bitly = new Bitly(Config.getString("bitly.token"));
+                        if(!bitly.bitlinks().shorten(link).isPresent()) {
+                            throw new Exception("Bitly failed to shorten the link.");
+                        }
 
-                Willy.getLogger().fine(STR."command bitly \{link} returned \{shortLink}.");
-                event.reply(shortLink).subscribe();
+                        String shortLink = bitly.bitlinks().shorten(link).get().getLink();
+                        if (shortLink == null || shortLink.isEmpty()) {
+                            Willy.getLogger().fine(STR."command bitly \{link} failed.");
+                            event.createFollowup("Something didn't work right.").subscribe();
+                            return;
+                        }
+                        if (shortLink.equals(link)) {
+                            Willy.getLogger().fine(STR."command bitly \{link} returned the same link.");
+                            event.createFollowup("Maybe it's already short enough.").subscribe();
+                            return;
+                        }
+
+                        Willy.getLogger().fine(STR."command bitly \{link} returned \{shortLink}.");
+                        event.createFollowup(shortLink).subscribe();
+                    } catch (Exception e) {
+                        Willy.getLogger().warning(e.getMessage());
+                        event.createFollowup(e.getMessage()).subscribe();
+                    }
+                });
+                thread.setDaemon(true);
+                thread.start();
+
+                return event.reply("Shortening the link, please wait...");
             } catch (Exception e) {
                 Willy.getLogger().warning(e.getMessage());
-                event.reply(e.getMessage()).subscribe();
+                return event.reply(e.getMessage());
             }
-        });
+        }
+        return null;
     }
 
     @Override

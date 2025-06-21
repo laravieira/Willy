@@ -20,7 +20,7 @@ public class Discord implements WillyChat {
 	@Override
 	public void connect() {
 		if(!Config.getBoolean("discord.enable")) {
-			Willy.getLogger().warning("Discord instance disabled.");
+			Willy.getLogger().warning("Discord service is disabled.");
 			return;
 		}
 		if(!Config.has("discord.token")) {
@@ -50,25 +50,25 @@ public class Discord implements WillyChat {
 
 		if(Config.has("discord.admin.log")) {
 			Willy.getLogger().registerDiscordHandler();
-			Willy.getLogger().info("Discord admin log channel initiated.");
+			Willy.getLogger().fine("Discord admin log channel initiated.");
 		}else {
 			Willy.getLogger().warning("Discord admin log channel not found.");
 		}
 
 		registerCommands();
-    	Willy.getLogger().info("Discord instance loaded.");
+    	Willy.getLogger().fine("Discord service connected successfully.");
 	}
 
 	public static void onReady() {
-		Willy.getLogger().info("Discord instance ready.");
+		Willy.getLogger().fine("Discord service ready.");
 		Discord.setReady(true);
 	}
 
 	@Override
 	public void disconnect() {
 		if(ready) {
-			gateway.logout().block();
-			gateway.onDisconnect().block();
+			gateway.logout().subscribe();
+			gateway.onDisconnect().subscribe();
 		}
 	}
 
@@ -119,6 +119,6 @@ public class Discord implements WillyChat {
 					.subscribe()
 				);
 			})
-			.block();
+			.subscribe();
 	}
 }

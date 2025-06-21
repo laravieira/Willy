@@ -11,9 +11,11 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel.Type;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.core.spec.MessageCreateSpec;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.Command;
+import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.internal.Config;
 import discord4j.core.object.entity.channel.MessageChannel;
 import me.laravieira.willy.storage.ContextStorage;
@@ -24,43 +26,49 @@ import org.jetbrains.annotations.NotNull;
 
 public class DiscordListener {
 
-	public static void onCommand(ChatInputInteractionEvent event) {
+	public static InteractionApplicationCommandCallbackReplyMono onCommand(ChatInputInteractionEvent event) {
 		try {
-			Command.adminCommandsList().forEach(command -> {
+			for (CommandListener command : Command.adminCommandsList()) {
 				if (command.getName().equals(event.getCommandName()))
-					command.execute(event);
-			});
-			Command.globalCommandsList().forEach(command -> {
+					return command.execute(event);
+			}
+			for (CommandListener command : Command.globalCommandsList()) {
 				if (command.getName().equals(event.getCommandName()))
-					command.execute(event);
-			});
+					return command.execute(event);
+			}
+			return null;
 		}catch(Exception e) {
-			event.reply(STR."Something went wrong: \{e.getMessage()}").subscribe();
+			return event.reply(STR."Interaction went wrong: \{e.getMessage()}");
 		}
 	}
 
 	public static void onMessage(Message message) {
-		try {
-			if(message.getAuthor().isPresent()) {
-				message.getContent();
-				MessageChannel channel = message.getChannel().block();
-				User author = message.getAuthor().get();
-				if (author.isBot()) return;
+		Thread thread = new Thread(() -> {
+			try {
+				if(message.getAuthor().isPresent()) {
+					message.getContent();
+					MessageChannel channel = message.getChannel().block();
+					User author = message.getAuthor().get();
+					if (author.isBot()) return;
 
-				assert channel != null;
-				if (channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
-					onPrivateTextChannelMessage(channel, author, message);
-				else
-					onPublicTextChannelMessage(channel, author, message);
+					assert channel != null;
+					if (channel.getType().equals(Type.DM) || channel.getType().equals(Type.GROUP_DM))
+						onPrivateTextChannelMessage(channel, author, message);
+					else
+						onPublicTextChannelMessage(channel, author, message);
+				}
+			}catch(Exception e) {
+				Willy.getLogger().severe(e.getMessage());
+				for(StackTraceElement elem : e.getStackTrace())
+					Willy.getLogger().severe(STR."\{elem.getMethodName()} (\{elem.getLineNumber()})");
 			}
-		}catch(Exception e) {
-			Willy.getLogger().severe(e.getMessage());
-			for(StackTraceElement elem : e.getStackTrace())
-				Willy.getLogger().severe(STR."\{elem.getMethodName()} (\{elem.getLineNumber()})");
-		}
+		});
+		thread.setName("Discord Message Listener");
+		thread.setDaemon(true);
+		thread.start();
 	}
-	
-	public static void onPrivateTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+
+	public static void onPrivateTextChannelMessage(MessageChannel channel, User user, Message message) {
 		String content = parseWillyDiscordId(message.getContent());
 		UUID id = UUID.nameUUIDFromBytes((STR."discord-\{user.getId().asString()}").getBytes());
 
@@ -92,7 +100,7 @@ public class DiscordListener {
 		return discordMessage;
 	}
 
-	public static void onPublicTextChannelMessage(MessageChannel channel, @NotNull User user, @NotNull Message message) {
+	public static void onPublicTextChannelMessage(MessageChannel channel, User user, Message message) {
 		if(!Config.getBoolean("discord.public_chat.enable"))
 			return;
 		String content = parseWillyDiscordId(message.getContent());

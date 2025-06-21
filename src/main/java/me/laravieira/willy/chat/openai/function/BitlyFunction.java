@@ -4,13 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.opsmatters.bitly.Bitly;
 import io.github.sashirestela.openai.common.function.FunctionDef;
-import io.github.sashirestela.openai.domain.chat.ChatMessage;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.context.Message;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
-import me.laravieira.willy.utils.PassedInterval;
 
 public class BitlyFunction extends Functional {
     @JsonPropertyDescription("The url to be shortened.")

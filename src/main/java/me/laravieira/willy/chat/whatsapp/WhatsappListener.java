@@ -44,7 +44,7 @@ public class WhatsappListener implements Listener {
             if(last == myLast || last.status() == MessageStatus.READ)
                 return;
 
-//            last.key(last.key().chat(chat));
+            // last.key(last.key().chat(chat));
             Willy.getLogger().info("Unread messages on chat "+chat.jid().user());
             onNewMessage(last);
         });
@@ -114,13 +114,13 @@ public class WhatsappListener implements Listener {
     @SneakyThrows
     @Override
     public void onLoggedIn() {
-        Willy.getLogger().info("Whatsapp instance connected.");
+        Willy.getLogger().info("Whatsapp service connected successfully.");
     }
 
     @Override
     public void onDisconnected(DisconnectReason reason) {
         Listener.super.onDisconnected(reason);
-        Willy.getLogger().info("Whatsapp instance disconnected.");
+        Willy.getLogger().info("Whatsapp service disconnected: "+reason.toString());
     }
 
     @Override

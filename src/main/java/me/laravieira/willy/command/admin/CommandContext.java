@@ -2,6 +2,7 @@ package me.laravieira.willy.command.admin;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -38,12 +39,12 @@ public class CommandContext implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
-        event.getOption(OPTION).ifPresentOrElse(option -> {
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
+        if(event.getOption(OPTION).isPresent()) {
             List<UUID> contexts = new ArrayList<>(ContextStorage.all().keySet());
             contexts.forEach(ContextStorage::remove);
-            event.reply("All contexts were vanished.").subscribe();
-        }, () -> {
+            return event.reply("All contexts were vanished.");
+        }else {
             StringBuilder list = new StringBuilder();
             list.append("**Contexts alive** `").append(new Date()).append("`").append("\r\n");
             list.append("```yaml").append("\r\n");
@@ -55,8 +56,8 @@ public class CommandContext implements CommandListener {
                     .append("\r\n")
             );
             list.append("```");
-            event.reply(list.toString()).subscribe();
-        });
+            return event.reply(list.toString());
+        }
     }
 
     @Override

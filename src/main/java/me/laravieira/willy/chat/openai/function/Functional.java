@@ -24,6 +24,12 @@ public class Functional implements io.github.sashirestela.openai.common.function
     }
 
     protected String askResponse(String message) {
+        Object last = ContextStorage.of(context).getLastMessage().getContent();
+        if(!(last instanceof ChatMessage.ResponseMessage)) {
+            return "Last message is not a ResponseMessage.";
+        } else if (((ChatMessage.ResponseMessage) last).getToolCalls().isEmpty()) {
+            return "Last message is not a ResponseMessage with tool calls.";
+        }
         ChatMessage.ToolMessage toolMessage = ChatMessage.ToolMessage.of(message, this.call);
 
         Message result = new Message(context);

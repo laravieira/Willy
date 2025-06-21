@@ -44,7 +44,7 @@ public class OpenAiSender implements SenderInterface {
                 .build();
 
             Chat chat = OpenAi.getService().chatCompletions().create(request).get();
-            OpenAiListener.whenCompletionComplete(chat, context);
+            new OpenAiListener(context).whenCompletionComplete(chat);
             Willy.getLogger().fine("OpenAI send text success.");
         } catch (InterruptedException | ExecutionException | MalformedURLException | URISyntaxException e) {
             Willy.getLogger().warning(STR."OpenAI send text fail: \{e.getMessage()}");

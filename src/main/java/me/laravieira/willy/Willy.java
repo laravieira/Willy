@@ -57,26 +57,26 @@ public class Willy {
 		if(!stop)
 			stop = true;
 
-		logger.info("Closing Willy!");
+		logger.info("Shutting down Willy!");
 		disconnectWillyChatInstances();
-		logger.info("Closing process finished.");
+		logger.info("Willy processes shutdown.");
 		logger.close();
 	}
 
 	private void run() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::onShutdown));
-		logger.info("Starting Willy! ("+getFullVersion()+")");
+		logger.info(STR."Initializing Willy! (\{getFullVersion()})");
 
 		Config.load();
 		logger.info("Configurations loaded.");
 
 		registryChats();
-		logger.info("Registered "+chats.size()+" chat instances.");
+		logger.info(STR."Registered \{chats.size()} chat instances.");
 
 		logger.info("Trying to connect chat instances.");
 		connectWillyChatInstances();
 
-		logger.info("Startup completed.");
+		logger.info("Initialization successful.");
 		logger.info("Welcome to Willy bot!");
 
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

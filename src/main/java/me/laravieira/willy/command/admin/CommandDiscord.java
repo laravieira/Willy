@@ -4,6 +4,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -103,15 +104,17 @@ public class CommandDiscord implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
-        event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).ifPresent(choice -> {
-            switch (choice.asString()) {
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
+        if (event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).isPresent()) {
+            String choice = event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).get().asString();
+            return switch (choice) {
                 case OPTION_USER -> onUserCommand(event);
                 case OPTION_NOADM -> onNoADMCommand(event);
                 case OPTION_PLAYER -> onPlayerCommand(event);
-                default -> event.reply("Unknown Discord command.").subscribe();
-            }
-        });
+                default -> event.reply("Unknown Discord command.");
+            };
+        }
+        return event.reply("Unknown Discord command.");
     }
 
     @Override
@@ -131,7 +134,7 @@ public class CommandDiscord implements CommandListener {
                 .build();
     }
 
-    private void onUserCommand(@NotNull ChatInputInteractionEvent event) {
+    private InteractionApplicationCommandCallbackReplyMono onUserCommand(@NotNull ChatInputInteractionEvent event) {
         event.getOption(OPTION).ifPresent(
             command -> command.getOption(OPTION_USER).ifPresentOrElse(
                 option -> option.getValue().ifPresent(value -> {
@@ -160,10 +163,11 @@ public class CommandDiscord implements CommandListener {
                 () -> event.reply("You need to type an user ID.").subscribe()
             )
         );
+        return null;
     }
 
-    private void onNoADMCommand(@NotNull ChatInputInteractionEvent event) {
-        event.reply("Not implemented yet.");
+    private InteractionApplicationCommandCallbackReplyMono onNoADMCommand(@NotNull ChatInputInteractionEvent event) {
+        return event.reply("Not implemented yet.");
 //        if(count > 1) {
 //            if(count > 3 && args[1].equalsIgnoreCase("ban")) {
 //                String reason = "";
@@ -193,8 +197,8 @@ public class CommandDiscord implements CommandListener {
 //        }
     }
 
-    private void onPlayerCommand(@NotNull ChatInputInteractionEvent event) {
-        event.reply("Not implemented yet.");
+    private InteractionApplicationCommandCallbackReplyMono onPlayerCommand(@NotNull ChatInputInteractionEvent event) {
+        return event.reply("Not implemented yet.");
 //        if(count > 1) {
 //            VoiceChannel channel = (VoiceChannel) Discord.getBotGateway().getChannelById(Snowflake.of(Config.getString("ap.command_default_channel_id"))).block();
 //            if(channel == null)

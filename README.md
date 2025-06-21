@@ -1,3 +1,5 @@
+![Docker Status](https://status.laravieira.me/api/badge/26/status)
+
 # Willy
 Willy is your best, beautiful, little and cute friend.
 
@@ -11,19 +13,18 @@ Willy is your best, beautiful, little and cute friend.
 ###### You can share Willy through [https://willybot.carrd.co/](https://willybot.carrd.co/).
 
 ## Where does Willy live?
-Willy is currently hosted on an AWS EC2 instance.
+Willy is currently hosted on my VPS.
 
 ## How does Willy think?
 ### Willy is a interface that passes the messages to:
-1. [Watson Assistent](https://assistant-us-south.watsonplatform.net/), who analyze the message and return an action.
-2. [Open AI - GPT-4](https://openai.com/), who builds the Willy's responses when no action is requested.
+1. [Open AI - GPT-3.5](https://openai.com/), who builds the Willy's responses.
 
 ### Willy has support to some action like:
 * Short a link using Bitly API.
 * Give the direct link of a given YouTube video.
 
 ### Willy runs as a service and is built with:
-* Java SDK 17, with preview features enabled.
+* Java SDK 21, with preview features enabled.
 * Maven project manager
 * Run on both Windows and Linux
 

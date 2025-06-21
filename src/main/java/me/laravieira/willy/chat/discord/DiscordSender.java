@@ -24,18 +24,16 @@ public class DiscordSender implements SenderInterface {
     }
 
     private void sendMessage(MessageCreateSpec messageCreateSpec) {
-        discord4j.core.object.entity.Message result;
-        try {
-            result = channel.createMessage(messageCreateSpec).block();
-        }catch (NullPointerException e) {
-            new Discord().connect();
-            result = channel.createMessage(messageCreateSpec).block();
-        }
-        // Save the message to the storage for auto delete
-        Message lastMessage = ContextStorage.of(context).getLastMessage();
-        DiscordMessage message = new DiscordMessage(context, lastMessage, result, expire);
-        MessageStorage.remove(lastMessage.getId());
-        MessageStorage.add(message);
+        channel.createMessage(messageCreateSpec)
+            .doOnSuccess(msg -> {
+                // Save the message to the storage for auto delete
+                Message lastMessage = ContextStorage.of(context).getLastMessage();
+                DiscordMessage message = new DiscordMessage(context, lastMessage, msg, expire);
+                MessageStorage.remove(lastMessage.getId());
+                MessageStorage.add(message);
+            })
+            .doOnError(err -> Willy.getLogger().severe(STR."Discord sendMessage failed: \{err.getMessage()}"))
+            .subscribe();
     }
 
     @Override
@@ -75,16 +73,6 @@ public class DiscordSender implements SenderInterface {
     @Override
     public void sendStick(Message message) throws Exception {
         //TODO Implement how to send stick images to Discord
-//        try {
-//            sendMessage(MessageCreateSpec.builder()
-//                    .addEmbed(EmbedCreateSpec.builder()
-//                            .thumbnail("attachment://stick.png")
-//                            .build())
-//                    .addFile("stick.png", new FileInputStream((File) message.getContent()))
-//                    .build());
-//        } catch(FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
         throw new Exception("This function is not implemented.");
     }
 

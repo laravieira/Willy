@@ -13,7 +13,7 @@ public class Telegram implements WillyChat {
     @Override
     public void connect() {
         if(!Config.getBoolean("telegram.enable")) {
-            Willy.getLogger().info("Telegram instance was disabled.");
+            Willy.getLogger().info("Telegram service is disabled.");
             return;
         }
         if(!Config.has("telegram.token")) {
@@ -22,7 +22,7 @@ public class Telegram implements WillyChat {
         }
         bot = new TelegramBot(Config.getString("telegram.token"));
         bot.setUpdatesListener(new TelegramListener());
-        Willy.getLogger().info("Telegram instance connected.");
+        Willy.getLogger().info("Telegram service connected successfully.");
     }
 
 

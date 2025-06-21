@@ -15,6 +15,7 @@ public class Config {
 	private final static int TYPE_LONG = 4;
 	private final static int TYPE_LIST = 5;
 	private final static int TYPE_TIME = 6;
+	private final static int TYPE_FILE = 7;
 
 	private final static Map<String, Object> settings = new HashMap<>();
 	private static Yaml configFile;
@@ -59,6 +60,7 @@ public class Config {
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, false);
 		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
 		set("openai.dall_e", "WILLY_OPENAI_DALL_E", "openai.dall-e", TYPE_BOOLEAN, false);
+		set("openai.prompt", "WILLY_OPENAI_PROMPT", "openai.prompt", TYPE_FILE, "prompt.txt");
 
 		// Whatsapp Settings
 		set("whatsapp.enable",                              "WILLY_WHATSAPP_ENABLE",                              "whatsapp.enable",                              TYPE_BOOLEAN, false);
@@ -90,13 +92,13 @@ public class Config {
 	private static void set(String key, String envKey, String fileKey, int type, Object defaultValue) {
 		if(configFile.has(fileKey)) {
 			switch (type) {
-				case TYPE_STRING  -> { if(configFile.isString(fileKey))  settings.put(key, configFile.asString(fileKey)); }
+				case TYPE_STRING, TYPE_FILE -> { if(configFile.isString(fileKey))  settings.put(key, configFile.asString(fileKey)); }
 				case TYPE_INT     -> { if(configFile.isInt(fileKey))     settings.put(key, configFile.asInt(fileKey)); }
 				case TYPE_LONG    -> { if(configFile.isLong(fileKey))    settings.put(key, configFile.asLong(fileKey)); }
 				case TYPE_BOOLEAN -> { if(configFile.isBoolean(fileKey)) settings.put(key, configFile.asBoolean(fileKey)); }
 				case TYPE_TIME    -> { if(configFile.isString(fileKey))  settings.put(key, parseTime(configFile.asString(fileKey))); }
 				case TYPE_LIST    -> { if(configFile.isList(fileKey))    settings.put(key, configFile.asList(fileKey)); }
-				default -> settings.put(key, configFile.asObject(fileKey));
+                default -> settings.put(key, configFile.asObject(fileKey));
 			}
 		}
 		if(System.getenv().get(envKey) != null) {
@@ -158,6 +160,7 @@ public class Config {
 			sconf += "openai:\r\n";
 			sconf += "    enable: false\r\n";
 			sconf += "    token: \r\n";
+			sconf += "    prompt: \r\n";
 			sconf += "\r\n";
 			sconf += "whatsapp:\r\n";
 			sconf += "    enable: false\r\n";
@@ -285,6 +288,40 @@ public class Config {
 		return new ArrayList<>();
 	}
 
+	public static File getFile(String keyword) {
+		String fileName = (String)settings.get(keyword);
+		if(fileName == null || fileName.isEmpty())
+			return null;
+		File file = new File(fileName);
+		if(!file.exists() || !file.isFile()) {
+			Willy.getLogger().severe("File "+fileName+" does not exist or is not a file.");
+			return null;
+		}
+		return file;
+	}
+
+	public static String getFileContent(String keyword) {
+		String fileName = (String)settings.get(keyword);
+		if(fileName == null || fileName.isEmpty())
+			return null;
+		File file = new File(fileName);
+		if(!file.exists() || !file.isFile()) {
+			Willy.getLogger().severe("File "+fileName+" does not exist or is not a file.");
+			return null;
+		}
+		StringBuilder content = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				content.append(line).append("\n");
+			}
+		} catch (IOException e) {
+			Willy.getLogger().severe("Error reading file "+fileName+": "+e.getMessage());
+			return null;
+		}
+		return content.toString();
+	}
+
 	public static boolean isString(String keyword) {
 		return settings.get(keyword) instanceof String;
 	}
@@ -308,4 +345,13 @@ public class Config {
 	public static boolean isList(String keyword) {
 		return settings.get(keyword) instanceof List;
 	}
+
+	public static boolean isFile(String keyword) {
+		String fileName = (String)settings.get(keyword);
+		if(fileName == null || fileName.isEmpty())
+			return false;
+		File file = new File(fileName);
+        return file.exists() && file.isFile();
+    }
+
 }

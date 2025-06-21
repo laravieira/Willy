@@ -2,6 +2,7 @@ package me.laravieira.willy.command.commands;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -68,54 +69,58 @@ public class CommandDallE implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
         if(!Config.getBoolean("openai.dall_e")) {
-            event.reply("Dall-E is not enabled.").subscribe();
-            return;
+            return event.reply("Dall-E is not enabled.");
         }
         if(event.getOptions().isEmpty()) {
-            event.reply("You need to provide a prompt.").subscribe();
-            return;
+            return event.reply("You need to provide a prompt.");
         }
-        String prompt = "";
-        ImageRequest.Style style = ImageRequest.Style.NATURAL;
-        Size size = Size.X256;
-        int amount = 1;
 
-        if(event.getOption(PROMPT).isPresent() && event.getOption(PROMPT).get().getValue().isPresent())
-            prompt = event.getOption(PROMPT).get().getValue().get().asString();
-        if(event.getOption(STYLE).isPresent() && event.getOption(STYLE).get().getValue().isPresent())
-            style = ImageRequest.Style.valueOf(event.getOption(STYLE).get().getValue().get().asString());
-        if(event.getOption(SIZE).isPresent() && event.getOption(SIZE).get().getValue().isPresent())
-            size = Size.valueOf(event.getOption(SIZE).get().getValue().get().asString());
-        if(event.getOption(AMOUNT).isPresent() && event.getOption(AMOUNT).get().getValue().isPresent())
-            amount = Integer.parseInt(event.getOption(AMOUNT).get().getValue().get().asString());
+        Thread thread = new Thread(() -> {
+            String prompt = "";
+            ImageRequest.Style style = ImageRequest.Style.NATURAL;
+            Size size = Size.X1024;
+            int amount = 1;
 
-        event.reply("Generating...").subscribe();
-        try {
-            ImageRequest request = ImageRequest.builder()
-                .model("dall-e-2")
-                .prompt(prompt)
-                .style(style)
-                .size(size)
-                .n(amount)
-                .responseFormat(ImageResponseFormat.URL)
-                .build();
-            List<Image> images = OpenAi.getService().images().create(request).get();
+            if(event.getOption(PROMPT).isPresent() && event.getOption(PROMPT).get().getValue().isPresent())
+                prompt = event.getOption(PROMPT).get().getValue().get().asString();
+            if(event.getOption(STYLE).isPresent() && event.getOption(STYLE).get().getValue().isPresent())
+                style = ImageRequest.Style.valueOf(event.getOption(STYLE).get().getValue().get().asString());
+            if(event.getOption(SIZE).isPresent() && event.getOption(SIZE).get().getValue().isPresent())
+                size = Size.valueOf(event.getOption(SIZE).get().getValue().get().asString());
+            if(event.getOption(AMOUNT).isPresent() && event.getOption(AMOUNT).get().getValue().isPresent())
+                amount = Integer.parseInt(event.getOption(AMOUNT).get().getValue().get().asString());
 
-            if(images == null || images.isEmpty()) {
-                event.reply("An error occurred while generating the image.").subscribe();
-                return;
+            try {
+                ImageRequest request = ImageRequest.builder()
+                        .model("dall-e-3")
+                        .prompt(prompt)
+                        .style(style)
+                        .size(size)
+                        .n(amount)
+                        .responseFormat(ImageResponseFormat.URL)
+                        .build();
+                List<Image> images = OpenAi.getService().images().create(request).get();
+
+                if(images == null || images.isEmpty()) {
+                    event.createFollowup("An error occurred while generating the image.").subscribe();
+                    return;
+                }
+                event.editReply("Here are the images generated:").subscribe();
+                for(Image image : images) {
+                    Willy.getLogger().fine(STR."Dall-E generated image: \{image.getUrl()}");
+                    event.createFollowup(image.getUrl()).block();
+                }
+            } catch (Exception e) {
+                Willy.getLogger().warning(STR."Dal-E error: \{e.getMessage()}");
+                event.createFollowup("An error occurred while generating the image.").subscribe();
             }
-            event.editReply("Here are the images generated:").subscribe();
-            for(Image image : images) {
-                Willy.getLogger().fine(STR."Dall-E generated image: \{image.getUrl()}");
-                event.createFollowup(image.getUrl()).block();
-            }
-        } catch (Exception e) {
-            Willy.getLogger().warning(STR."Dal-E error: \{e.getMessage()}");
-            event.editReply("An error occurred while generating the image.").subscribe();
-        }
+        });
+        thread.setDaemon(true);
+        thread.start();
+
+        return event.reply("Generating...");
     }
 
     @Override

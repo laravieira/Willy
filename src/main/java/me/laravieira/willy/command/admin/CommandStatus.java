@@ -1,6 +1,7 @@
 package me.laravieira.willy.command.admin;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.http.HTTP;
@@ -29,7 +30,7 @@ public class CommandStatus implements CommandListener {
     }
 
     @Override
-    public void execute(@NotNull ChatInputInteractionEvent event) {
+    public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
         boolean status = Status.generalStatus();
         StringBuilder list = new StringBuilder();
 
@@ -70,7 +71,7 @@ public class CommandStatus implements CommandListener {
         list.append("contexts: ").append(ContextStorage.size()).append(" in use").append("\r\n");
 
         list.append("```");
-        event.reply(list.toString()).subscribe();
+        return event.reply(list.toString());
     }
 
     @Override

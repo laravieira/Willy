@@ -4,6 +4,7 @@ import it.auties.whatsapp.model.chat.Chat;
 import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.message.standard.ImageMessage;
 import it.auties.whatsapp.model.message.standard.ImageMessageSimpleBuilder;
+import it.auties.whatsapp.model.message.standard.TextMessageBuilder;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.context.Message;
 import me.laravieira.willy.context.SenderInterface;
@@ -51,12 +52,13 @@ public class WhatsappSender implements SenderInterface {
 
     @Override
     public void sendText(String message) {
-        try {
-            Whatsapp.getApi().sendMessage(chat, message).get();
-            resetStatus();
-        } catch (InterruptedException | ExecutionException e) {
-            Willy.getLogger().warning(STR."Whatsapp send text fail: \{e.getMessage()}");
-        }
+        Whatsapp.getApi().sendMessage(
+            chat,
+            new TextMessageBuilder()
+                .text(message)
+                .build()
+        );
+        resetStatus();
     }
 
     @Override

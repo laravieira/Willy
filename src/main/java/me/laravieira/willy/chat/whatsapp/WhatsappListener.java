@@ -1,8 +1,7 @@
 package me.laravieira.willy.chat.whatsapp;
 
 import it.auties.whatsapp.api.DisconnectReason;
-import it.auties.whatsapp.api.SocketEvent;
-import it.auties.whatsapp.listener.Listener;
+import it.auties.whatsapp.api.Listener;
 import it.auties.whatsapp.model.chat.Chat;
 import it.auties.whatsapp.model.contact.ContactStatus;
 import it.auties.whatsapp.model.info.ChatMessageInfo;
@@ -89,6 +88,8 @@ public class WhatsappListener implements Listener {
             ContextStorage.of(id).setUserSender(sender);
             ContextStorage.of(id).setApp("whatsapp");
 
+//            Whatsapp.getWhatsapp().sendMessage(chat, "Mensagem de teste");
+
             WhatsappMessage whatsappMessage = new WhatsappMessage(id, info, content, PassedInterval.DISABLE);
             if(info.mediaData().isPresent())
                 whatsappMessage.addAttachment(Path.of(info.mediaData().get().localPath()).toFile());
@@ -123,12 +124,12 @@ public class WhatsappListener implements Listener {
         Willy.getLogger().info("Whatsapp service disconnected: "+reason.toString());
     }
 
-    @Override
-    public void onSocketEvent(SocketEvent event) {
-        try {
-            Listener.super.onSocketEvent(event);
-        }catch (CompletionException | CancellationException e) {
-            Willy.getLogger().warning(event.name());
-        }
-    }
+//    @Override
+//    public void onSocketEvent(SocketEvent event) {
+//        try {
+//            Listener.super.onSocketEvent(event);
+//        }catch (CompletionException | CancellationException e) {
+//            Willy.getLogger().warning(event.name());
+//        }
+//    }
 }

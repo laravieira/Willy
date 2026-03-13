@@ -4,8 +4,6 @@ import it.auties.whatsapp.api.MediaProxySetting;
 import it.auties.whatsapp.api.QrHandler;
 import it.auties.whatsapp.api.TextPreviewSetting;
 import it.auties.whatsapp.api.WebHistorySetting;
-import it.auties.whatsapp.model.companion.CompanionDevice;
-import it.auties.whatsapp.model.signal.auth.Version;
 import lombok.Getter;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
@@ -36,7 +34,6 @@ public class Whatsapp implements WillyChat {
     private static void onConnectionRequest() {
         whatsapp = webBuilder()
             .newConnection(Willy.getWilly().getName())
-            .autodetectListeners(false)
             .mediaProxySetting(MediaProxySetting.NONE)
             .automaticMessageReceipts(false)
             .textPreviewSetting(TextPreviewSetting.DISABLED)
@@ -45,11 +42,6 @@ public class Whatsapp implements WillyChat {
             .errorHandler(WhatsappHandler::onError)
             .unregistered(QrHandler.toFile(WhatsappHandler::onQRCode ))
             .addListener(new WhatsappListener());
-
-        //TODO Temp fix till version 0.0.10 is released
-        whatsapp.store()
-            .setDevice(CompanionDevice.web(Version.of("2.3000.1023231279")));
-
         whatsapp.connect().join();
     }
 

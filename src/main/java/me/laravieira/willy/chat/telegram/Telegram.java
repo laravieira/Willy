@@ -4,7 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import lombok.Getter;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.internal.WillyChat;
+import me.laravieira.willy.WillyChat;
 
 public class Telegram implements WillyChat {
     @Getter
@@ -43,5 +43,10 @@ public class Telegram implements WillyChat {
     @Override
     public void refresh() {
 
+    }
+
+    @Override
+    public String getName() {
+        return "Telegram";
     }
 }

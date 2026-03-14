@@ -30,8 +30,8 @@ public class Status extends Controller {
     @Override
     public boolean onGet() {
         JSONObject body = new JSONObject() {{
-            put("name", Willy.getWilly().getName());
-            put("version", Willy.getWilly().getFullVersion());
+            put("name", Willy.getName());
+            put("version", Willy.getFullVersion());
             put("status", generalStatus());
             put("environment", Config.getString("environment"));
             put("openai", new JSONObject() {{

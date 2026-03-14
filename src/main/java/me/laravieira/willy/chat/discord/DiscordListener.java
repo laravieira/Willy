@@ -13,13 +13,13 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.core.spec.MessageCreateSpec;
+import me.laravieira.willy.Context;
 import me.laravieira.willy.Willy;
+import me.laravieira.willy.WillyMessage;
 import me.laravieira.willy.command.Command;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.internal.Config;
 import discord4j.core.object.entity.channel.MessageChannel;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
 import me.laravieira.willy.utils.PassedInterval;
 import me.laravieira.willy.utils.WillyUtils;
 import org.jetbrains.annotations.NotNull;
@@ -78,16 +78,14 @@ public class DiscordListener {
 			return;
 
 		Willy.getLogger().fine("Msg on Discord dm "+channel.getId().asLong()+" by "+user.getId().asLong());
-		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, PassedInterval.DISABLE);
-		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
+        Context context = Context.of(id, new DiscordChannel(channel, PassedInterval.DISABLE), "Discord", user.getUsername());
+		DiscordMessage discordMessage = buildMessage(user, message, content, PassedInterval.DISABLE);
+        context.process(discordMessage);
 	}
 
 	@NotNull
-	private static DiscordMessage buildMessage(MessageChannel channel, User user, Message message, String content, UUID id, long expire) {
-		ContextStorage.of(id).setUserSender(new DiscordSender(id, channel, expire));
-		ContextStorage.of(id).setApp("discord");
-
-		DiscordMessage discordMessage = new DiscordMessage(id, user, message, content, expire);
+	private static DiscordMessage buildMessage(User user, Message message, String content, long expire) {
+		DiscordMessage discordMessage = new DiscordMessage(user, message, content, expire);
 		for(Attachment attachment : message.getAttachments()) {
 			try {
 				if(attachment.getContentType().isPresent() && attachment.getContentType().get().toLowerCase().startsWith("image"))
@@ -96,7 +94,6 @@ public class DiscordListener {
 				Willy.getLogger().warning("Error on attachment proccessing: "+e.getMessage());
 			}
 		}
-		MessageStorage.add(discordMessage);
 		return discordMessage;
 	}
 
@@ -110,7 +107,7 @@ public class DiscordListener {
 			return;
 		if(WillyUtils.startsWith(content, Config.getStringList("discord.public_chat.ignore_start_with")))
 			return;
-		if(!WillyUtils.hasWillyName(content, Config.getStringList("discord.public_chat.willy_names")) && !ContextStorage.has(id))
+		if(!WillyUtils.hasWillyName(content, Config.getStringList("discord.public_chat.willy_names")) && !Context.has(id))
 			return;
 
 		long expire = Config.getBoolean("discord.public_chat.auto_delete.willy_messages")
@@ -118,8 +115,10 @@ public class DiscordListener {
 				: PassedInterval.DISABLE;
 
 		Willy.getLogger().fine("Msg on Discord public "+channel.getId().asLong()+" by "+user.getId().asLong());
-		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, expire);
-		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
+        Context context = Context.of(id, new DiscordChannel(channel, expire), "discord", user.getUsername());
+        context.setUser(user.getUsername());
+        DiscordMessage discordMessage = buildMessage(user, message, content, expire);
+        context.process(discordMessage);
 	}
 	
 	@NotNull
@@ -167,57 +166,48 @@ public class DiscordListener {
 		//TODO Make this a command
 		try {
 			UUID id = UUID.nameUUIDFromBytes(("discord-"+channel.getId()).getBytes());
-			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
-			ContextStorage.of(id).setUserSender(sender);
-			ContextStorage.of(id).setApp("discord");
+			DiscordChannel sender = new DiscordChannel(channel, Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
+			Context context = Context.of(id, sender, "discord", user.getUsername());
 
-			me.laravieira.willy.context.Message message = new me.laravieira.willy.context.Message(id);
+			WillyMessage message = new WillyMessage(
+                MessageCreateSpec.builder()
+                    .addEmbed(EmbedCreateSpec.builder()
+                        .image("https://raw.laravieira.me/willy/help/helps.png")
+                        .build())
+                    .build()
+            );
 			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
-			message.setContent(MessageCreateSpec.builder()
-					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://raw.laravieira.me/willy/help/helps.png")
-							.build())
-					.build());
-			message.setFrom(Willy.getWilly().getName());
-			message.setTo(user.getUsername());
-			MessageStorage.add(message);
-			sender.sendEmbed((MessageCreateSpec)message.getContent());
+            context.respond(message);
 
-			message = new me.laravieira.willy.context.Message(id);
+			message = new WillyMessage(
+                MessageCreateSpec.builder()
+                    .addEmbed(EmbedCreateSpec.builder()
+                        .image("https://raw.laravieira.me/willy/help/help.png")
+                        .build())
+                    .build()
+            );
 			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
-			message.setContent(MessageCreateSpec.builder()
-					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://raw.laravieira.me/willy/help/help.png")
-							.build())
-					.build());
-			message.setFrom(Willy.getWilly().getName());
-			message.setTo(user.getUsername());
-			MessageStorage.add(message);
-			sender.sendEmbed((MessageCreateSpec)message.getContent());
+            context.respond(message);
 
-			message = new me.laravieira.willy.context.Message(id);
+			message = new WillyMessage(
+                MessageCreateSpec.builder()
+                    .addEmbed(EmbedCreateSpec.builder()
+                        .image("https://raw.laravieira.me/willy/help/be-help.png")
+                        .build())
+                    .build()
+            );
 			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
-			message.setContent(MessageCreateSpec.builder()
-					.addEmbed(EmbedCreateSpec.builder()
-							.image("https://raw.laravieira.me/willy/help/be-help.png")
-							.build())
-					.build());
-			message.setFrom(Willy.getWilly().getName());
-			message.setTo(user.getUsername());
-			MessageStorage.add(message);
-			sender.sendEmbed((MessageCreateSpec)message.getContent());
+            context.respond(message);
 
-			message = new me.laravieira.willy.context.Message(id);
+			message = new WillyMessage(
+                MessageCreateSpec.builder()
+                    .addEmbed(EmbedCreateSpec.builder()
+                        .thumbnail("https://raw.laravieira.me/willy/help/piscadela.jpg")
+                        .build())
+                    .build()
+            );
 			message.setExpire(Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
-			message.setContent(MessageCreateSpec.builder()
-					.addEmbed(EmbedCreateSpec.builder()
-							.thumbnail("https://raw.laravieira.me/willy/help/piscadela.jpg")
-							.build())
-					.build());
-			message.setFrom(Willy.getWilly().getName());
-			message.setTo(user.getUsername());
-			MessageStorage.add(message);
-			sender.sendEmbed((MessageCreateSpec)message.getContent());
+            context.respond(message);
 
 			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
 		}catch(RuntimeException e) {

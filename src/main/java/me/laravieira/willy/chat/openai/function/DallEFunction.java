@@ -3,22 +3,6 @@ package me.laravieira.willy.chat.openai.function;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.github.sashirestela.openai.common.function.FunctionDef;
-import io.github.sashirestela.openai.domain.chat.ChatMessage;
-import io.github.sashirestela.openai.domain.image.Image;
-import io.github.sashirestela.openai.domain.image.ImageRequest;
-import io.github.sashirestela.openai.domain.image.ImageResponseFormat;
-import io.github.sashirestela.openai.domain.image.Size;
-import me.laravieira.willy.Willy;
-import me.laravieira.willy.chat.openai.OpenAi;
-import me.laravieira.willy.context.Context;
-import me.laravieira.willy.context.Message;
-import me.laravieira.willy.context.MessageType;
-import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
-import me.laravieira.willy.utils.PassedInterval;
-
-import java.util.List;
 
 public class DallEFunction extends Functional {
     @JsonPropertyDescription("Prompt to generate the image.")

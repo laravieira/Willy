@@ -2,7 +2,7 @@ package me.laravieira.willy.chat.http;
 
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.internal.WillyChat;
+import me.laravieira.willy.WillyChat;
 import org.eclipse.jetty.server.Server;
 
 public class HTTP implements WillyChat {
@@ -49,4 +49,9 @@ public class HTTP implements WillyChat {
 
     @Override
     public void refresh() {}
+
+    @Override
+    public String getName() {
+        return "rest";
+    }
 }

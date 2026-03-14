@@ -5,13 +5,14 @@ import io.github.sashirestela.openai.common.function.FunctionExecutor;
 import io.github.sashirestela.openai.domain.chat.ChatMessage.SystemMessage;
 import io.github.sashirestela.openai.domain.chat.ChatRequest;
 import lombok.Getter;
-import me.laravieira.willy.Willy;
+import me.laravieira.willy.*;
 import me.laravieira.willy.chat.openai.function.BitlyFunction;
 import me.laravieira.willy.chat.openai.function.DallEFunction;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.internal.WillyChat;
 
-public class OpenAi implements WillyChat {
+import java.util.UUID;
+
+public class OpenAi implements WillyBrain {
     public static final String MODEL = "gpt-3.5-turbo-0125"; // newest 3.5 model (3.5 is the cheapest model available with functions)
     public static final int MAX_TOKENS = 100;
     public static final int HISTORY_SIZE = 10;
@@ -51,8 +52,11 @@ public class OpenAi implements WillyChat {
     }
 
     @Override
-    public void refresh() {
+    public void refresh() {}
 
+    @Override
+    public String getName() {
+        return "willy";
     }
 
     public static ChatRequest.ChatRequestBuilder chat() {
@@ -64,5 +68,12 @@ public class OpenAi implements WillyChat {
             .maxTokens(MAX_TOKENS)
             .message(SystemMessage.of(Config.getFileContent("openai.prompt")))
             .tools(executor.getToolFunctions());
+    }
+
+    @Override
+    public WillyChannel getChannel(Context context) {
+        OpenAiSender channel = new OpenAiSender();
+        channel.setContext(context);
+        return channel;
     }
 }

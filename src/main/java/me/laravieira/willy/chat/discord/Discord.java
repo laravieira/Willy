@@ -3,18 +3,20 @@ package me.laravieira.willy.chat.discord;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.guild.MemberUpdateEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.gateway.GatewayReactorResources;
 import discord4j.gateway.intent.IntentSet;
+import lombok.Setter;
 import me.laravieira.willy.Willy;
 import me.laravieira.willy.command.Command;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.internal.WillyChat;
+import me.laravieira.willy.WillyChat;
 
 public class Discord implements WillyChat {
 	private static GatewayDiscordClient gateway;
+    @Setter
 	private static boolean ready = false;
 
 	@Override
@@ -38,11 +40,15 @@ public class Discord implements WillyChat {
 		eventDispatcher.on(ReconnectEvent.class)           .subscribe(_ -> Discord.onReady(), Discord::errorDisplay);
 		eventDispatcher.on(DisconnectEvent.class)          .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
 		eventDispatcher.on(SessionInvalidatedEvent.class)  .subscribe(_ -> Discord.setReady(false), Discord::errorDisplay);
-		eventDispatcher.on(MemberUpdateEvent.class)        .subscribe(DiscordListener::onMemberUpdate, Discord::errorDisplay);
 		eventDispatcher.on(MessageCreateEvent.class)       .subscribe(event -> DiscordListener.onMessage(event.getMessage()), Discord::errorDisplay);
 
 		gateway = DiscordClient.create(Config.getString("discord.token"))
 			.gateway()
+            .setGatewayReactorResources(resources -> GatewayReactorResources
+                .builder(resources)
+                .httpClient(resources.getHttpClient().keepAlive(false))
+                .build()
+            )
 			.setEventDispatcher(eventDispatcher)
 			.setEnabledIntents(IntentSet.all())
 			.login()
@@ -79,21 +85,21 @@ public class Discord implements WillyChat {
 
 	@Override
 	public void refresh() {
-
 	}
 
-	private static void errorDisplay(Throwable error) {
-		Willy.getLogger().severe("Discord: "+error.getMessage()+"");
+    @Override
+    public String getName() {
+        return "Discord";
+    }
+
+    private static void errorDisplay(Throwable error) {
+		Willy.getLogger().severe("Discord: "+error.getMessage());
 	}
 
     public static GatewayDiscordClient getBotGateway() {
     	return gateway;
     }
     
-    private static void setReady(boolean ready) {
-    	Discord.ready = ready;
-    }
-
 	private static void registerCommands() {
 		if(gateway == null)
 			return;

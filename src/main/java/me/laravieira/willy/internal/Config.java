@@ -25,8 +25,8 @@ public class Config {
 		loadConfigFile();
 
 		List<String> names = new ArrayList<>();
-		names.add(Willy.getWilly().getName());
-		names.add(Willy.getWilly().getName().toLowerCase());
+		names.add(Willy.getName());
+		names.add(Willy.getName().toLowerCase());
 
 		List<String> ignore = new ArrayList<>();
 		ignore.add("!");
@@ -220,7 +220,7 @@ public class Config {
 			} catch (IOException | InterruptedException e) {
 				Willy.getLogger().severe("Can't create the config file, please check write and read system permissions.");
 				Willy.getLogger().severe(e.getMessage());
-				Willy.getWilly().stop();
+				Willy.stop();
 			}
 		}
 	}

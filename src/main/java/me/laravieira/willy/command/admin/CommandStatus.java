@@ -11,7 +11,7 @@ import me.laravieira.willy.chat.telegram.Telegram;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.internal.Config;
-import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
@@ -33,10 +33,10 @@ public class CommandStatus implements CommandListener {
         boolean status = Status.generalStatus();
         StringBuilder list = new StringBuilder();
 
-        long time  = (new Date().getTime()- Willy.getWilly().getStartTime())/1000;
+        long time  = (new Date().getTime()- Willy.getStartTime())/1000;
         list.append(status ? ":white_check_mark:" : ":broken_heart:").append("   ");
         list.append("**Willy**").append("   ");
-        list.append(Willy.getWilly().getFullVersion()).append("   ");
+        list.append(Willy.getFullVersion()).append("   ");
         list.append("`").append(Config.getString("environment")).append("`   ");
         list.append("`").append(time / (3600 * 24)).append("d ").append((time % (3600 * 24)) / (3600)).append("h ").append(time % (3600) / 60).append("m ").append(time % 60).append("s").append("`\r\n");
 
@@ -63,7 +63,7 @@ public class CommandStatus implements CommandListener {
         list.append("    port: ").append(Config.getInt("http_api.port")).append("\r\n");
         list.append("bitly:").append("\r\n");
         list.append("    enabled: ").append(Config.getBoolean("bitly.enable")).append("\r\n");
-        list.append("contexts: ").append(ContextStorage.size()).append(" in use").append("\r\n");
+        list.append("contexts: ").append(Context.size()).append(" in use").append("\r\n");
 
         list.append("```");
         return event.reply(list.toString());

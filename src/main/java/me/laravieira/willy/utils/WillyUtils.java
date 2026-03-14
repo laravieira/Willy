@@ -3,13 +3,10 @@ package me.laravieira.willy.utils;
 import io.github.sashirestela.openai.common.content.ContentPart;
 import io.github.sashirestela.openai.domain.chat.ChatMessage;
 import me.laravieira.willy.Willy;
-import me.laravieira.willy.context.Message;
-import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.WillyMessage;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,40 +28,37 @@ public class WillyUtils {
         return false;
     }
 
-
-    public static List<ChatMessage> parseContextToOpenAIChat(@NotNull LinkedList<UUID> messages, int historySize) throws MalformedURLException, URISyntaxException {
+    public static List<ChatMessage> parseContextToOpenAIChat(@NotNull LinkedList<WillyMessage> messages, int historySize) throws MalformedURLException, URISyntaxException {
         List<ChatMessage> chat = new ArrayList<>();
-        LinkedList<UUID> lastMessages = new LinkedList<>(messages);
-        LinkedList<Message> descendingHistory = new LinkedList<>();
-        for(int i = 0; i < messages.size() && i < historySize; i++)
-            descendingHistory.add(MessageStorage.of(lastMessages.pollLast()));
-        Iterator<Message> history = descendingHistory.descendingIterator();
+        Iterator<WillyMessage> history = messages.iterator();
 
-        while(history.hasNext()) {
-            Message message = history.next();
+        int count = historySize;
+        while(history.hasNext() && count-- > 0) {
+            WillyMessage message = history.next();
             if(message.getContent() instanceof ChatMessage)
                 chat.add((ChatMessage) message.getContent());
             else {
-                for(File image : message.getAttachments()) {
-                    ContentPart.ContentPartImageUrl.ImageUrl imageUrl = loadImageAsBase64(image.toPath());
-                    if(imageUrl != null) {
-                        ChatMessage.UserMessage usermessage = ChatMessage.UserMessage.of(List.of(
-                            ContentPart.ContentPartText.of(message.getText()),
-                            ContentPart.ContentPartImageUrl.of(imageUrl)
-                        ));
-                        chat.add(usermessage);
-                    }
-                }
-                for(String image : message.getUrls()) {
-                    ContentPart.ContentPartImageUrl.ImageUrl imageUrl = loadImageAsBase64(Path.of(URI.create(image)));
-                    if(image != null) {
-                        ChatMessage.UserMessage usermessage = ChatMessage.UserMessage.of(List.of(
-                            ContentPart.ContentPartText.of(message.getText()),
-                            ContentPart.ContentPartImageUrl.of(ContentPart.ContentPartImageUrl.ImageUrl.of(image))
-                        ));
-                        chat.add(usermessage);
-                    }
-                }
+                //TODO: Implement file uploads
+                // for(File image : message.getAttachments()) {
+                //     ContentPart.ContentPartImageUrl.ImageUrl imageUrl = loadImageAsBase64(image.toPath());
+                //     if(imageUrl != null) {
+                //         ChatMessage.UserMessage usermessage = ChatMessage.UserMessage.of(List.of(
+                //             ContentPart.ContentPartText.of(message.getText()),
+                //             ContentPart.ContentPartImageUrl.of(imageUrl)
+                //         ));
+                //         chat.add(usermessage);
+                //     }
+                // }
+                // for(String image : message.getUrls()) {
+                //     ContentPart.ContentPartImageUrl.ImageUrl imageUrl = loadImageAsBase64(Path.of(URI.create(image)));
+                //     if(image != null) {
+                //         ChatMessage.UserMessage usermessage = ChatMessage.UserMessage.of(List.of(
+                //             ContentPart.ContentPartText.of(message.getText()),
+                //             ContentPart.ContentPartImageUrl.of(ContentPart.ContentPartImageUrl.ImageUrl.of(image))
+                //         ));
+                //         chat.add(usermessage);
+                //     }
+                // }
                 chat.add(ChatMessage.UserMessage.of(List.of(
                     ContentPart.ContentPartText.of(message.getText())
                 )));

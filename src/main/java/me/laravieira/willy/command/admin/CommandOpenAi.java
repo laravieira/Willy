@@ -6,14 +6,10 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import me.laravieira.willy.Willy;
+import me.laravieira.willy.Context;
+import me.laravieira.willy.WillyMessage;
 import me.laravieira.willy.command.CommandListener;
-import me.laravieira.willy.chat.openai.OpenAiSender;
-import me.laravieira.willy.command.CommandSender;
-import me.laravieira.willy.context.Message;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
-import me.laravieira.willy.utils.PassedInterval;
+import me.laravieira.willy.command.CommandChannel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -41,18 +37,12 @@ public class CommandOpenAi implements CommandListener {
     public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
         if(event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).isPresent()) {
             String value = event.getOption(OPTION).flatMap(ApplicationCommandInteractionOption::getValue).get().asString();
-            UUID context = UUID.nameUUIDFromBytes("willy-console".getBytes());
-            ContextStorage.of(context).setUserSender(new CommandSender(event));
+            UUID id = UUID.nameUUIDFromBytes("willy-console".getBytes());
+            Context context = Context.of(id, new CommandChannel(event), "Console", "Console");
 
-            Message message = new Message(context);
-            message.setExpire(PassedInterval.DISABLE);
-            message.setContent(value);
+            WillyMessage message = new WillyMessage(value);
             message.setText(value);
-            message.setFrom("Console");
-            message.setTo(Willy.getWilly().getName());
-            MessageStorage.add(message);
-
-            new OpenAiSender(message.getContext()).sendText(message.getText());
+            context.process(message);
         }
         return null;
     }

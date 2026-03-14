@@ -7,7 +7,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import me.laravieira.willy.command.CommandListener;
-import me.laravieira.willy.storage.ContextStorage;
+import me.laravieira.willy.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -41,14 +41,14 @@ public class CommandContext implements CommandListener {
     @Override
     public InteractionApplicationCommandCallbackReplyMono execute(@NotNull ChatInputInteractionEvent event) {
         if(event.getOption(OPTION).isPresent()) {
-            List<UUID> contexts = new ArrayList<>(ContextStorage.all().keySet());
-            contexts.forEach(ContextStorage::remove);
+            List<UUID> contexts = new ArrayList<>(Context.all().keySet());
+            contexts.forEach(Context::destroy);
             return event.reply("All contexts were vanished.");
         }else {
             StringBuilder list = new StringBuilder();
             list.append("**Contexts alive** `").append(new Date()).append("`").append("\r\n");
             list.append("```yaml").append("\r\n");
-            ContextStorage.all().forEach(
+            Context.all().forEach(
                 (identifier, context) -> list.append(identifier)
                     .append(": ")
                     .append(context.getExpire().remaining() / 1000)

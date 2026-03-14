@@ -11,8 +11,8 @@ import java.util.EventListener;
 
 public class Handler implements org.eclipse.jetty.server.Handler {
     public static final JSONObject DEFAULT_RESPONSE = new JSONObject() {{
-        put("name", Willy.getWilly().getName());
-        put("version", Willy.getWilly().getFullVersion());
+        put("name", Willy.getName());
+        put("version", Willy.getFullVersion());
         put("paths", new String[] {"/ping", "/status"});
     }};
 

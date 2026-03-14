@@ -4,8 +4,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.response.GetFileResponse;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.Context;
 import me.laravieira.willy.utils.PassedInterval;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,21 +27,18 @@ public class TelegramListener implements UpdatesListener {
         UUID id = UUID.nameUUIDFromBytes(("telegram-"+chat.id()).getBytes());
 
         Thread messageHandler = new Thread(() -> {
-            TelegramSender sender = new TelegramSender(chat);
-            ContextStorage.of(id).setUserSender(sender);
-            ContextStorage.of(id).setApp("telegram");
+            TelegramChannel sender = new TelegramChannel(chat);
+            Context context = Context.of(id, sender, "Telegram", chat.username());
 
-            TelegramMessage message = new TelegramMessage(id, msg, chat, PassedInterval.DISABLE);
+            TelegramMessage message = new TelegramMessage(msg, chat, PassedInterval.DISABLE);
             if(msg.photo() != null && msg.photo().length > 0) {
                 for(PhotoSize photo : msg.photo()) {
                     GetFileResponse response = Telegram.getBot().execute(new GetFile(photo.fileId()));
                     if(response.isOk())
-                        message.addUrl(Telegram.getBot().getFullFilePath(response.file()));
+                        message.addFile(Telegram.getBot().getFullFilePath(response.file()));
                 }
             }
-            MessageStorage.add(message);
-
-            ContextStorage.of(message.getContext()).getSender().send(message);
+            context.process(message);
         });
         messageHandler.setDaemon(true);
         messageHandler.start();

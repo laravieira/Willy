@@ -2,10 +2,8 @@ package me.laravieira.willy.chat.openai.function;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import io.github.sashirestela.openai.domain.chat.ChatMessage;
-import me.laravieira.willy.Willy;
-import me.laravieira.willy.context.Message;
-import me.laravieira.willy.storage.ContextStorage;
-import me.laravieira.willy.storage.MessageStorage;
+import me.laravieira.willy.Context;
+import me.laravieira.willy.WillyMessage;
 import me.laravieira.willy.utils.PassedInterval;
 
 import java.util.UUID;
@@ -24,7 +22,8 @@ public class Functional implements io.github.sashirestela.openai.common.function
     }
 
     protected String askResponse(String message) {
-        Object last = ContextStorage.of(context).getLastMessage().getContent();
+        Context context = Context.of(this.context);
+        Object last = context.getMessages().getLast().getContent();
         if(!(last instanceof ChatMessage.ResponseMessage)) {
             return "Last message is not a ResponseMessage.";
         } else if (((ChatMessage.ResponseMessage) last).getToolCalls().isEmpty()) {
@@ -32,15 +31,12 @@ public class Functional implements io.github.sashirestela.openai.common.function
         }
         ChatMessage.ToolMessage toolMessage = ChatMessage.ToolMessage.of(message, this.call);
 
-        Message result = new Message(context);
-        result.setExpire(PassedInterval.DISABLE);
-        result.setTo(Willy.getWilly().getName());
+        WillyMessage result = new WillyMessage(toolMessage);
         result.setFrom("SYSTEM");
-        result.setContent(toolMessage);
+        result.setExpire(PassedInterval.DISABLE);
         result.setText(toolMessage.getContent());
-        MessageStorage.add(result);
+        context.process(result);
 
-        ContextStorage.of(context).getSender().sendText(result.toString());
         return message;
     }
 }

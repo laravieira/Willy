@@ -40,6 +40,8 @@ public class Handler implements org.eclipse.jetty.server.Handler {
             return onNoMethod(new Ping(request, response, callback));
         if (request.getHttpURI().getPath().equals("/status"))
             return onNoMethod(new Status(request, response, callback));
+        if (request.getHttpURI().getPath().equals("/whatsapp"))
+            return onNoMethod(new WhatsApp(request, response, callback));
         return new Controller(request, response, callback).toJSON(DEFAULT_RESPONSE, 404);
     }
 

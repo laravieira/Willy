@@ -38,7 +38,7 @@ public class DiscordListener {
 			}
 			return null;
 		}catch(Exception e) {
-			return event.reply(STR."Interaction went wrong: \{e.getMessage()}");
+			return event.reply("Interaction went wrong: "+e.getMessage());
 		}
 	}
 
@@ -60,7 +60,7 @@ public class DiscordListener {
 			}catch(Exception e) {
 				Willy.getLogger().severe(e.getMessage());
 				for(StackTraceElement elem : e.getStackTrace())
-					Willy.getLogger().severe(STR."\{elem.getMethodName()} (\{elem.getLineNumber()})");
+					Willy.getLogger().severe(elem.getMethodName()+" "+elem.getLineNumber());
 			}
 		});
 		thread.setName("Discord Message Listener");
@@ -70,14 +70,14 @@ public class DiscordListener {
 
 	public static void onPrivateTextChannelMessage(MessageChannel channel, User user, Message message) {
 		String content = parseWillyDiscordId(message.getContent());
-		UUID id = UUID.nameUUIDFromBytes((STR."discord-\{user.getId().asString()}").getBytes());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+user.getId().asString()).getBytes());
 
 		if(content.isEmpty())
 			return;
 		if(WillyUtils.startsWith(content, Config.getStringList("discord.public_chat.ignore_start_with")))
 			return;
 
-		Willy.getLogger().fine(STR."Msg on Discord dm \{channel.getId().asLong()} by \{user.getId().asLong()}");
+		Willy.getLogger().fine("Msg on Discord dm "+channel.getId().asLong()+" by "+user.getId().asLong());
 		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, PassedInterval.DISABLE);
 		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
 	}
@@ -93,7 +93,7 @@ public class DiscordListener {
 				if(attachment.getContentType().isPresent() && attachment.getContentType().get().toLowerCase().startsWith("image"))
 					discordMessage.addUrl(attachment.getUrl());
 			}catch(Exception e) {
-				Willy.getLogger().warning(STR."Error on attachment proccessing: \{e.getMessage()}");
+				Willy.getLogger().warning("Error on attachment proccessing: "+e.getMessage());
 			}
 		}
 		MessageStorage.add(discordMessage);
@@ -104,7 +104,7 @@ public class DiscordListener {
 		if(!Config.getBoolean("discord.public_chat.enable"))
 			return;
 		String content = parseWillyDiscordId(message.getContent());
-		UUID id = UUID.nameUUIDFromBytes((STR."discord-\{channel.getId()}").getBytes());
+		UUID id = UUID.nameUUIDFromBytes(("discord-"+channel.getId()).getBytes());
 
 		if(content.isEmpty())
 			return;
@@ -117,7 +117,7 @@ public class DiscordListener {
 				? Config.getLong("discord.public_chat.auto_delete.delete_after_wait")
 				: PassedInterval.DISABLE;
 
-		Willy.getLogger().fine(STR."Msg on Discord public \{channel.getId().asLong()} by \{user.getId().asLong()}");
+		Willy.getLogger().fine("Msg on Discord public "+channel.getId().asLong()+" by "+user.getId().asLong());
 		DiscordMessage discordMessage = buildMessage(channel, user, message, content, id, expire);
 		ContextStorage.of(discordMessage.getContext()).getSender().send(discordMessage);
 	}
@@ -126,7 +126,7 @@ public class DiscordListener {
 	private static String parseWillyDiscordId(@NotNull String message) {
 		long id = Config.getLong("discord.client_id");
 		String name = Config.getStringList("discord.public_chat.willy_names").getFirst();
-		return message.replaceAll(STR."<@\{id}>", name);
+		return message.replaceAll("<@"+id+">", name);
 	}
 
 	public static void onMemberUpdate(MemberUpdateEvent event) {
@@ -140,7 +140,7 @@ public class DiscordListener {
 					member.edit(GuildMemberEditSpec.builder()
 							.nicknameOrNull(null)
 							.build())
-						.doOnError(data -> Willy.getLogger().warning(STR."Master nickname reset failed caused by: \{data.getMessage()}"))
+						.doOnError(data -> Willy.getLogger().warning("Master nickname reset failed caused by: "+data.getMessage()))
 						.block();
 				}
 			}
@@ -151,7 +151,7 @@ public class DiscordListener {
 					member.edit(GuildMemberEditSpec.builder()
 									.nicknameOrNull(null)
 									.build())
-							.doOnError(data -> Willy.getLogger().warning(STR."Willy nickname reset failed caused by: \{data.getMessage()}"))
+							.doOnError(data -> Willy.getLogger().warning("Willy nickname reset failed caused by: "+data.getMessage()))
 							.block();
 				}
 			}
@@ -159,14 +159,14 @@ public class DiscordListener {
 			if(e.getMessage().contains("Missing Permissions"))
 				Willy.getLogger().warning("Nickname reset failed caused by missing permission.");
 			else
-				Willy.getLogger().warning(STR."Nickname reset exception: \{e.getMessage()}");
+				Willy.getLogger().warning("Nickname reset exception: "+e.getMessage());
 		}
 	}
 
 	private static void floodChat(MessageChannel channel, User user) {
 		//TODO Make this a command
 		try {
-			UUID id = UUID.nameUUIDFromBytes((STR."discord-\{channel.getId()}").getBytes());
+			UUID id = UUID.nameUUIDFromBytes(("discord-"+channel.getId()).getBytes());
 			DiscordSender sender = new DiscordSender(id, channel, Config.getLong("discord.public_chat.auto_delete.delete_after_wait"));
 			ContextStorage.of(id).setUserSender(sender);
 			ContextStorage.of(id).setApp("discord");
@@ -219,7 +219,7 @@ public class DiscordListener {
 			MessageStorage.add(message);
 			sender.sendEmbed((MessageCreateSpec)message.getContent());
 
-			Willy.getLogger().info(STR."Chat flood sent to \{channel.getId().asString()}.");
+			Willy.getLogger().info("Chat flood sent to "+channel.getId().asString()+".");
 		}catch(RuntimeException e) {
 			e.printStackTrace();
 		}

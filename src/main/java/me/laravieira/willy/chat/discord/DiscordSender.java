@@ -32,7 +32,7 @@ public class DiscordSender implements SenderInterface {
                 MessageStorage.remove(lastMessage.getId());
                 MessageStorage.add(message);
             })
-            .doOnError(err -> Willy.getLogger().severe(STR."Discord sendMessage failed: \{err.getMessage()}"))
+            .doOnError(err -> Willy.getLogger().severe("Discord sendMessage failed: "+err.getMessage()))
             .subscribe();
     }
 
@@ -55,7 +55,7 @@ public class DiscordSender implements SenderInterface {
             sendMessage(MessageCreateSpec.builder().content(message).build());
             Willy.getLogger().fine("Discord send text success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Discord send text fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Discord send text fail: "+e.getMessage());
         }
     }
 
@@ -66,7 +66,7 @@ public class DiscordSender implements SenderInterface {
             sendMessage(MessageCreateSpec.builder().content(content).build());
             Willy.getLogger().fine("Discord send link success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Discord send link fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Discord send link fail: "+e.getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ public class DiscordSender implements SenderInterface {
             sendMessage(messageCreateSpec);
             Willy.getLogger().fine("Discord send embed success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Discord send embed fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Discord send embed fail: "+e.getMessage());
         }
     }
 
@@ -109,7 +109,7 @@ public class DiscordSender implements SenderInterface {
             sendMessage(builder.build());
             Willy.getLogger().fine("Discord send image success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Discord send image fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Discord send image fail: "+e.getMessage());
         }
     }
 
@@ -146,7 +146,7 @@ public class DiscordSender implements SenderInterface {
                 .build());
             Willy.getLogger().fine("Discord send file success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Discord send file fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Discord send file fail: "+e.getMessage());
         }
     }
 }

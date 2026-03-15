@@ -8,7 +8,6 @@ import me.laravieira.willy.chat.http.HTTP;
 import me.laravieira.willy.chat.http.Status;
 import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.chat.telegram.Telegram;
-import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.command.CommandListener;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.internal.Config;
@@ -55,10 +54,6 @@ public class CommandStatus implements CommandListener {
         list.append("    public-chat:").append("\r\n");
         list.append("        enabled: ").append(Config.getBoolean("discord.public_chat.enable")).append("\r\n");
         list.append("        auto-delete: ").append(Config.getBoolean("discord.public_chat.auto_delete.willy_messages")).append("\r\n");
-        list.append("whatsapp:").append("\r\n");
-        list.append("    enabled: ").append(Config.getBoolean("whatsapp.enable")).append("\r\n");
-        list.append("    connected: ").append(new Whatsapp().isConnected()).append("\r\n");
-        list.append("    phone-number: ").append(Config.getLong("whatsapp.phone_number")).append("\r\n");
         list.append("telegram:").append("\r\n");
         list.append("    enabled: ").append(Config.getBoolean("telegram.enable")).append("\r\n");
         list.append("    connected: ").append(new Telegram().isConnected()).append("\r\n");

@@ -5,7 +5,6 @@ import me.laravieira.willy.Willy;
 import me.laravieira.willy.chat.discord.Discord;
 import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.chat.telegram.Telegram;
-import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.Config;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -20,8 +19,6 @@ public class Status extends Controller {
         if(!Config.getBoolean("openai.enable") || !new OpenAi().isConnected())
             return false;
         if(!Config.getBoolean("discord.enable") || !new Discord().isConnected())
-            return false;
-        if(!Config.getBoolean("whatsapp.enable") || !new Whatsapp().isConnected())
             return false;
         if(!Config.getBoolean("telegram.enable") || !new Telegram().isConnected())
             return false;
@@ -44,10 +41,6 @@ public class Status extends Controller {
             put("discord", new JSONObject() {{
                 put("enabled", Config.getBoolean("discord.enable"));
                 put("connected", new Discord().isConnected());
-            }});
-            put("whatsapp", new JSONObject() {{
-                put("enabled", Config.getBoolean("whatsapp.enable"));
-                put("connected", new Whatsapp().isConnected());
             }});
             put("telegram", new JSONObject() {{
                 put("enabled", Config.getBoolean("telegram.enable"));

@@ -51,17 +51,17 @@ public class CommandBitly implements CommandListener {
 
                         String shortLink = bitly.bitlinks().shorten(link).get().getLink();
                         if (shortLink == null || shortLink.isEmpty()) {
-                            Willy.getLogger().fine(STR."command bitly \{link} failed.");
+                            Willy.getLogger().fine("command bitly "+link+" failed.");
                             event.createFollowup("Something didn't work right.").subscribe();
                             return;
                         }
                         if (shortLink.equals(link)) {
-                            Willy.getLogger().fine(STR."command bitly \{link} returned the same link.");
+                            Willy.getLogger().fine("command bitly "+link+" returned the same link.");
                             event.createFollowup("Maybe it's already short enough.").subscribe();
                             return;
                         }
 
-                        Willy.getLogger().fine(STR."command bitly \{link} returned \{shortLink}.");
+                        Willy.getLogger().fine("command bitly "+link+" returned "+shortLink+".");
                         event.createFollowup(shortLink).subscribe();
                     } catch (Exception e) {
                         Willy.getLogger().warning(e.getMessage());

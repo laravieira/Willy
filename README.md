@@ -36,7 +36,7 @@ maven package
 ```
 To run use:
 ```shell
-java --enable-preview -jar /target/willy-0.17.0-jar-with-dependencies.jar
+java -jar /target/willy-0.18.0-jar-with-dependencies.jar
 ```
 
 ### Configuring

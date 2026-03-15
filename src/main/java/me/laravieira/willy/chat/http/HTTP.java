@@ -24,9 +24,9 @@ public class HTTP implements WillyChat {
 
         try {
             server.start();
-            Willy.getLogger().fine(STR."HTTP API listening on port \{Config.getInt("http_api.port")}.");
+            Willy.getLogger().fine("HTTP API listening on port "+Config.getInt("http_api.port")+".");
         }catch (Exception exception) {
-            Willy.getLogger().severe(STR."HTTP API failed to start: \{exception.getMessage()}");
+            Willy.getLogger().severe("HTTP API failed to start: "+exception.getMessage());
         }
     }
 

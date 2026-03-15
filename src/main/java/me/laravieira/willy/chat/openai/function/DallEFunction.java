@@ -36,54 +36,51 @@ public class DallEFunction extends Functional {
 
     @Override
     public Object execute() {
-        try {
-            if(!Config.getBoolean("openai.dall_e")) {
-                throw new Exception("Dall-E is not enabled.");
-            }
-            if(this.context == null) {
-                throw new Exception("Context is null.");
-            }
-            if(prompt == null || prompt.isEmpty()) {
-                throw new Exception("Prompt is empty.");
-            }
-
-            ImageRequest.Style style = ImageRequest.Style.NATURAL;
-            Size size = Size.X1024;
-            int amount = 1;
-
-            ImageRequest request = ImageRequest.builder()
-                    .model("dall-e-3")
-                    .prompt(prompt)
-                    .style(style)
-                    .size(size)
-                    .n(amount)
-                    .responseFormat(ImageResponseFormat.URL)
-                    .build();
-            List<Image> images = OpenAi.getService().images().create(request).get();
-
-            if(images == null || images.isEmpty()) {
-                throw new Exception("An error occurred while generating the image.");
-            }
-            Context context = ContextStorage.of(this.context);
-            List<String> urls = images.stream().map(Image::getUrl).toList();
-
-            ChatMessage.ToolMessage toolMessage = ChatMessage.ToolMessage.of("Image generated and sent.", this.call);
-            Message result = new Message(context.getId());
-            result.setExpire(PassedInterval.DISABLE);
-            result.setTo(MessageStorage.of(context.getMessages().getFirst()).getFrom());
-            result.setFrom("SYSTEM");
-            result.setContent(toolMessage);
-            result.setUrls(urls);
-            result.setType(MessageType.IMAGE);
-            MessageStorage.add(result);
-
-            Willy.getLogger().fine(STR."Dall-E function \{result.getId()}");
-            context.getUserSender().send(result);
-            context.getSender().sendText(result.toString());
-            return toolMessage.getContent();
-        } catch (Exception e) {
-            Willy.getLogger().warning(STR."Dall-E function error: \{e.getMessage()}");
-            return askResponse(STR."Something didn't work right: \{e.getMessage()}");
-        }
+//TODO: Rework this
+//        try {
+//            if(!Config.getBoolean("openai.dall_e")) {
+//                throw new Exception("Dall-E is not enabled.");
+//            }
+//            if(this.context == null) {
+//                throw new Exception("Context is null.");
+//            }
+//            if(prompt == null || prompt.isEmpty()) {
+//                throw new Exception("Prompt is empty.");
+//            }
+//            ImageRequest.Style style = ImageRequest.Style.NATURAL;
+//            Size size = Size.X1024;
+//            int amount = 1;
+//            ImageRequest request = ImageRequest.builder()
+//                    .model("dall-e-3")
+//                    .prompt(prompt)
+//                    .style(style)
+//                    .size(size)
+//                    .n(amount)
+//                    .responseFormat(ImageResponseFormat.URL)
+//                    .build();
+//            List<Image> images = OpenAi.getService().images().create(request).get();
+//            if(images == null || images.isEmpty()) {
+//                throw new Exception("An error occurred while generating the image.");
+//            }
+//            Context context = ContextStorage.of(this.context);
+//            List<String> urls = images.stream().map(Image::getUrl).toList();
+//            ChatMessage.ToolMessage toolMessage = ChatMessage.ToolMessage.of("Image generated and sent.", this.call);
+//            Message result = new Message(context.getId());
+//            result.setExpire(PassedInterval.DISABLE);
+//            result.setTo(MessageStorage.of(context.getMessages().getFirst()).getFrom());
+//            result.setFrom("SYSTEM");
+//            result.setContent(toolMessage);
+//            result.setUrls(urls);
+//            result.setType(MessageType.IMAGE);
+//            MessageStorage.add(result);
+//            Willy.getLogger().fine(STR."Dall-E function \{result.getId()}");
+//            context.getUserSender().send(result);
+//            context.getSender().sendText(result.toString());
+//            return toolMessage.getContent();
+//        } catch (Exception e) {
+//            Willy.getLogger().warning(STR."Dall-E function error: \{e.getMessage()}");
+//            return askResponse(STR."Something didn't work right: \{e.getMessage()}");
+//        }
+        return askResponse("Not implemented yet.");
     }
 }

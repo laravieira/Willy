@@ -14,7 +14,6 @@ public class Command {
 		commands.add(new CommandContext());
 		commands.add(new CommandDiscord());
 		commands.add(new CommandStatus());
-		commands.add(new CommandWhatsapp());
 
 		return commands;
 	}

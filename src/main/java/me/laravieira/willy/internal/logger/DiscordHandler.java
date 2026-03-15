@@ -23,7 +23,7 @@ class DiscordHandler extends Handler {
         if(gateway == null || !Config.has("discord.admin.log"))
             return;
 
-        String message = STR."```yaml\r\n[\{record.getLevel()}] \{record.getMessage()}```";
+        String message = "```yaml\r\n["+record.getLevel()+"] "+record.getMessage()+"```";
         gateway.getChannelById(Snowflake.of(Config.getLong("discord.admin.log")))
             .publishOn(Schedulers.boundedElastic())
             .doOnError(error -> Willy.getLogger().fine(error.getMessage()))

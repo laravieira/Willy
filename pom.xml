@@ -5,16 +5,16 @@
 
   <groupId>me.laravieira</groupId>
   <artifactId>willy</artifactId>
-  <version>0.17.0</version>
+  <version>0.18.0</version>
   <packaging>jar</packaging>
 
   <name>Willy</name>
   <description>A cute discord bot</description>
 
   <properties>
-  	<maven.compiler.source>21</maven.compiler.source>
-  	<maven.compiler.target>21</maven.compiler.target>
-	<project.java.version>21</project.java.version>
+  	<maven.compiler.source>25</maven.compiler.source>
+  	<maven.compiler.target>25</maven.compiler.target>
+	<project.java.version>25</project.java.version>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.manifest.mainClass>me.laravieira.willy.Willy</project.manifest.mainClass>
@@ -30,7 +30,6 @@
         <configuration>
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>
-          <compilerArgs>--enable-preview</compilerArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -88,25 +87,25 @@
       <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.13</version>
+      <version>2.0.17</version>
     </dependency>
     <dependency>
       <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.13</version>
+      <version>2.0.17</version>
     </dependency>
     <dependency>
       <!-- https://search.maven.org/artifact/com.google.code.gson/gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.2</version>
     </dependency>
     <dependency>
       <!-- https://github.com/sealedtx/java-youtube-downloader -->
       <groupId>com.github.sealedtx</groupId>
       <artifactId>java-youtube-downloader</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.1</version>
     </dependency>
     <dependency>
       <!-- https://github.com/opsmatters/bitly-java-api -->
@@ -118,80 +117,75 @@
       <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.10.3</version>
+      <version>6.0.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>12.0.14</version>
+      <version>12.1.7</version>
     </dependency>
     <dependency>
-      <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
-      <version>11.0.23</version>
+      <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-servlet -->
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
+      <version>12.1.7</version>
     </dependency>
     <dependency>
       <!-- https://mvnrepository.com/artifact/org.snakeyaml/snakeyaml-engine -->
       <groupId>org.snakeyaml</groupId>
       <artifactId>snakeyaml-engine</artifactId>
-      <version>2.7</version>
+      <version>3.0.1</version>
     </dependency>
     <dependency>
       <!-- https://github.com/pengrad/java-telegram-bot-api -->
       <groupId>com.github.pengrad</groupId>
       <artifactId>java-telegram-bot-api</artifactId>
-      <version>7.4.0</version>
-    </dependency>
-    <dependency>
-      <!-- https://github.com/Auties00/Cobalt -->
-      <groupId>com.github.auties00</groupId>
-      <artifactId>cobalt</artifactId>
-      <version>0.0.10</version>
+      <version>9.5.0</version>
     </dependency>
     <dependency>
       <!-- https://github.com/Discord4J/Discord4J -->
       <groupId>com.discord4j</groupId>
       <artifactId>discord4j-core</artifactId>
-      <version>3.2.8</version>
+      <version>3.3.1</version>
     </dependency>
     <dependency>
       <!-- https://github.com/sashirestela/simple-openai -->
       <groupId>io.github.sashirestela</groupId>
       <artifactId>simple-openai</artifactId>
-      <version>3.5.1</version>
+      <version>3.22.2</version>
     </dependency>
     <dependency>
       <!-- https://github.com/commonmark/commonmark-java -->
       <groupId>org.commonmark</groupId>
       <artifactId>commonmark</artifactId>
-      <version>0.22.0</version>
+      <version>0.27.1</version>
     </dependency>
     <dependency>
+      <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.34</version>
+      <version>1.18.44</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+    <!-- https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
     <dependencies>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
-        <version>2.17.1</version>
+        <version>3.1.0</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.17.1</version>
+        <version>3.1.0</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-datatype-jdk8</artifactId>
-        <version>2.17.1</version>
+        <version>3.1.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

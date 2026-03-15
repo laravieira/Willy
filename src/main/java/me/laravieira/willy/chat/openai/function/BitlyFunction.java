@@ -36,15 +36,15 @@ public class BitlyFunction extends Functional {
 
             String shortLink = bitly.bitlinks().shorten(link).get().getLink();
             if (shortLink == null || shortLink.isEmpty()) {
-                Willy.getLogger().fine(STR."function call shortenLink \{link} failed.");
+                Willy.getLogger().fine("function call shortenLink "+link+" failed.");
                 return askResponse("Something didn't work right.");
             }
             if (shortLink.equals(link)) {
-                Willy.getLogger().fine(STR."function call shortenLink \{link} returned the same link.");
+                Willy.getLogger().fine("function call shortenLink "+link+" returned the same link.");
                 return askResponse("Maybe it's already short enough.");
             }
 
-            Willy.getLogger().fine(STR."function call shortenLink \{link} returned \{shortLink}.");
+            Willy.getLogger().fine("function call shortenLink "+link+" returned "+shortLink+".");
             return askResponse(shortLink);
         } catch (Exception e) {
             Willy.getLogger().warning(e.getMessage());

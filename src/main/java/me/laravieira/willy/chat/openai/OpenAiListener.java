@@ -41,7 +41,7 @@ public class OpenAiListener {
             MessageStorage.add(message);
 
             ContextStorage.of(context).getUserSender().send(message);
-            Willy.getLogger().fine(STR."OpenAI chat completion \{chat.getId()}");
+            Willy.getLogger().fine("OpenAI chat completion "+chat.getId());
         }else {
             message.setTo("SYSTEM");
             message.setFrom(Willy.getWilly().getName());

@@ -45,7 +45,7 @@ public class WillyLogger extends Logger {
 			fileHandler.setFormatter(LOG_FORMATTER);
 			consoleHandler.setFormatter(LOG_FORMATTER);
 
-			consoleLogger = Logger.getLogger(STR."\{Willy.class.getCanonicalName()}-console");
+			consoleLogger = Logger.getLogger(Willy.class.getCanonicalName()+"-console");
 
 			this.addHandler(fileHandler);
 			this.addHandler(consoleHandler);

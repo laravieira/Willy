@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import me.laravieira.willy.chat.http.HTTP;
 import me.laravieira.willy.chat.openai.OpenAi;
-import me.laravieira.willy.chat.whatsapp.Whatsapp;
 import me.laravieira.willy.internal.WillyChat;
 import me.laravieira.willy.internal.Config;
 import me.laravieira.willy.chat.discord.Discord;
@@ -21,7 +20,7 @@ import me.laravieira.willy.storage.MessageStorage;
 public class Willy {
 	
 	private static final String my_name    = "Willy";
-	private static final int[]  my_version = {0,17,0};
+	private static final int[]  my_version = {0,18,0};
 	private static final long   start_time = new Date().getTime();
 
 	@Getter
@@ -48,7 +47,6 @@ public class Willy {
 	private void registryChats() {
 		willy.addWillyChatInstance(new OpenAi());
 		willy.addWillyChatInstance(new Discord());
-		willy.addWillyChatInstance(new Whatsapp());
 		willy.addWillyChatInstance(new Telegram());
 		willy.addWillyChatInstance(new HTTP());
 	}
@@ -65,13 +63,13 @@ public class Willy {
 
 	private void run() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::onShutdown));
-		logger.info(STR."Initializing Willy! (\{getFullVersion()})");
+		logger.info("Initializing Willy! ("+getFullVersion()+")");
 
 		Config.load();
 		logger.info("Configurations loaded.");
 
 		registryChats();
-		logger.info(STR."Registered \{chats.size()} chat instances.");
+		logger.info("Registered "+chats.size()+" chat instances.");
 
 		logger.info("Trying to connect chat instances.");
 		connectWillyChatInstances();

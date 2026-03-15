@@ -41,7 +41,7 @@ public class TelegramSender implements SenderInterface {
             Telegram.getBot().execute(send);
             Willy.getLogger().fine("Telegram send text success.");
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Telegram send text fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Telegram send text fail: "+e.getMessage());
         }
     }
 
@@ -80,10 +80,10 @@ public class TelegramSender implements SenderInterface {
                 SendPhoto send = new SendPhoto(chat.id(), image)
                         .caption(message.getText());
                 Telegram.getBot().execute(send);
-                Willy.getLogger().fine(STR."Telegram send image success: \{message.getId()}");
+                Willy.getLogger().fine("Telegram send image success: "+message.getId());
             }
         } catch (Exception e) {
-            Willy.getLogger().warning(STR."Telegram send image fail: \{e.getMessage()}");
+            Willy.getLogger().warning("Telegram send image fail: "+e.getMessage());
         }
     }
 

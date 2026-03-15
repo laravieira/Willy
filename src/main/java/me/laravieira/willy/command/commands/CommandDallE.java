@@ -46,16 +46,17 @@ public class CommandDallE implements CommandListener {
                 .required(false)
                 .build()
             )
-            .addOption(ApplicationCommandOptionData.builder()
-                .name(SIZE)
-                .description("Image size.")
-                .type(ApplicationCommandOption.Type.STRING.getValue())
-                .addChoice(ApplicationCommandOptionChoiceData.builder().name("256").value(Size.X256.name()).build())
-                .addChoice(ApplicationCommandOptionChoiceData.builder().name("512").value(Size.X512.name()).build())
-                .addChoice(ApplicationCommandOptionChoiceData.builder().name("1024").value(Size.X1024.name()).build())
-                .required(false)
-                .build()
-            )
+//TODO: Fix image size custom
+//            .addOption(ApplicationCommandOptionData.builder()
+//                .name(SIZE)
+//                .description("Image size.")
+//                .type(ApplicationCommandOption.Type.STRING.getValue())
+//                .addChoice(ApplicationCommandOptionChoiceData.builder().name("256").value(Size.X256.name()).build())
+//                .addChoice(ApplicationCommandOptionChoiceData.builder().name("512").value(Size.X512.name()).build())
+//                .addChoice(ApplicationCommandOptionChoiceData.builder().name("1024").value(Size.X1024.name()).build())
+//                .required(false)
+//                .build()
+//            )
             .addOption(ApplicationCommandOptionData.builder()
                 .name(AMOUNT)
                 .description("The amount of images to generate.")
@@ -80,40 +81,40 @@ public class CommandDallE implements CommandListener {
         Thread thread = new Thread(() -> {
             String prompt = "";
             ImageRequest.Style style = ImageRequest.Style.NATURAL;
-            Size size = Size.X1024;
+//            Size size = Size.X1024;
             int amount = 1;
 
             if(event.getOption(PROMPT).isPresent() && event.getOption(PROMPT).get().getValue().isPresent())
                 prompt = event.getOption(PROMPT).get().getValue().get().asString();
             if(event.getOption(STYLE).isPresent() && event.getOption(STYLE).get().getValue().isPresent())
                 style = ImageRequest.Style.valueOf(event.getOption(STYLE).get().getValue().get().asString());
-            if(event.getOption(SIZE).isPresent() && event.getOption(SIZE).get().getValue().isPresent())
-                size = Size.valueOf(event.getOption(SIZE).get().getValue().get().asString());
+//            if(event.getOption(SIZE).isPresent() && event.getOption(SIZE).get().getValue().isPresent())
+//                size = Size.valueOf(event.getOption(SIZE).get().getValue().get().asString());
             if(event.getOption(AMOUNT).isPresent() && event.getOption(AMOUNT).get().getValue().isPresent())
                 amount = Integer.parseInt(event.getOption(AMOUNT).get().getValue().get().asString());
 
             try {
-                ImageRequest request = ImageRequest.builder()
-                        .model("dall-e-3")
-                        .prompt(prompt)
-                        .style(style)
-                        .size(size)
-                        .n(amount)
-                        .responseFormat(ImageResponseFormat.URL)
-                        .build();
-                List<Image> images = OpenAi.getService().images().create(request).get();
-
-                if(images == null || images.isEmpty()) {
-                    event.createFollowup("An error occurred while generating the image.").subscribe();
-                    return;
-                }
-                event.editReply("Here are the images generated:").subscribe();
-                for(Image image : images) {
-                    Willy.getLogger().fine(STR."Dall-E generated image: \{image.getUrl()}");
-                    event.createFollowup(image.getUrl()).block();
-                }
+//TODO: Fix image sending
+//                ImageRequest request = ImageRequest.builder()
+//                        .model("dall-e-3")
+//                        .prompt(prompt)
+//                        .style(style)
+//                        .size(size)
+//                        .n(amount)
+//                        .responseFormat(ImageResponseFormat.URL)
+//                        .build();
+//                List<Image> images = OpenAi.getService().images().create(request).get();
+//                if(images == null || images.isEmpty()) {
+//                    event.createFollowup("An error occurred while generating the image.").subscribe();
+//                    return;
+//                }
+//                event.editReply("Here are the images generated:").subscribe();
+//                for(Image image : images) {
+//                    Willy.getLogger().fine("Dall-E generated image: "+image.getUrl());
+//                    event.createFollowup(image.getUrl()).block();
+//                }
             } catch (Exception e) {
-                Willy.getLogger().warning(STR."Dal-E error: \{e.getMessage()}");
+                Willy.getLogger().warning("Dal-E error: "+e.getMessage());
                 event.createFollowup("An error occurred while generating the image.").subscribe();
             }
         });

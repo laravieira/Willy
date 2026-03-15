@@ -64,6 +64,11 @@ public class Config {
 
 		// Whatsapp Settings
 		set("whatsapp.enable",                              "WILLY_WHATSAPP_ENABLE",                              "whatsapp.enable",                              TYPE_BOOLEAN, false);
+		set("whatsapp.gowa.host",                           "WILLY_WHATSAPP_GOWA_HOST",                           "whatsapp.gowa.host",                           TYPE_STRING, null);
+		set("whatsapp.gowa.device",                         "WILLY_WHATSAPP_GOWA_DEVICE",                         "whatsapp.gowa.device",                         TYPE_STRING, null);
+		set("whatsapp.gowa.secret",                         "WILLY_WHATSAPP_GOWA_SECRET",                         "whatsapp.gowa.secret",                         TYPE_STRING, null);
+		set("whatsapp.gowa.user",                           "WILLY_WHATSAPP_GOWA_USER",                           "whatsapp.gowa.user",                           TYPE_STRING, null);
+		set("whatsapp.gowa.password",                       "WILLY_WHATSAPP_GOWA_PASSWORD",                       "whatsapp.gowa.password",                       TYPE_STRING, null);
 		set("whatsapp.phone_number",                        "WILLY_WHATSAPP_PHONE_NUMBER",                        "whatsapp.phone-number",                        TYPE_LONG, null);
 		set("whatsapp.group.enable",                        "WILLY_WHATSAPP_GROUP_ENABLE",                        "whatsapp.group.enable",                        TYPE_BOOLEAN, true);
 		set("whatsapp.group.willy_names",                   "WILLY_WHATSAPP_GROUP_WILLY_NAMES",                   "whatsapp.group.willy-names",                   TYPE_LIST, names);
@@ -164,6 +169,7 @@ public class Config {
 			sconf += "\r\n";
 			sconf += "whatsapp:\r\n";
 			sconf += "    enable: false\r\n";
+			sconf += "    secret: \r\n";
 			sconf += "    phone-number: \r\n";
 			sconf += "    group: # Not implemented yet\r\n";
 			sconf += "        enable: false\r\n";

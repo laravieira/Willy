@@ -42,6 +42,12 @@ openai:
 whatsapp:
     enable: false
     phone-number:
+    gowa:
+      host:
+      device:
+      secret:
+      user:
+      password:
     group: # Not implemented yet
         enable: false
         willy-names:

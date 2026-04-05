@@ -33,6 +33,8 @@ discord:
         guild:
         command:
         log:
+        heartbeat:
+        heartbeat-interval: 5m
 
 openai:
     enable: false

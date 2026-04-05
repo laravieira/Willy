@@ -9,6 +9,7 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import discord4j.core.object.entity.channel.GuildMessageChannel;
 import me.laravieira.willy.Willy;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,8 +58,8 @@ public class WillyLogger extends Logger {
 		}
 	}
 
-	public void registerDiscordHandler() {
-		Handler discordHandler = new DiscordHandler();
+	public void registerDiscordHandler(GuildMessageChannel channel) {
+		Handler discordHandler = new DiscordHandler(channel);
 		discordHandler.setLevel(Level.INFO);
 		discordHandler.setFormatter(LOG_FORMATTER);
 		this.addHandler(discordHandler);

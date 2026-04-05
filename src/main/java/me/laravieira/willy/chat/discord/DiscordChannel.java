@@ -92,7 +92,7 @@ public class DiscordChannel implements WillyChannel {
             builder.content(links.toString());
 
             for(File file : message.getImages())
-                builder.addFile(file.getName(), new FileInputStream(file));
+//                builder.addFile(file.getName(), new FileInputStream(file));
 
             sendMessage(builder.build());
             Willy.getLogger().fine("Discord send image success.");

@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import me.laravieira.willy.chat.http.HTTP;
+import me.laravieira.willy.chat.telegram.Telegram;
 import me.laravieira.willy.chat.whatsapp.WhatsApp;
 import me.laravieira.willy.chat.openai.OpenAi;
 import me.laravieira.willy.internal.Config;
@@ -53,7 +54,7 @@ public class Willy {
         chats.add(brain);
         chats.add(new Discord());
         chats.add(new WhatsApp());
-//		chats.add(new Telegram());
+		chats.add(new Telegram());
 		chats.add(new HTTP());
         logger.info("Registered "+chats.size()+" chat instances.");
 

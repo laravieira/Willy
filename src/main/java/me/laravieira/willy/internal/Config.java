@@ -42,14 +42,16 @@ public class Config {
 		set("context_lifetime",      "WILLY_CONTEXT_LIFETIME",         "context-life-time",       TYPE_TIME,   parseTime("5m"));
 
 		// Discord settings
-		set("discord.enable",           "WILLY_DISCORD_ENABLE",           "discord.enable",           TYPE_BOOLEAN, false);
-		set("discord.client_id",        "WILLY_DISCORD_CLIENT_ID",        "discord.client-id",        TYPE_LONG,    null);
-		set("discord.token",            "WILLY_DISCORD_TOKEN",            "discord.token",            TYPE_STRING,  null);
-		set("discord.keep_willy_nick",  "WILLY_DISCORD_KEEP_NICK_WILLY",  "discord.keep-willy-nick",  TYPE_BOOLEAN, true);
-		set("discord.keep_master_nick", "WILLY_DISCORD_KEEP_NICK_MASTER", "discord.keep-master-nick", TYPE_LONG,    null);
-		set("discord.admin.guild",      "WILLY_DISCORD_ADMIN_GUILD",      "discord.admin.guild",      TYPE_LONG,    null);
-		set("discord.admin.command",    "WILLY_DISCORD_ADMIN_COMMAND",    "discord.admin.command",    TYPE_LONG,    null);
-		set("discord.admin.log",        "WILLY_DISCORD_ADMIN_LOG",        "discord.admin.log",        TYPE_LONG,    null);
+		set("discord.enable",                   "WILLY_DISCORD_ENABLE",                   "discord.enable",                   TYPE_BOOLEAN, false);
+		set("discord.client_id",                "WILLY_DISCORD_CLIENT_ID",                "discord.client-id",                TYPE_LONG,    null);
+		set("discord.token",                    "WILLY_DISCORD_TOKEN",                    "discord.token",                    TYPE_STRING,  null);
+		set("discord.keep_willy_nick",          "WILLY_DISCORD_KEEP_NICK_WILLY",          "discord.keep-willy-nick",          TYPE_BOOLEAN, true);
+		set("discord.keep_master_nick",         "WILLY_DISCORD_KEEP_NICK_MASTER",         "discord.keep-master-nick",         TYPE_LONG,    null);
+		set("discord.admin.guild",              "WILLY_DISCORD_ADMIN_GUILD",              "discord.admin.guild",              TYPE_LONG,    null);
+		set("discord.admin.command",            "WILLY_DISCORD_ADMIN_COMMAND",            "discord.admin.command",            TYPE_LONG,    null);
+		set("discord.admin.log",                "WILLY_DISCORD_ADMIN_LOG",                "discord.admin.log",                TYPE_LONG,    null);
+		set("discord.admin.heartbeat",          "WILLY_DISCORD_ADMIN_HEARTBEAT",          "discord.admin.heartbeat",          TYPE_LONG,    null);
+		set("discord.admin.heartbeat_interval", "WILLY_DISCORD_ADMIN_HEARTBEAT_INTERVAL", "discord.admin.heartbeat-interval", TYPE_TIME,    parseTime("5m"));
 		set("discord.public_chat.enable",                        "WILLY_DISCORD_PUBLIC_CHAT_ENABLE",                        "discord.public-chat.enable",                        TYPE_BOOLEAN, true);
 		set("discord.public_chat.willy_names",                   "WILLY_DISCORD_PUBLIC_CHAT_WILLY_NAMES",                   "discord.public-chat.willy-names",                   TYPE_LIST, names);
 		set("discord.public_chat.ignore_start_with",             "WILLY_DISCORD_PUBLIC_CHAT_IGNORE_START_WITH",             "discord.public-chat.ignore-start-with",             TYPE_LIST, ignore);
@@ -58,9 +60,9 @@ public class Config {
 
 		// OpenAI settings
 		set("openai.enable", "WILLY_OPENAI_ENABLE", "openai.enable", TYPE_BOOLEAN, false);
-		set("openai.token", "WILLY_OPENAI_TOKEN", "openai.token", TYPE_STRING, null);
+		set("openai.token",  "WILLY_OPENAI_TOKEN",  "openai.token",  TYPE_STRING,  null);
 		set("openai.dall_e", "WILLY_OPENAI_DALL_E", "openai.dall-e", TYPE_BOOLEAN, false);
-		set("openai.prompt", "WILLY_OPENAI_PROMPT", "openai.prompt", TYPE_FILE, "prompt.txt");
+		set("openai.prompt", "WILLY_OPENAI_PROMPT", "openai.prompt", TYPE_FILE,    "prompt.txt");
 
 		// Whatsapp Settings
 		set("whatsapp.enable",                              "WILLY_WHATSAPP_ENABLE",                              "whatsapp.enable",                              TYPE_BOOLEAN, false);

@@ -7,7 +7,7 @@ Willy is your best, beautiful, little and cute friend.
 
 ## Is Willy on...
 * [x] [Discord](https://discordapp.com/users/604134489484165121)
-* [x] [Whatsapp](https://wa.me/19292381810?text=Heey!%20What'%20up) `+19292381810`
+* [x] [Whatsapp](https://api.whatsapp.com/send?phone=19292381810&text=Oii) `+19292381810`
 * [x] [Telegram](https://t.me/WillyDiscordBot)
 
 ###### You can share Willy through [https://willybot.carrd.co/](https://willybot.carrd.co/).
@@ -24,7 +24,7 @@ Willy is currently hosted on my VPS.
 * Give the direct link of a given YouTube video.
 
 ### Willy runs as a service and is built with:
-* Java SDK 21, with preview features enabled.
+* Java SDK 25
 * Maven project manager
 * Run on both Windows and Linux
 

@@ -18,8 +18,9 @@
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.manifest.mainClass>me.laravieira.willy.Willy</project.manifest.mainClass>
-    <maven.compile.version>3.11.0</maven.compile.version>
-    <maven.assembly.version>3.6.0</maven.assembly.version>
+    <maven.compile.version>3.15.0</maven.compile.version>
+    <maven.assembly.version>3.8.0</maven.assembly.version>
+    <lombok.version>1.18.44</lombok.version>
   </properties>
   <build>
     <plugins>
@@ -30,6 +31,13 @@
         <configuration>
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
@@ -166,7 +174,7 @@
       <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.44</version>
+      <version>${lombok.version}</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
